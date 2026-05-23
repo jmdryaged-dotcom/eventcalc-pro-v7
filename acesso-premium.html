@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Desbloquear Acesso Permanente - EventCalc Pro v7</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Lora:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="rastreamento-seguranca.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -302,55 +303,73 @@
             <!-- PLANOS -->
             <div class="planos">
                 <div class="plano">
-                    <h2>Pessoal</h2>
+                    <h2>Semanal</h2>
                     <div class="preco">
-                        R$ 197,00
-                        <small>uso pessoal por 1 ano</small>
+                        R$ 7,90
+                        <small>por 7 dias</small>
                     </div>
                     <ul class="beneficios">
                         <li>Acesso completo à calculadora</li>
                         <li>Histórico ilimitado de orçamentos</li>
                         <li>Exportação em PDF</li>
-                        <li>Armazenamento em nuvem</li>
-                        <li>Suporte por email</li>
+                        <li>Teste sem compromisso</li>
+                        <li>Cancelamento a qualquer hora</li>
                     </ul>
-                    <button class="btn-plano" onclick="abrirCheckout('pessoal', 197)">
+                    <button class="btn-plano" onclick="abrirCheckout('semanal', 7.90)">
                         Desbloquear Agora
                     </button>
                 </div>
 
                 <div class="plano">
-                    <h2>Profissional</h2>
+                    <h2>Mensal</h2>
                     <div class="preco">
-                        R$ 497,00
-                        <small>uso profissional por 1 ano</small>
+                        R$ 24,90
+                        <small>por mês (recorrente)</small>
                     </div>
                     <ul class="beneficios">
-                        <li>Tudo do Pessoal +</li>
-                        <li>Múltiplas equipes</li>
-                        <li>Relatórios avançados</li>
-                        <li>Integração com WhatsApp</li>
-                        <li>Prioridade em suporte</li>
+                        <li>Acesso completo à calculadora</li>
+                        <li>Histórico ilimitado de orçamentos</li>
+                        <li>Exportação em PDF</li>
+                        <li>Renovação automática</li>
+                        <li>Cancelamento quando quiser</li>
                     </ul>
-                    <button class="btn-plano" onclick="abrirCheckout('profissional', 497)">
+                    <button class="btn-plano" onclick="abrirCheckout('mensal', 24.90)">
                         Desbloquear Agora
                     </button>
                 </div>
 
                 <div class="plano">
-                    <h2>Vitalício</h2>
+                    <h2>Trimestral</h2>
                     <div class="preco">
-                        R$ 997,00
+                        R$ 59,90
+                        <small>a cada 3 meses</small>
+                    </div>
+                    <ul class="beneficios">
+                        <li>Acesso completo à calculadora</li>
+                        <li>Histórico ilimitado de orçamentos</li>
+                        <li>Exportação em PDF</li>
+                        <li>Melhor custo-benefício</li>
+                        <li>Sem compromisso longo prazo</li>
+                    </ul>
+                    <button class="btn-plano" onclick="abrirCheckout('trimestral', 59.90)">
+                        Desbloquear Agora
+                    </button>
+                </div>
+
+                <div class="plano">
+                    <h2>🏆 Vitalício</h2>
+                    <div class="preco">
+                        R$ 199,00
                         <small>sem limite de tempo</small>
                     </div>
                     <ul class="beneficios">
-                        <li>Tudo do Profissional +</li>
                         <li>Acesso permanente</li>
+                        <li>Histórico ilimitado</li>
+                        <li>Exportação em PDF</li>
                         <li>Atualizações gratuitas</li>
-                        <li>Customizações sob demanda</li>
-                        <li>Suporte prioritário 24h</li>
+                        <li>Nunca mais pagar</li>
                     </ul>
-                    <button class="btn-plano" onclick="abrirCheckout('vitalicio', 997)">
+                    <button class="btn-plano" onclick="abrirCheckout('vitalicio', 199)">
                         Desbloquear Agora
                     </button>
                 </div>
@@ -385,6 +404,17 @@
                 </div>
             </div>
 
+            <!-- CÓDIGOS DE TESTE -->
+            <div class="info-caixa" style="margin-top: 30px; background: rgba(76,175,80,0.1); border-left-color: #4caf50;">
+                <h4 style="color: #4caf50;">🧪 Códigos de Teste (para você testar agora)</h4>
+                <p>
+                    <strong>EVENTCALC-SEMANAL-2026-TEST001</strong> (7 dias)<br>
+                    <strong>EVENTCALC-MENSAL-2026-TEST002</strong> (30 dias)<br>
+                    <strong>EVENTCALC-TRIMESTRAL-2026-TEST003</strong> (90 dias)<br>
+                    <strong>EVENTCALC-VITALICIO-2026-TEST004</strong> (sem expiração)
+                </p>
+            </div>
+
             <!-- INFO ADICIONAL -->
             <div class="info-caixa">
                 <h4>❓ Dúvidas?</h4>
@@ -416,27 +446,32 @@
         // Formato: "EVENTCALC-TIPO-DATA-HASH"
         const CODIGOS_VALIDOS = {
             // === CÓDIGOS DE TESTE (para você testar o sistema) ===
-            'EVENTCALC-PESSOAL-2026-TEST001': {
-                tipo: 'pessoal',
-                duracao_dias: 365,
-                descricao: 'Pessoal por 1 ano'
+            'EVENTCALC-SEMANAL-2026-TEST001': {
+                tipo: 'semanal',
+                duracao_dias: 7,
+                descricao: 'Semanal (7 dias)'
             },
-            'EVENTCALC-PROFISSIONAL-2026-TEST002': {
-                tipo: 'profissional',
-                duracao_dias: 365,
-                descricao: 'Profissional por 1 ano'
+            'EVENTCALC-MENSAL-2026-TEST002': {
+                tipo: 'mensal',
+                duracao_dias: 30,
+                descricao: 'Mensal (30 dias)'
             },
-            'EVENTCALC-VITALICIO-2026-TEST003': {
+            'EVENTCALC-TRIMESTRAL-2026-TEST003': {
+                tipo: 'trimestral',
+                duracao_dias: 90,
+                descricao: 'Trimestral (90 dias)'
+            },
+            'EVENTCALC-VITALICIO-2026-TEST004': {
                 tipo: 'vitalicio',
                 duracao_dias: 99999, // 273 anos = essencialmente infinito
                 descricao: 'Vitalício (sem expiração)'
             },
             // === CÓDIGOS DE CLIENTES (SUBSTITUA CONFORME VENDAS) ===
             // Adicionar novos códigos aqui após cada venda
-            // Exemplo: 'EVENTCALC-PESSOAL-20260523-CLIENTE001': { tipo: 'pessoal', duracao_dias: 365, descricao: '...' }
+            // Exemplo: 'EVENTCALC-MENSAL-20260523-CLIENTE001': { tipo: 'mensal', duracao_dias: 30, descricao: '...' }
         };
 
-        function ativarCodigo() {
+        async function ativarCodigo() {
             const codigo = document.getElementById('codigoInput').value.trim().toUpperCase();
             const mensagem = document.getElementById('mensagem');
 
@@ -447,6 +482,15 @@
             }
 
             const plano = CODIGOS_VALIDOS[codigo];
+
+            // 🔐 REGISTRAR ATIVAÇÃO PARA RASTREAMENTO DE SEGURANÇA
+            const resultadoRastreamento = await RastreamentoSeguranca.registrarAtivacao(codigo, 'cliente@email.com');
+
+            // Se detectou compartilhamento suspeito, mostrar aviso
+            let avisoSuspeita = '';
+            if (resultadoRastreamento.suspeito && resultadoRastreamento.alertas.length > 0) {
+                avisoSuspeita = `<br><br><strong style="color: #ff6b6b;">⚠️ Alerta de Segurança:</strong> Este código foi ativado em múltiplos dispositivos/IPs. Por favor, não compartilhe sua licença.<br>`;
+            }
 
             // Calcular data de expiração
             const agora = new Date();
@@ -461,7 +505,7 @@
 
             // Mostrar sucesso
             mostrarMensagem(
-                `✅ Licença ativada com sucesso!<br>Tipo: ${plano.descricao}<br>Expira em: ${expiracao.toLocaleDateString('pt-BR')}`,
+                `✅ Licença ativada com sucesso!<br>Tipo: ${plano.descricao}<br>Expira em: ${expiracao.toLocaleDateString('pt-BR')}${avisoSuspeita}`,
                 'sucesso'
             );
 
