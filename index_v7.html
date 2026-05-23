@@ -1641,7 +1641,7 @@
 
         // ── ENVIAR EMAIL (COM PDF) ──
         function enviarEmailNotificacao(lead) {
-            return fetch('/.netlify/functions/send-email', {
+            return fetch('/api/send-email', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(lead)
@@ -1659,7 +1659,7 @@
 
         // ── ENVIAR WHATSAPP ──
         function enviarWhatsappNotificacao(lead) {
-            return fetch('/.netlify/functions/send-whatsapp', {
+            return fetch('/api/send-whatsapp', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ ...lead, tipo: 'welcome' })
