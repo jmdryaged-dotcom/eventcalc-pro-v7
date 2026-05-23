@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciador de Licenças - EventCalc Pro v7</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Lora:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --dark-bg: #0a0a0a;
+            --dark-card: #242424;
+            --gold: #d4af37;
+            --red: #c41e3a;
+            --text: #ffffff;
+            --text-secondary: #d0d0d0;
+        }
+
+        body {
+            font-family: 'Lora', serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+            color: var(--text);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            color: var(--gold);
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+        }
+
+        h2 {
+            color: var(--gold);
+            margin-top: 30px;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+            border-bottom: 2px solid rgba(212,175,55,0.3);
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: var(--gold);
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            background: var(--dark-card);
+            border: 1px solid rgba(212,175,55,0.3);
+            border-radius: 6px;
+            color: white;
+            font-family: 'Lora', serif;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--gold);
+            box-shadow: 0 0 10px rgba(212,175,55,0.2);
+        }
+
+        button {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, var(--red), #8b1428);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(196,30,58,0.3);
+        }
+
+        .section {
+            background: rgba(36,36,36,0.6);
+            border: 1px solid rgba(212,175,55,0.2);
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid rgba(212,175,55,0.1);
+        }
+
+        th {
+            background: rgba(212,175,55,0.1);
+            color: var(--gold);
+            font-weight: bold;
+        }
+
+        tr:hover {
+            background: rgba(212,175,55,0.05);
+        }
+
+        .codigo-gerado {
+            background: var(--dark-bg);
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 4px solid var(--gold);
+            margin-top: 15px;
+            font-family: 'Courier New', monospace;
+            word-break: break-all;
+        }
+
+        .btn-copy {
+            background: var(--gold);
+            color: #0a0a0a;
+            padding: 8px 15px;
+            margin-left: 10px;
+            font-size: 0.9rem;
+        }
+
+        .btn-copy:hover {
+            background: #b8860b;
+        }
+
+        .info-box {
+            background: rgba(212,175,55,0.1);
+            border-left: 4px solid var(--gold);
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+
+        .info-box h4 {
+            color: var(--gold);
+            margin-bottom: 8px;
+        }
+
+        .info-box p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin-bottom: 5px;
+        }
+
+        .status-ativo {
+            color: #4caf50;
+            font-weight: bold;
+        }
+
+        .status-expirado {
+            color: #ff6b6b;
+            font-weight: bold;
+        }
+
+        .btn-delete {
+            background: var(--red);
+            padding: 6px 12px;
+            font-size: 0.85rem;
+        }
+
+        .mensagem {
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .mensagem.sucesso {
+            background: rgba(76,175,80,0.2);
+            color: #4caf50;
+            border: 1px solid #4caf50;
+        }
+
+        .mensagem.erro {
+            background: rgba(196,30,58,0.2);
+            color: #ff6b6b;
+            border: 1px solid #c41e3a;
+        }
+
+        .voltar {
+            display: inline-block;
+            margin-bottom: 20px;
+            padding: 10px 20px;
+            background: rgba(212,175,55,0.2);
+            border: 1px solid var(--gold);
+            color: var(--gold);
+            text-decoration: none;
+            border-radius: 6px;
+            transition: all 0.3s;
+        }
+
+        .voltar:hover {
+            background: rgba(212,175,55,0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index_v7.html" class="voltar">← Voltar à Calculadora</a>
+
+        <h1>🔐 Gerenciador de Licenças EventCalc Pro v7</h1>
+
+        <div id="mensagem" class="mensagem"></div>
+
+        <!-- SEÇÃO 1: GERAR NOVO CÓDIGO -->
+        <div class="section">
+            <h2>✏️ Gerar Novo Código de Licença</h2>
+
+            <div class="info-box">
+                <h4>📋 Como funciona:</h4>
+                <p>1. Preencha os dados do cliente</p>
+                <p>2. Escolha o tipo de plano e duração</p>
+                <p>3. Clique em "Gerar Código"</p>
+                <p>4. Copie o código e envie por email ao cliente</p>
+            </div>
+
+            <div class="form-group">
+                <div>
+                    <label for="nomeCliente">Nome do Cliente:</label>
+                    <input type="text" id="nomeCliente" placeholder="Ex: João Silva">
+                </div>
+                <div>
+                    <label for="emailCliente">Email do Cliente:</label>
+                    <input type="email" id="emailCliente" placeholder="Ex: joao@email.com">
+                </div>
+                <div>
+                    <label for="tipoPlano">Tipo de Plano:</label>
+                    <select id="tipoPlano">
+                        <option value="pessoal">Pessoal (R$ 197)</option>
+                        <option value="profissional">Profissional (R$ 497)</option>
+                        <option value="vitalicio">Vitalício (R$ 997)</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="duracao">Duração:</label>
+                    <select id="duracao">
+                        <option value="365">1 Ano (365 dias)</option>
+                        <option value="730">2 Anos (730 dias)</option>
+                        <option value="99999">Sem Expiração (Vitalício)</option>
+                    </select>
+                </div>
+            </div>
+
+            <button onclick="gerarCodigo()">🔑 Gerar Código</button>
+
+            <div id="codigoGerado"></div>
+        </div>
+
+        <!-- SEÇÃO 2: LICENÇAS ATIVAS -->
+        <div class="section">
+            <h2>📊 Licenças Ativas no Sistema</h2>
+
+            <div class="info-box">
+                <h4>💾 Como ver licenças ativas:</h4>
+                <p>Esta lista mostra apenas as licenças que foram <strong>ativadas por clientes</strong> usando os códigos.</p>
+                <p>Para ver o código de um cliente, verifique seu histórico de emails enviados.</p>
+            </div>
+
+            <button onclick="carregarLicencasAtivas()">🔄 Atualizar Lista</button>
+
+            <div id="licencasAtivas"></div>
+        </div>
+
+        <!-- SEÇÃO 3: CÓDIGOS DE TESTE -->
+        <div class="section">
+            <h2>🧪 Códigos de Teste</h2>
+
+            <div class="info-box">
+                <h4>Para testar o sistema, use esses códigos:</h4>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Código</th>
+                        <th>Tipo</th>
+                        <th>Duração</th>
+                        <th>Ação</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>EVENTCALC-PESSOAL-2026-TEST001</code></td>
+                        <td>Pessoal</td>
+                        <td>1 Ano</td>
+                        <td><button class="btn-copy" onclick="copiarTexto('EVENTCALC-PESSOAL-2026-TEST001')">Copiar</button></td>
+                    </tr>
+                    <tr>
+                        <td><code>EVENTCALC-PROFISSIONAL-2026-TEST002</code></td>
+                        <td>Profissional</td>
+                        <td>1 Ano</td>
+                        <td><button class="btn-copy" onclick="copiarTexto('EVENTCALC-PROFISSIONAL-2026-TEST002')">Copiar</button></td>
+                    </tr>
+                    <tr>
+                        <td><code>EVENTCALC-VITALICIO-2026-TEST003</code></td>
+                        <td>Vitalício</td>
+                        <td>Sem Expiração</td>
+                        <td><button class="btn-copy" onclick="copiarTexto('EVENTCALC-VITALICIO-2026-TEST003')">Copiar</button></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- SEÇÃO 4: INSTRUÇÕES -->
+        <div class="section">
+            <h2>📖 Como Usar Este Gerenciador</h2>
+
+            <div style="color: var(--text-secondary); line-height: 1.8;">
+                <h4 style="color: var(--gold); margin: 15px 0 10px 0;">1️⃣ Quando um cliente paga:</h4>
+                <ul style="margin-left: 20px; margin-bottom: 20px;">
+                    <li>Preencha os dados do cliente acima</li>
+                    <li>Clique em "Gerar Código"</li>
+                    <li>Copie o código e envie por email</li>
+                    <li>O cliente cola o código em <strong>acesso-premium.html</strong> para desbloquear</li>
+                </ul>
+
+                <h4 style="color: var(--gold); margin: 15px 0 10px 0;">2️⃣ Como compartilhar o código com cliente:</h4>
+                <p style="margin-bottom: 20px; padding: 15px; background: rgba(212,175,55,0.1); border-radius: 6px;">
+                    <strong>Email sugerido:</strong><br><br>
+                    "Olá [NOME],<br><br>
+                    Seu pagamento foi confirmado! 🎉<br><br>
+                    Para desbloquear o acesso permanente à EventCalc Pro v7, use este código:<br><br>
+                    <strong style="color: var(--gold); font-family: 'Courier New';">[CÓDIGO]</strong><br><br>
+                    Acesse: <strong>seu-site.com/acesso-premium.html</strong> e cole o código no campo de ativação.<br><br>
+                    Dúvidas? Responda este email ou entre em contato via WhatsApp.<br><br>
+                    Abraços!"
+                </p>
+
+                <h4 style="color: var(--gold); margin: 15px 0 10px 0;">3️⃣ Teste de expiração:</h4>
+                <ul style="margin-left: 20px; margin-bottom: 20px;">
+                    <li>A data de expiração é calculada automaticamente (dias fornecidos)</li>
+                    <li>Passada a data, o cliente vê tela de "Período Expirado" e volta para upgrade</li>
+                    <li>Você pode criar um código com 7 dias para testar o aviso antes de expiração</li>
+                </ul>
+
+                <h4 style="color: var(--gold); margin: 15px 0 10px 0;">⚠️ Importante:</h4>
+                <ul style="margin-left: 20px;">
+                    <li>Não compartilhe códigos de teste publicamente</li>
+                    <li>Cada código pode ser ativado múltiplas vezes (sem limite de reutilização)</li>
+                    <li>Se quiser restrição de 1 cliente/código, você precisará de backend (banco de dados)</li>
+                    <li>Para agora, recomendo: use códigos únicos por cliente + confiança</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * Gerenciador de Licenças - EventCalc Pro v7
+         */
+
+        // Função para gerar um código aleatório
+        function gerarHash() {
+            return Math.random().toString(36).substring(2, 8).toUpperCase();
+        }
+
+        // Função para gerar código de licença
+        function gerarCodigo() {
+            const nome = document.getElementById('nomeCliente').value.trim();
+            const email = document.getElementById('emailCliente').value.trim();
+            const tipo = document.getElementById('tipoPlano').value;
+            const duracao = parseInt(document.getElementById('duracao').value);
+
+            // Validação
+            if (!nome || !email) {
+                mostrarMensagem('Preencha o nome e email do cliente!', 'erro');
+                return;
+            }
+
+            // Gerar código
+            const data = new Date().toISOString().split('T')[0].replace(/-/g, '').substring(0, 8);
+            const hash = gerarHash();
+            const codigo = `EVENTCALC-${tipo.toUpperCase()}-${data}-${hash}`;
+
+            // Calcular data de expiração
+            const expiracao = new Date();
+            expiracao.setDate(expiracao.getDate() + duracao);
+            const dataExpiracaoStr = expiracao.toISOString().split('T')[0];
+
+            // Salvar em localStorage (banco de dados simples)
+            const codigos = JSON.parse(localStorage.getItem('eventcalc_codigos_gerados') || '[]');
+            codigos.push({
+                codigo: codigo,
+                nome: nome,
+                email: email,
+                tipo: tipo,
+                duracao: duracao,
+                dataExpiracao: dataExpiracaoStr,
+                criadoEm: new Date().toISOString(),
+                ativado: false
+            });
+            localStorage.setItem('eventcalc_codigos_gerados', JSON.stringify(codigos));
+
+            // Mostrar resultado
+            const container = document.getElementById('codigoGerado');
+            container.innerHTML = `
+                <div class="codigo-gerado">
+                    <strong style="color: var(--gold);">Código Gerado:</strong><br><br>
+                    ${codigo}
+                    <button class="btn-copy" onclick="copiarTexto('${codigo}')">Copiar</button>
+                    <br><br>
+                    <small style="color: var(--text-secondary);">
+                        Cliente: ${nome}<br>
+                        Email: ${email}<br>
+                        Tipo: ${tipo.toUpperCase()}<br>
+                        Expira em: ${new Date(dataExpiracaoStr).toLocaleDateString('pt-BR')}<br>
+                    </small>
+                </div>
+            `;
+
+            mostrarMensagem(`✅ Código gerado! Copie e envie por email para ${email}`, 'sucesso');
+
+            // Limpar formulário
+            document.getElementById('nomeCliente').value = '';
+            document.getElementById('emailCliente').value = '';
+        }
+
+        // Função para copiar para clipboard
+        function copiarTexto(texto) {
+            navigator.clipboard.writeText(texto).then(() => {
+                mostrarMensagem('✅ Código copiado!', 'sucesso');
+            });
+        }
+
+        // Função para carregar licenças ativas
+        function carregarLicencasAtivas() {
+            const codigos = JSON.parse(localStorage.getItem('eventcalc_codigos_gerados') || '[]');
+            const container = document.getElementById('licencasAtivas');
+
+            if (codigos.length === 0) {
+                container.innerHTML = '<p style="color: var(--text-secondary); text-align: center; margin-top: 20px;">Nenhum código gerado ainda.</p>';
+                return;
+            }
+
+            let html = '<table style="margin-top: 15px;"><thead><tr><th>Cliente</th><th>Email</th><th>Tipo</th><th>Expira em</th><th>Status</th></tr></thead><tbody>';
+
+            const hoje = new Date();
+            hoje.setHours(0, 0, 0, 0);
+
+            codigos.forEach((c, i) => {
+                const dataExp = new Date(c.dataExpiracao);
+                const status = dataExp >= hoje ? '<span class="status-ativo">✅ Ativo</span>' : '<span class="status-expirado">❌ Expirado</span>';
+
+                html += `
+                    <tr>
+                        <td>${c.nome}</td>
+                        <td>${c.email}</td>
+                        <td>${c.tipo}</td>
+                        <td>${new Date(c.dataExpiracao).toLocaleDateString('pt-BR')}</td>
+                        <td>${status}</td>
+                    </tr>
+                `;
+            });
+
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        // Função para mostrar mensagens
+        function mostrarMensagem(texto, tipo) {
+            const container = document.getElementById('mensagem');
+            container.innerHTML = texto;
+            container.className = 'mensagem ' + tipo;
+            container.style.display = 'block';
+            setTimeout(() => { container.style.display = 'none'; }, 5000);
+        }
+
+        // Carregar ao abrir página
+        window.addEventListener('load', () => {
+            carregarLicencasAtivas();
+        });
+    </script>
+</body>
+</html>

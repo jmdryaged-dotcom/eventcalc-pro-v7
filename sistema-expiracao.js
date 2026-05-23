@@ -18,7 +18,7 @@
     const DATA_EXPIRACAO = '2026-06-01';
 
     // URL para redirecionamento após expiração
-    const URL_PAGAMENTO = 'https://seu-dominio.com/planos';
+    const URL_PAGAMENTO = 'acesso-premium.html';
 
     // Número de dias antes de expiração para mostrar aviso
     const DIAS_AVISO = 7;
@@ -28,6 +28,36 @@
     // ═══════════════════════════════════════════════════════════════════
 
     function verificarExpiracao() {
+        // PRIORIDADE 1: Verificar se tem licença ativa
+        const temLicenca = localStorage.getItem('eventcalc_licenca_ativa') === 'true';
+        if (temLicenca) {
+            const dataExpiracaoLicenca = localStorage.getItem('eventcalc_licenca_expiracao');
+            if (dataExpiracaoLicenca) {
+                const hoje = new Date();
+                const expiracao = new Date(dataExpiracaoLicenca);
+
+                // Se licença ainda é válida: ACESSO COMPLETO
+                if (hoje <= expiracao) {
+                    const tipoLicenca = localStorage.getItem('eventcalc_licenca_tipo') || 'desconhecido';
+                    const diasRestantes = Math.ceil((expiracao - hoje) / (1000 * 60 * 60 * 24));
+
+                    // Se falta pouco: mostrar aviso de renovação
+                    if (diasRestantes <= 30) {
+                        mostrarAvisoRenovacao(diasRestantes, tipoLicenca);
+                    }
+
+                    console.log(`✅ EventCalc Pro v7 - Licença ${tipoLicenca} ativa até ${dataExpiracaoLicenca}`);
+                    return true;
+                } else {
+                    // Licença expirou: limpar e bloquear
+                    localStorage.removeItem('eventcalc_licenca_ativa');
+                    localStorage.removeItem('eventcalc_licenca_tipo');
+                    localStorage.removeItem('eventcalc_licenca_expiracao');
+                }
+            }
+        }
+
+        // PRIORIDADE 2: Verificar data de expiração de teste
         const hoje = new Date();
         const expiracao = new Date(DATA_EXPIRACAO);
 
@@ -119,6 +149,40 @@
         // Bloqueia cliques e navegação
         document.addEventListener('click', (e) => e.preventDefault(), true);
         document.addEventListener('contextmenu', (e) => e.preventDefault());
+    }
+
+    function mostrarAvisoRenovacao(diasRestantes, tipoLicenca) {
+        // Cria banner no topo da página (licença ativa mas vencendo)
+        const banner = document.createElement('div');
+        banner.id = 'aviso-renovacao';
+        banner.innerHTML = `
+            <div style="
+                background: linear-gradient(90deg, #d4af37 0%, #b8860b 100%);
+                color: #0a0a0a;
+                padding: 15px 20px;
+                text-align: center;
+                font-family: 'Lora', serif;
+                font-size: 1.1rem;
+                border-bottom: 3px solid #8b1428;
+                box-shadow: 0 4px 12px rgba(212,175,55,0.3);
+                position: sticky;
+                top: 0;
+                z-index: 9999;
+            ">
+                <strong>📅 AVISO DE RENOVAÇÃO</strong> -
+                Sua licença (${tipoLicanca}) expira em <strong>${diasRestantes} dia${diasRestantes !== 1 ? 's' : ''}</strong>.
+                <a href="${URL_PAGAMENTO}" style="
+                    color: #8b1428;
+                    text-decoration: underline;
+                    font-weight: bold;
+                    margin-left: 10px;
+                    cursor: pointer;
+                ">Renovar agora</a>
+            </div>
+        `;
+
+        // Insere no topo do body
+        document.body.insertBefore(banner, document.body.firstChild);
     }
 
     function mostrarAvisoExpiracao(diasRestantes) {

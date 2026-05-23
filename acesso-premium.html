@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Desbloquear Acesso Permanente - EventCalc Pro v7</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Lora:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --dark-bg: #0a0a0a;
+            --dark-surface: #1a1a1a;
+            --dark-card: #242424;
+            --gold-light: #d4af37;
+            --red-primary: #c41e3a;
+            --red-dark: #8b1428;
+            --text-primary: #ffffff;
+            --text-secondary: #d0d0d0;
+        }
+
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Lora', serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background: linear-gradient(180deg, rgba(26,26,26,0.95) 0%, rgba(10,10,10,0.8) 100%);
+            border-bottom: 1px solid rgba(212,175,55,0.3);
+            padding: 20px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            color: var(--gold-light);
+            font-weight: 900;
+        }
+
+        main {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            padding: 60px 20px;
+        }
+
+        .content {
+            max-width: 900px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .content h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 3rem;
+            color: var(--gold-light);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .content > p {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .planos {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 60px;
+        }
+
+        .plano {
+            background: rgba(36,36,36,0.8);
+            border: 2px solid rgba(212,175,55,0.3);
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .plano:hover {
+            border-color: var(--gold-light);
+            box-shadow: 0 10px 30px rgba(212,175,55,0.2);
+            transform: translateY(-5px);
+        }
+
+        .plano h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            color: var(--gold-light);
+            margin-bottom: 15px;
+        }
+
+        .preco {
+            font-size: 2.5rem;
+            color: var(--gold-light);
+            font-weight: bold;
+            margin: 20px 0;
+            font-family: 'Playfair Display', serif;
+        }
+
+        .preco small {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            display: block;
+            margin-top: 5px;
+        }
+
+        .beneficios {
+            list-style: none;
+            text-align: left;
+            margin: 30px 0;
+            font-size: 1rem;
+        }
+
+        .beneficios li {
+            padding: 10px 0;
+            color: var(--text-secondary);
+            border-bottom: 1px solid rgba(212,175,55,0.1);
+        }
+
+        .beneficios li:before {
+            content: "✓ ";
+            color: var(--gold-light);
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .btn-plano {
+            display: inline-block;
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #c41e3a, #8b1428);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            margin-top: 20px;
+            transition: all 0.3s;
+        }
+
+        .btn-plano:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(196,30,58,0.3);
+        }
+
+        .secao-codigo {
+            background: rgba(26,26,26,0.8);
+            border: 2px solid var(--gold-light);
+            border-radius: 12px;
+            padding: 40px;
+            margin-bottom: 40px;
+        }
+
+        .secao-codigo h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            color: var(--gold-light);
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .secao-codigo p {
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .form-codigo {
+            display: flex;
+            gap: 10px;
+            max-width: 500px;
+            margin: 0 auto;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        #codigoInput {
+            flex: 1;
+            min-width: 200px;
+            padding: 12px 15px;
+            background: var(--dark-card);
+            border: 1px solid rgba(212,175,55,0.3);
+            border-radius: 6px;
+            color: white;
+            font-family: 'Courier New', monospace;
+            font-size: 1rem;
+        }
+
+        #codigoInput:focus {
+            outline: none;
+            border-color: var(--gold-light);
+            box-shadow: 0 0 10px rgba(212,175,55,0.2);
+        }
+
+        .btn-ativar {
+            padding: 12px 25px;
+            background: linear-gradient(135deg, #d4af37, #b8860b);
+            color: #0a0a0a;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .btn-ativar:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(212,175,55,0.3);
+        }
+
+        .mensagem {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 6px;
+            text-align: center;
+            display: none;
+        }
+
+        .mensagem.sucesso {
+            background: rgba(76,175,80,0.2);
+            color: #4caf50;
+            border: 1px solid #4caf50;
+        }
+
+        .mensagem.erro {
+            background: rgba(196,30,58,0.2);
+            color: #ff6b6b;
+            border: 1px solid #c41e3a;
+        }
+
+        .info-caixa {
+            background: rgba(212,175,55,0.1);
+            border-left: 4px solid var(--gold-light);
+            padding: 20px;
+            border-radius: 6px;
+            margin-top: 30px;
+        }
+
+        .info-caixa h4 {
+            color: var(--gold-light);
+            margin-bottom: 10px;
+        }
+
+        .info-caixa p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        footer {
+            background: linear-gradient(180deg, rgba(26,26,26,0.95) 0%, rgba(10,10,10,0.8) 100%);
+            border-top: 1px solid rgba(212,175,55,0.3);
+            padding: 30px 0;
+            text-align: center;
+            color: var(--text-secondary);
+            margin-top: auto;
+        }
+
+        footer a {
+            color: var(--gold-light);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="logo">💎 EventCalc Pro v7</div>
+        </div>
+    </header>
+
+    <main>
+        <div class="content">
+            <h1>🔓 Desbloquear Acesso Permanente</h1>
+            <p>Escolha seu plano e comece a usar a calculadora de orçamentos sem limitações</p>
+
+            <!-- PLANOS -->
+            <div class="planos">
+                <div class="plano">
+                    <h2>Pessoal</h2>
+                    <div class="preco">
+                        R$ 197,00
+                        <small>uso pessoal por 1 ano</small>
+                    </div>
+                    <ul class="beneficios">
+                        <li>Acesso completo à calculadora</li>
+                        <li>Histórico ilimitado de orçamentos</li>
+                        <li>Exportação em PDF</li>
+                        <li>Armazenamento em nuvem</li>
+                        <li>Suporte por email</li>
+                    </ul>
+                    <button class="btn-plano" onclick="abrirCheckout('pessoal', 197)">
+                        Desbloquear Agora
+                    </button>
+                </div>
+
+                <div class="plano">
+                    <h2>Profissional</h2>
+                    <div class="preco">
+                        R$ 497,00
+                        <small>uso profissional por 1 ano</small>
+                    </div>
+                    <ul class="beneficios">
+                        <li>Tudo do Pessoal +</li>
+                        <li>Múltiplas equipes</li>
+                        <li>Relatórios avançados</li>
+                        <li>Integração com WhatsApp</li>
+                        <li>Prioridade em suporte</li>
+                    </ul>
+                    <button class="btn-plano" onclick="abrirCheckout('profissional', 497)">
+                        Desbloquear Agora
+                    </button>
+                </div>
+
+                <div class="plano">
+                    <h2>Vitalício</h2>
+                    <div class="preco">
+                        R$ 997,00
+                        <small>sem limite de tempo</small>
+                    </div>
+                    <ul class="beneficios">
+                        <li>Tudo do Profissional +</li>
+                        <li>Acesso permanente</li>
+                        <li>Atualizações gratuitas</li>
+                        <li>Customizações sob demanda</li>
+                        <li>Suporte prioritário 24h</li>
+                    </ul>
+                    <button class="btn-plano" onclick="abrirCheckout('vitalicio', 997)">
+                        Desbloquear Agora
+                    </button>
+                </div>
+            </div>
+
+            <!-- ATIVAR COM CÓDIGO -->
+            <div class="secao-codigo">
+                <h3>💳 Já pagou? Ative seu acesso</h3>
+                <p>Se você já possui um código de licença, ative-o aqui para desbloquear imediatamente:</p>
+
+                <div class="form-codigo">
+                    <input
+                        type="text"
+                        id="codigoInput"
+                        placeholder="Cole seu código de licença..."
+                        autocomplete="off"
+                    />
+                    <button class="btn-ativar" onclick="ativarCodigo()">Ativar</button>
+                </div>
+
+                <div id="mensagem" class="mensagem"></div>
+
+                <div class="info-caixa">
+                    <h4>📧 Método de Pagamento Direto</h4>
+                    <p>
+                        <strong>Para clientes que preferem PIX ou transferência bancária:</strong><br><br>
+                        Envie um email para <strong>jm.dryaged@gmail.com</strong> informando:<br>
+                        - Qual plano deseja (Pessoal/Profissional/Vitalício)<br>
+                        - Seus dados (nome + email)<br><br>
+                        Você receberá os dados de pagamento (PIX/TED) e o código de licença após confirmação do pagamento.
+                    </p>
+                </div>
+            </div>
+
+            <!-- INFO ADICIONAL -->
+            <div class="info-caixa">
+                <h4>❓ Dúvidas?</h4>
+                <p>
+                    Entre em contato conosco:<br>
+                    📧 Email: <a href="mailto:jm.dryaged@gmail.com">jm.dryaged@gmail.com</a><br>
+                    📱 WhatsApp: <a href="https://wa.me/5547996681010" target="_blank">+55 47 99668-1010</a>
+                </p>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p style="margin-bottom: 10px;">EventCalc Pro v7 © 2026 - Juliomar Meskiu</p>
+            <p>
+                <a href="politica-privacidade.html">Política de Privacidade</a> •
+                <a href="index_v7.html">Voltar à Calculadora</a>
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        /**
+         * Sistema de Ativação por Código de Licença
+         */
+
+        // Códigos válidos (você gerará esses após pagamento)
+        // Formato: "EVENTCALC-TIPO-DATA-HASH"
+        const CODIGOS_VALIDOS = {
+            // === CÓDIGOS DE TESTE (para você testar o sistema) ===
+            'EVENTCALC-PESSOAL-2026-TEST001': {
+                tipo: 'pessoal',
+                duracao_dias: 365,
+                descricao: 'Pessoal por 1 ano'
+            },
+            'EVENTCALC-PROFISSIONAL-2026-TEST002': {
+                tipo: 'profissional',
+                duracao_dias: 365,
+                descricao: 'Profissional por 1 ano'
+            },
+            'EVENTCALC-VITALICIO-2026-TEST003': {
+                tipo: 'vitalicio',
+                duracao_dias: 99999, // 273 anos = essencialmente infinito
+                descricao: 'Vitalício (sem expiração)'
+            },
+            // === CÓDIGOS DE CLIENTES (SUBSTITUA CONFORME VENDAS) ===
+            // Adicionar novos códigos aqui após cada venda
+            // Exemplo: 'EVENTCALC-PESSOAL-20260523-CLIENTE001': { tipo: 'pessoal', duracao_dias: 365, descricao: '...' }
+        };
+
+        function ativarCodigo() {
+            const codigo = document.getElementById('codigoInput').value.trim().toUpperCase();
+            const mensagem = document.getElementById('mensagem');
+
+            // Validar se código existe
+            if (!CODIGOS_VALIDOS[codigo]) {
+                mostrarMensagem('Código inválido ou já utilizado.', 'erro');
+                return;
+            }
+
+            const plano = CODIGOS_VALIDOS[codigo];
+
+            // Calcular data de expiração
+            const agora = new Date();
+            const expiracao = new Date(agora.getTime() + (plano.duracao_dias * 24 * 60 * 60 * 1000));
+            const dataExpiracaoStr = expiracao.toISOString().split('T')[0];
+
+            // Salvar em localStorage
+            localStorage.setItem('eventcalc_licenca_ativa', 'true');
+            localStorage.setItem('eventcalc_licenca_tipo', plano.tipo);
+            localStorage.setItem('eventcalc_licenca_expiracao', dataExpiracaoStr);
+            localStorage.setItem('eventcalc_licenca_ativada_em', new Date().toISOString());
+
+            // Mostrar sucesso
+            mostrarMensagem(
+                `✅ Licença ativada com sucesso!<br>Tipo: ${plano.descricao}<br>Expira em: ${expiracao.toLocaleDateString('pt-BR')}`,
+                'sucesso'
+            );
+
+            // Redirecionar após 2 segundos
+            setTimeout(() => {
+                window.location.href = 'index_v7.html';
+            }, 2000);
+        }
+
+        function mostrarMensagem(texto, tipo) {
+            const mensagem = document.getElementById('mensagem');
+            mensagem.innerHTML = texto;
+            mensagem.className = 'mensagem ' + tipo;
+            mensagem.style.display = 'block';
+        }
+
+        function abrirCheckout(tipo, valor) {
+            // Aqui você poderia integrar com Stripe/MercadoPago/etc
+            // Por enquanto, mostrar instruções para pagamento direto
+            alert(`Plano ${tipo.toUpperCase()} - R$ ${valor},00\n\nEntre em contato:\njm.dryaged@gmail.com`);
+        }
+
+        // Verificar se já tem licença ativa ao carregar página
+        window.addEventListener('load', () => {
+            const temLicenca = localStorage.getItem('eventcalc_licenca_ativa') === 'true';
+            if (temLicenca) {
+                const expiracao = localStorage.getItem('eventcalc_licenca_expiracao');
+                const hoje = new Date().toISOString().split('T')[0];
+                if (expiracao > hoje) {
+                    mostrarMensagem(
+                        '✅ Você já tem uma licença ativa! Redirecionando em 2 segundos...',
+                        'sucesso'
+                    );
+                    setTimeout(() => {
+                        window.location.href = 'index_v7.html';
+                    }, 2000);
+                }
+            }
+        });
+    </script>
+</body>
+</html>
