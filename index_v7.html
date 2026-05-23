@@ -708,10 +708,10 @@
                 <a href="#precos" class="btn btn-secondary">Ver Planos</a>
             </div>
 
-            <!-- CTA para Receber Tutorial -->
-            <div class="leads-cta" style="margin-top: 25px;">
+            <!-- CTA para Receber Tutorial - DESABILITADO (LGPD compliance) -->
+            <!-- <div class="leads-cta" style="margin-top: 25px;">
                 <a href="#" onclick="abrirModalLeads(); return false;">📚 Receber Tutorial Gratuito</a>
-            </div>
+            </div> -->
         </div>
     </section>
     
@@ -1685,5 +1685,64 @@
 
     <!-- 📚 Script para gerar Tutorial PDF -->
     <script src="gerar-tutorial-pdf.js"></script>
+
+    <!-- 🔒 FOOTER COM PRIVACIDADE & CONFORMIDADE LGPD -->
+    <footer style="background: #1a1a1a; border-top: 1px solid rgba(212,175,55,0.3); padding: 30px 20px; text-align: center; color: #d0d0d0; margin-top: 60px;">
+        <div style="max-width: 1200px; margin: 0 auto;">
+            <p style="margin-bottom: 15px;">
+                <strong style="color: #d4af37;">EventCalc Pro v7</strong> © 2026 - Juliomar Meskiu
+            </p>
+            <p style="margin-bottom: 15px; font-size: 0.9rem; color: #909090;">
+                ✅ Conformidade LGPD | 🔒 Seus dados são seguros | 📍 Itapema, SC
+            </p>
+            <p style="font-size: 0.9rem;">
+                <a href="politica-privacidade.html" style="color: #d4af37; text-decoration: none; transition: 0.3s;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">
+                    🔐 Política de Privacidade
+                </a>
+                &nbsp;|&nbsp;
+                <a href="mailto:jm.dryaged@gmail.com" style="color: #d4af37; text-decoration: none; transition: 0.3s;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">
+                    📧 Contato
+                </a>
+            </p>
+        </div>
+    </footer>
+
+    <!-- 🔔 AVISO DE CONSENTIMENTO (localStorage) -->
+    <script>
+        // Avisar sobre coleta de dados (localStorage)
+        window.addEventListener('load', () => {
+            // Verificar se usuário já viu o aviso
+            if (!localStorage.getItem('eventcalc_privacy_consent')) {
+                const aviso = document.createElement('div');
+                aviso.style.cssText = `
+                    position: fixed;
+                    bottom: 0;
+                    left: 0;
+                    right: 0;
+                    background: rgba(26, 26, 26, 0.95);
+                    border-top: 2px solid #d4af37;
+                    padding: 20px;
+                    text-align: center;
+                    color: #d0d0d0;
+                    font-size: 0.9rem;
+                    z-index: 9999;
+                    max-width: 100%;
+                `;
+                aviso.innerHTML = `
+                    <div style="max-width: 900px; margin: 0 auto;">
+                        <p style="margin-bottom: 15px;">
+                            <strong style="color: #d4af37;">🔒 Privacidade:</strong> Esta aplicação armazena seus dados de orçamento localmente no seu navegador (localStorage). Você tem controle total sobre seus dados.
+                            <a href="politica-privacidade.html" style="color: #d4af37; text-decoration: underline; margin-left: 10px;">Leia nossa Política de Privacidade</a>
+                        </p>
+                        <button onclick="document.querySelector('[data-privacy-consent]').style.display='none'; localStorage.setItem('eventcalc_privacy_consent', 'true');" style="background: #c41e3a; color: white; border: none; padding: 10px 30px; border-radius: 5px; cursor: pointer; font-weight: bold; transition: 0.3s;" onmouseover="this.style.background='#8b1428'" onmouseout="this.style.background='#c41e3a'">
+                            ✓ Entendi e Aceito
+                        </button>
+                    </div>
+                `;
+                aviso.setAttribute('data-privacy-consent', 'true');
+                document.body.appendChild(aviso);
+            }
+        });
+    </script>
 </body>
 </html>
