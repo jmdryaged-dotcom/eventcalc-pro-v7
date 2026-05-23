@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EventCalc Pro v7 - Cardápio</title>
+    <!-- 🔐 Sistema de Expiração Automática -->
+    <script src="sistema-expiracao.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Lora:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --dark-bg: #0a0a0a;
+            --dark-card: #242424;
+            --gold: #d4af37;
+            --red: #c41e3a;
+            --green: #4caf50;
+            --white: #ffffff;
+        }
+        body { font-family: 'Lora', serif; background: var(--dark-bg); color: var(--white); }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+
+        .header {
+            background: linear-gradient(135deg, #1a1a1a 0%, #242424 100%);
+            padding: 28px 40px; border-radius: 8px; margin-bottom: 16px;
+            border: 1px solid rgba(212,175,55,0.3); text-align: center;
+        }
+        .header h1 { font-family: 'Playfair Display'; font-size: 2rem; color: var(--gold); margin-bottom: 4px; }
+        .header p { color: #909090; font-size: 0.88rem; }
+        .header .cliente-info { color: var(--gold); font-size: 0.85rem; margin-top: 6px; font-style: italic; }
+
+        /* ── BARRA DE PROGRESSO ── */
+        .prog-bar {
+            display: flex; align-items: center; justify-content: center;
+            padding: 14px 20px; margin-bottom: 16px;
+            background: var(--dark-card);
+            border: 1px solid rgba(212,175,55,0.3);
+            border-radius: 8px;
+        }
+        .prog-step { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        .prog-circle {
+            width: 32px; height: 32px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: bold; font-size: 0.82rem;
+            border: 2px solid rgba(212,175,55,0.2);
+            color: #555; background: transparent; transition: 0.2s;
+        }
+        .prog-circle.done { border-color: var(--gold); color: var(--gold); background: rgba(212,175,55,0.12); cursor: pointer; }
+        .prog-circle.done:hover { background: rgba(212,175,55,0.22); }
+        .prog-circle.active { border-color: var(--gold); color: #0a0a0a; background: var(--gold); }
+        .prog-label { font-size: 0.66rem; color: #555; text-align: center; white-space: nowrap; }
+        .prog-label.done, .prog-label.active { color: var(--gold); }
+        .prog-line { height: 2px; width: 48px; background: rgba(212,175,55,0.15); margin-bottom: 18px; flex-shrink: 0; }
+        .prog-line.done { background: rgba(212,175,55,0.5); }
+        @media (max-width: 500px) { .prog-line { width: 18px; } .prog-label { font-size: 0.58rem; } }
+
+        .progress {
+            background: var(--dark-card); padding: 14px 20px;
+            border-radius: 8px; margin-bottom: 20px;
+            border: 1px solid rgba(212,175,55,0.3); text-align: center;
+        }
+        .progress h3 { color: var(--gold); font-size: 0.93rem; }
+
+        /* ── CATEGORIAS ── */
+        .categories {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+            gap: 24px;
+            margin-bottom: 30px;
+        }
+
+        .category-card {
+            background: var(--dark-card);
+            border: 2px solid rgba(212,175,55,0.3);
+            border-radius: 8px; padding: 20px; transition: all 0.3s;
+        }
+        .category-card:hover { border-color: var(--gold); box-shadow: 0 0 18px rgba(212,175,55,0.15); }
+
+        .category-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 16px; padding-bottom: 10px;
+            border-bottom: 2px solid rgba(212,175,55,0.2);
+        }
+        .category-title { font-family: 'Playfair Display'; font-size: 1.35rem; color: var(--gold); }
+        .category-count {
+            background: rgba(212,175,55,0.15); color: var(--gold);
+            border-radius: 12px; padding: 2px 10px; font-size: 0.78rem; font-weight: 600;
+        }
+
+        .item-input { display: flex; gap: 8px; margin-bottom: 12px; }
+        .item-input input {
+            flex: 1; background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(212,175,55,0.15);
+            color: white; padding: 9px 10px; border-radius: 4px; font-family: 'Lora'; font-size: 0.88rem;
+        }
+        .item-input input:focus { outline: none; border-color: var(--gold); background: rgba(212,175,55,0.08); }
+        .item-input input::placeholder { color: #555; }
+
+        .btn-add-item {
+            background: rgba(76,175,80,0.2); color: var(--green);
+            border: 2px solid var(--green); padding: 9px 13px;
+            border-radius: 4px; cursor: pointer; font-weight: 600;
+            font-size: 0.82rem; white-space: nowrap; transition: 0.2s;
+        }
+        .btn-add-item:hover { background: var(--green); color: white; }
+
+        .items-list {
+            background: rgba(0,0,0,0.3); border-radius: 6px;
+            padding: 10px; min-height: 52px; max-height: 260px; overflow-y: auto;
+        }
+        .items-list::-webkit-scrollbar { width: 4px; }
+        .items-list::-webkit-scrollbar-thumb { background: rgba(212,175,55,0.3); border-radius: 2px; }
+
+        .item {
+            background: rgba(212,175,55,0.08); border-left: 3px solid var(--gold);
+            padding: 8px 10px; border-radius: 4px; margin-bottom: 6px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .item-name { color: #d0d0d0; font-size: 0.88rem; }
+        .btn-remove {
+            background: rgba(196,30,58,0.2); color: var(--red);
+            border: 1px solid rgba(196,30,58,0.4); padding: 3px 8px;
+            border-radius: 3px; cursor: pointer; font-size: 0.72rem;
+            font-weight: 600; transition: 0.2s; flex-shrink: 0; margin-left: 8px;
+        }
+        .btn-remove:hover { background: var(--red); color: white; border-color: var(--red); }
+
+        .empty-hint { color: #4a4a4a; text-align: center; padding: 16px; font-size: 0.83rem; font-style: italic; }
+
+        /* ── BOTÕES NAV ── */
+        .buttons { display: flex; gap: 12px; margin-top: 20px; }
+        .btn {
+            padding: 12px 22px; border: none; border-radius: 6px;
+            cursor: pointer; font-weight: 600; font-family: 'Lora';
+            text-transform: uppercase; flex: 1; transition: 0.3s; font-size: 0.88rem;
+        }
+        .btn-primary { background: linear-gradient(135deg, var(--red), #8b1428); color: white; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(196,30,58,0.4); }
+        .btn-secondary { background: transparent; color: var(--gold); border: 2px solid var(--gold); }
+        .btn-secondary:hover { background: rgba(212,175,55,0.1); }
+
+        /* ── BARRA DE PROGRESSO PERCENTUAL ── */
+        .percentage-bar-container {
+            display: flex; align-items: center; gap: 12px; margin-top: 10px;
+        }
+        .percentage-bar {
+            flex: 1; height: 8px; background: rgba(212,175,55,0.1);
+            border-radius: 4px; overflow: hidden; border: 1px solid rgba(212,175,55,0.2);
+        }
+        .percentage-bar-fill {
+            height: 100%; background: linear-gradient(90deg, var(--gold), #b8952a);
+            transition: width 0.3s ease; border-radius: 4px;
+        }
+        .percentage-text {
+            color: var(--gold); font-weight: 700; font-size: 0.9rem;
+            min-width: 45px; text-align: right; font-family: 'Playfair Display';
+        }
+
+        /* ── ABAS CARDÁPIO ── */
+        .abas-cardapio {
+            display: flex; gap: 0; margin-bottom: 20px;
+            background: var(--dark-card); border: 1px solid rgba(212,175,55,0.3);
+            border-radius: 8px; overflow: hidden;
+        }
+        .aba-btn {
+            flex: 1; padding: 14px 16px; border: none;
+            background: transparent; color: #707070; cursor: pointer;
+            font-family: 'Lora'; font-weight: 600; font-size: 0.9rem;
+            transition: 0.3s; text-align: center;
+            border-right: 1px solid rgba(212,175,55,0.2);
+        }
+        .aba-btn:last-child { border-right: none; }
+        .aba-btn:hover { color: #a0a0a0; background: rgba(212,175,55,0.05); }
+        .aba-btn.active {
+            background: rgba(212,175,55,0.15); color: var(--gold);
+            border-bottom: 3px solid var(--gold);
+        }
+
+        #abaManual { display: none; }
+        #abaManual.show { display: block; }
+        #abaSugestoes { display: none; }
+        #abaSugestoes.show { display: block; }
+
+        /* ── MODAL CARDÁPIOS SUGERIDOS ── */
+        .modal-sugestoes {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7); z-index: 1000; align-items: center; justify-content: center;
+        }
+        .modal-sugestoes.show { display: flex; }
+        .modal-content-sugestoes {
+            background: var(--dark-card); border: 1px solid rgba(212,175,55,0.3);
+            border-radius: 8px; padding: 28px; max-width: 700px; width: 90%; max-height: 80vh;
+            overflow-y: auto;
+        }
+        .modal-content-sugestoes h2 { font-family: 'Playfair Display'; color: var(--gold); margin-bottom: 20px; }
+        .sugestoes-grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
+        .sugestao-card {
+            background: rgba(255,255,255,0.02); border: 1px solid rgba(212,175,55,0.2);
+            border-radius: 6px; padding: 16px; cursor: pointer; transition: 0.3s;
+        }
+        .sugestao-card:hover {
+            border-color: var(--gold); background: rgba(212,175,55,0.08);
+        }
+        .sugestao-titulo { color: var(--gold); font-weight: 600; margin-bottom: 8px; }
+        .sugestao-desc { color: #909090; font-size: 0.85rem; }
+        .sugestao-itens { color: #c0c0c0; font-size: 0.75rem; margin-top: 8px; }
+
+        footer {
+            background: var(--dark-card); border-top: 1px solid rgba(212,175,55,0.3);
+            padding: 22px; text-align: center; color: #707070;
+            margin-top: 50px; font-size: 0.83rem;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <div class="header">
+        <h1>EventCalc Pro v7</h1>
+        <p>Cardápio do Evento</p>
+        <div class="cliente-info" id="clienteInfo"></div>
+    </div>
+
+    <!-- BARRA DE PROGRESSO -->
+    <div class="prog-bar">
+        <div class="prog-step">
+            <div class="prog-circle done" onclick="window.location.href='event_calculator_pro_v7_questionario.html'" title="Voltar ao Questionário">1</div>
+            <div class="prog-label done">Questionário</div>
+        </div>
+        <div class="prog-line done"></div>
+        <div class="prog-step">
+            <div class="prog-circle active">2</div>
+            <div class="prog-label active">Cardápio</div>
+        </div>
+        <div class="prog-line"></div>
+        <div class="prog-step">
+            <div class="prog-circle">3</div>
+            <div class="prog-label">Volumes</div>
+        </div>
+        <div class="prog-line"></div>
+        <div class="prog-step">
+            <div class="prog-circle">4</div>
+            <div class="prog-label">Proposta</div>
+        </div>
+    </div>
+
+    <div class="progress">
+        <h3>🍖 Etapa 2 de 4: CARDÁPIO</h3>
+        <div class="percentage-bar-container">
+            <div class="percentage-bar">
+                <div class="percentage-bar-fill" id="progressBar" style="width: 0%"></div>
+            </div>
+            <div class="percentage-text" id="progressPercentage">0%</div>
+        </div>
+    </div>
+
+    <!-- ABAS: MANUAL vs SUGESTÕES -->
+    <div class="abas-cardapio">
+        <button class="aba-btn active" id="btnAbaManual" onclick="mudarAbaCardapio('manual')">✏️ Manual</button>
+        <button class="aba-btn" id="btnAbaSugestoes" onclick="mudarAbaCardapio('sugestoes')">💡 Sugestões</button>
+    </div>
+
+    <!-- ABA 1: MANUAL (Cardápio Customizado) -->
+    <div id="abaManual" class="show">
+        <div class="categories">
+
+        <!-- APERITIVO -->
+        <div class="category-card">
+            <div class="category-header">
+                <div class="category-title">🥂 Aperitivo</div>
+                <div class="category-count" id="countAperitivo">0 itens</div>
+            </div>
+            <div class="item-input">
+                <input type="text" id="inputAperitivo" placeholder="Adicione um item..."
+                    onkeydown="if(event.key==='Enter'){event.preventDefault();adicionarItem('aperitivo');}" />
+                <button class="btn-add-item" onclick="adicionarItem('aperitivo')">+ Add</button>
+            </div>
+            <div class="items-list" id="listaAperitivo"></div>
+        </div>
+
+        <!-- PROTEÍNA -->
+        <div class="category-card">
+            <div class="category-header">
+                <div class="category-title">🍖 Proteína</div>
+                <div class="category-count" id="countProteina">0 itens</div>
+            </div>
+            <div class="item-input">
+                <input type="text" id="inputProteina" placeholder="Adicione um item..."
+                    onkeydown="if(event.key==='Enter'){event.preventDefault();adicionarItem('proteina');}" />
+                <button class="btn-add-item" onclick="adicionarItem('proteina')">+ Add</button>
+            </div>
+            <div class="items-list" id="listaProteina"></div>
+        </div>
+
+        <!-- CARBOIDRATO -->
+        <div class="category-card">
+            <div class="category-header">
+                <div class="category-title">🥔 Carboidrato</div>
+                <div class="category-count" id="countCarboidrato">0 itens</div>
+            </div>
+            <div class="item-input">
+                <input type="text" id="inputCarboidrato" placeholder="Adicione um item..."
+                    onkeydown="if(event.key==='Enter'){event.preventDefault();adicionarItem('carboidrato');}" />
+                <button class="btn-add-item" onclick="adicionarItem('carboidrato')">+ Add</button>
+            </div>
+            <div class="items-list" id="listaCarboidrato"></div>
+        </div>
+
+        <!-- SALADA -->
+        <div class="category-card">
+            <div class="category-header">
+                <div class="category-title">🥗 Salada</div>
+                <div class="category-count" id="countSalada">0 itens</div>
+            </div>
+            <div class="item-input">
+                <input type="text" id="inputSalada" placeholder="Adicione um item..."
+                    onkeydown="if(event.key==='Enter'){event.preventDefault();adicionarItem('salada');}" />
+                <button class="btn-add-item" onclick="adicionarItem('salada')">+ Add</button>
+            </div>
+            <div class="items-list" id="listaSalada"></div>
+        </div>
+
+        <!-- SOBREMESA -->
+        <div class="category-card">
+            <div class="category-header">
+                <div class="category-title">🍰 Sobremesa</div>
+                <div class="category-count" id="countSobremesa">0 itens</div>
+            </div>
+            <div class="item-input">
+                <input type="text" id="inputSobremesa" placeholder="Adicione um item..."
+                    onkeydown="if(event.key==='Enter'){event.preventDefault();adicionarItem('sobremesa');}" />
+                <button class="btn-add-item" onclick="adicionarItem('sobremesa')">+ Add</button>
+            </div>
+            <div class="items-list" id="listaSobremesa"></div>
+        </div>
+
+        </div><!-- FIM: .categories -->
+    </div><!-- FIM: #abaManual -->
+
+    <!-- ABA 2: SUGESTÕES -->
+    <div id="abaSugestoes" class="show" style="text-align: center; padding: 40px 20px;">
+        <h2 style="color: var(--gold); margin-bottom: 20px;">💡 Escolha um Cardápio Sugerido</h2>
+        <p style="color: #909090; margin-bottom: 20px;">Selecione uma sugestão de cardápio para começar com um modelo pronto, ou customize manualmente na aba Manual</p>
+        <button class="btn btn-primary" onclick="abrirSugestoes()" style="width: auto; padding: 14px 40px; font-size: 1rem;">Abrir Cardápios Sugeridos</button>
+    </div><!-- FIM: #abaSugestoes -->
+
+    <div class="buttons">
+        <button type="button" class="btn btn-secondary" onclick="voltar()">← Voltar</button>
+        <button type="button" class="btn btn-secondary" id="btnSalvarCardapio" style="display: none;" onclick="abrirSalvarCardapio()">💾 Salvar como Sugestão</button>
+        <button type="button" class="btn btn-primary" id="btnCardapioEspecial" style="display: none;" onclick="irParaCardapioEspecial()">🥘 Preparar Cardápio Especial →</button>
+        <button type="button" class="btn btn-primary" id="btnProsseguir" onclick="prosseguir()">Prosseguir para Volumes →</button>
+    </div>
+
+</div>
+
+<!-- MODAL CARDÁPIOS SUGERIDOS -->
+<div class="modal-sugestoes" id="modalSugestoes">
+    <div class="modal-content-sugestoes">
+        <h2>💡 Cardápios Sugeridos</h2>
+        <div class="sugestoes-grid" id="grilhaSugestoes"></div>
+    </div>
+</div>
+
+<!-- MODAL SALVAR NOVO CARDÁPIO -->
+<div class="modal-sugestoes" id="modalSalvarCardapio">
+    <div class="modal-content-sugestoes" style="max-width: 500px;">
+        <h2>💾 Salvar como Nova Sugestão</h2>
+
+        <div style="margin-bottom: 16px;">
+            <label style="display: block; color: var(--gold); font-weight: 600; margin-bottom: 6px;">Nome do Cardápio</label>
+            <input type="text" id="inputNomeCardapio" placeholder="Ex: Meu Churrasco Premium"
+                style="width: 100%; padding: 10px; border: 1px solid rgba(212,175,55,0.2); background: rgba(255,255,255,0.05); color: white; border-radius: 4px; font-family: 'Lora';" />
+        </div>
+
+        <div style="margin-bottom: 16px;">
+            <label style="display: block; color: var(--gold); font-weight: 600; margin-bottom: 6px;">Descrição</label>
+            <textarea id="textDescCardapio" placeholder="Ex: Combinação testada para churrascos com muita proteína"
+                style="width: 100%; padding: 10px; border: 1px solid rgba(212,175,55,0.2); background: rgba(255,255,255,0.05); color: white; border-radius: 4px; font-family: 'Lora'; resize: vertical; min-height: 80px;" ></textarea>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+            <label style="display: block; color: var(--gold); font-weight: 600; margin-bottom: 6px;">Tipo de Refeição</label>
+            <select id="selectTipoRefeicao"
+                style="width: 100%; padding: 10px; border: 1px solid rgba(212,175,55,0.2); background: rgba(255,255,255,0.05); color: white; border-radius: 4px; font-family: 'Lora';">
+                <option value="">-- Selecione --</option>
+                <option value="cafe">☕ Café da Manhã</option>
+                <option value="almoco">🍖 Almoço</option>
+                <option value="lanche">🥪 Lanche</option>
+                <option value="jantar">🍽️ Jantar</option>
+            </select>
+        </div>
+
+        <div style="display: flex; gap: 12px;">
+            <button class="btn btn-secondary" style="flex: 1;" onclick="fecharSalvarCardapio()">Cancelar</button>
+            <button class="btn btn-primary" style="flex: 1;" onclick="salvarNovoCardapio()">Salvar Sugestão</button>
+        </div>
+    </div>
+</div>
+
+<footer>
+    <p>EventCalc Pro v7 — Sistema Profissional de Orçamento para Eventos</p>
+</footer>
+
+<script>
+    let cardapio = { aperitivo: [], proteina: [], carboidrato: [], salada: [], sobremesa: [] };
+    let questionario = {};
+
+    /* ── ATUALIZAR PROGRESSÃO ── */
+    function atualizarProgressao() {
+        const totalItens = Object.values(cardapio).reduce((sum, cat) => sum + cat.length, 0);
+        const percentual = Math.round(Math.min(100, (totalItens / 15) * 100));
+        document.getElementById('progressBar').style.width = percentual + '%';
+        document.getElementById('progressPercentage').textContent = percentual + '%';
+    }
+
+    /* ── CARREGAR ── */
+    function carregarCardapio() {
+        // Info do cliente no header
+        try {
+            const qSalvo = localStorage.getItem('eventocalcData');
+            if (qSalvo) {
+                questionario = JSON.parse(qSalvo).questionario || {};
+                if (questionario.nomeContratante) {
+                    document.getElementById('clienteInfo').textContent =
+                        'Cliente: ' + questionario.nomeContratante + (questionario.numeroProposta ? '  |  ' + questionario.numeroProposta : '');
+                }
+
+                // Verificar se há restrições que precisam cardápio especial
+                const temCeliaco = (questionario.restricoes?.celiaco || 0) > 0;
+                const temLactose = (questionario.restricoes?.lactose || 0) > 0;
+
+                if (temCeliaco || temLactose) {
+                    document.getElementById('btnCardapioEspecial').style.display = 'block';
+                    document.getElementById('btnProsseguir').style.display = 'none';
+                } else {
+                    document.getElementById('btnCardapioEspecial').style.display = 'none';
+                    document.getElementById('btnProsseguir').style.display = 'block';
+                }
+            }
+        } catch(e) {}
+
+        // Cardápio
+        const salvo = localStorage.getItem('eventocalc_cardapio');
+        if (salvo) {
+            try { cardapio = JSON.parse(salvo); } catch(e) {}
+        }
+        renderizar();
+        atualizarProgressao();
+    }
+
+    /* ── ADICIONAR ── */
+    function adicionarItem(categoria) {
+        const inputId = 'input' + capitalize(categoria);
+        const input   = document.getElementById(inputId);
+        const valor   = input.value.trim();
+
+        if (!valor) {
+            input.focus();
+            return;
+        }
+        if (cardapio[categoria].map(i => i.toLowerCase()).includes(valor.toLowerCase())) {
+            alert('⚠️ Este item já existe nesta categoria!');
+            input.select();
+            return;
+        }
+
+        cardapio[categoria].push(valor);
+        input.value = '';
+        input.focus();
+        salvar();
+        renderizar();
+    }
+
+    /* ── REMOVER ── */
+    function removerItem(categoria, indice) {
+        cardapio[categoria].splice(indice, 1);
+        salvar();
+        renderizar();
+    }
+
+    /* ── RENDERIZAR ── */
+    function renderizar() {
+        Object.keys(cardapio).forEach(categoria => {
+            const lista  = document.getElementById('lista' + capitalize(categoria));
+            const count  = document.getElementById('count' + capitalize(categoria));
+            const qtd    = cardapio[categoria].length;
+
+            count.textContent = qtd + (qtd === 1 ? ' item' : ' itens');
+            lista.innerHTML   = '';
+
+            if (qtd === 0) {
+                lista.innerHTML = '<div class="empty-hint">Nenhum item ainda — digite e pressione Enter</div>';
+            } else {
+                cardapio[categoria].forEach((item, idx) => {
+                    const div = document.createElement('div');
+                    div.className = 'item';
+                    div.innerHTML =
+                        '<span class="item-name">' + escHtml(item) + '</span>' +
+                        '<button class="btn-remove" onclick="removerItem(\'' + categoria + '\',' + idx + ')">✕ Remover</button>';
+                    lista.appendChild(div);
+                });
+            }
+        });
+        atualizarProgressao();
+    }
+
+    /* ── SALVAR ── */
+    function salvar() {
+        localStorage.setItem('eventocalc_cardapio', JSON.stringify(cardapio));
+    }
+
+    /* ── NAV ── */
+    function voltar() { window.location.href = 'event_calculator_pro_v7_questionario.html'; }
+
+    function irParaCardapioEspecial() {
+        const totalItens = Object.values(cardapio).flat().length;
+        if (totalItens === 0) {
+            alert('❌ Adicione pelo menos um item ao cardápio normal antes de preparar cardápio especial!');
+            return;
+        }
+        salvar();
+        setTimeout(() => { window.location.href = 'event_calculator_pro_v7_cardapio_2b.html'; }, 200);
+    }
+
+    function prosseguir() {
+        const totalItens = Object.values(cardapio).flat().length;
+        if (totalItens === 0) {
+            alert('❌ Adicione pelo menos um item ao cardápio antes de prosseguir!');
+            return;
+        }
+        salvar();
+
+        // Verificar se há restrições alimentares
+        let temRestricoes = false;
+        try {
+            const qSalvo = localStorage.getItem('eventocalcData');
+            if (qSalvo) {
+                const dados = JSON.parse(qSalvo);
+                const q = dados.questionario || {};
+                const celiaco = (q.restricoes?.celiaco || 0) > 0;
+                const lactose = (q.restricoes?.lactose || 0) > 0;
+                const veganos = (q.veganos || 0) > 0;
+                const vegetarianos = (q.vegetarianos || 0) > 0;
+
+                temRestricoes = celiaco || lactose || veganos || vegetarianos;
+                console.log('🔍 Verificação restrições:', { celiaco, lactose, veganos, vegetarianos, temRestricoes });
+            }
+        } catch(e) { console.error('Erro ao verificar restrições:', e); }
+
+        // Navegar para Tela 2B se houver restrições, senão para Tela 3
+        const proximaPagina = temRestricoes
+            ? 'event_calculator_pro_v7_cardapio_2b.html'
+            : 'event_calculator_pro_v7_volumes.html';
+
+        console.log('→ Navegando para:', proximaPagina);
+        setTimeout(() => { window.location.href = proximaPagina; }, 200);
+    }
+
+    /* ── BIBLIOTECA DE CARDÁPIOS ── */
+    const cardapiosBiblioteca = {
+        cafe: [
+            {
+                nome: '☕ Café da Manhã Completo',
+                desc: 'Opção profissional para eventos matinais',
+                itens: {
+                    aperitivo: ['Croissant', 'Pão de Queijo', 'Broinhas'],
+                    proteina: ['Presunto Cru', 'Queijo Meia Cura'],
+                    carboidrato: ['Pão Francês', 'Bolo de Milho'],
+                    salada: [],
+                    sobremesa: ['Frutas Vermelhas', 'Iogurte Grego']
+                }
+            },
+            {
+                nome: '🥐 Café da Manhã Premium',
+                desc: 'Opção gourmet com focas e bolos artesanais',
+                itens: {
+                    aperitivo: ['Croissant de Amêndoa', 'Pão de Chocolate', 'Brioches'],
+                    proteina: ['Presunto Ibérico', 'Queijo Brie', 'Ovos Benedict'],
+                    carboidrato: ['Broa de Milho', 'Bolo de Cenoura'],
+                    salada: ['Mix de Frutas'],
+                    sobremesa: ['Brigadeiro Gourmet', 'Chocotone', 'Mel e Melado']
+                }
+            }
+        ],
+        almoco: [
+            {
+                nome: '🍖 Almoço Tradicional Churrasco',
+                desc: 'Clássico churrasquaria com carnes e acompanhamentos',
+                itens: {
+                    aperitivo: ['Queijo Meia Cura', 'Presunto Cru', 'Azeitonas'],
+                    proteina: ['Picanha', 'Costela', 'Frango Inteiro', 'Linguiça'],
+                    carboidrato: ['Arroz Integral', 'Feijão Preto', 'Batata Assada'],
+                    salada: ['Mix de Saladas', 'Tomate com Cebola', 'Beterraba'],
+                    sobremesa: ['Pavê', 'Sorvete Premium', 'Frutas Frescas']
+                }
+            },
+            {
+                nome: '🥩 Almoço Premium BBQ',
+                desc: 'Churrasquaria premium com cortes especiais',
+                itens: {
+                    aperitivo: ['Queijo Gourmet', 'Presunto Ibérico', 'Castanhas'],
+                    proteina: ['Costela Defumada', 'Picanha Maturada', 'Contrafilé Premium', 'Frango Gourmet'],
+                    carboidrato: ['Risoto de Abóbora', 'Polenta Cremosa', 'Batata Rústica'],
+                    salada: ['Salada Caprese', 'Rúcula com Parmesão', 'Legumes Grelhados'],
+                    sobremesa: ['Torta de Chocolate', 'Mousse de Maracujá', 'Frutas Caramelizadas']
+                }
+            }
+        ],
+        lanche: [
+            {
+                nome: '🥪 Lanche Profissional',
+                desc: 'Petiscos variados para coquetel',
+                itens: {
+                    aperitivo: ['Pastéis', 'Coxinhas', 'Risoles', 'Bruschetas'],
+                    proteina: ['Almôndegas', 'Tiras de Frango', 'Camarão'],
+                    carboidrato: ['Batata Chips', 'Mini Pães', 'Biscoitos'],
+                    salada: ['Melancia com Presunto', 'Melão Envolvido'],
+                    sobremesa: ['Brigadeiro', 'beijinho', 'Docinhos Variados']
+                }
+            }
+        ],
+        jantar: [
+            {
+                nome: '🍽️ Jantar Clássico Churrasco',
+                desc: 'Cardápio sofisticado para jantares',
+                itens: {
+                    aperitivo: ['Queijo Meia Cura', 'Presunto Cru', 'Azeitonas Premium'],
+                    proteina: ['Picanha', 'Costela', 'Contrafilé', 'Linguiça Premium'],
+                    carboidrato: ['Arroz Branco', 'Feijão Tropeiro', 'Batata Roti'],
+                    salada: ['Alface Crocante', 'Beterraba', 'Tomate'],
+                    sobremesa: ['Pavê Tradicional', 'Chopp Gelado', 'Frutas Frescas']
+                }
+            },
+            {
+                nome: '🌟 Jantar Premium',
+                desc: 'Experiência gastronômica de alto nível',
+                itens: {
+                    aperitivo: ['Queijo Parmesão Meia Cura', 'Presunto Ibérico', 'Azeitona Kalamata'],
+                    proteina: ['Picanha Maturada', 'Costela Negra', 'Contrafilé Premium', 'Linguiça Artesanal'],
+                    carboidrato: ['Arroz Selvagem', 'Feijão Preto', 'Batata Rosti'],
+                    salada: ['Salada Caprese', 'Rúcula com Parmesão Flor', 'Legumes Grelhados'],
+                    sobremesa: ['Pavê Gourmet', 'Mousse Premium', 'Sorvete Artesanal']
+                }
+            }
+        ]
+    };
+
+    function abrirSugestoes() {
+        try {
+            const qSalvo = localStorage.getItem('eventocalcData');
+            const q = qSalvo ? JSON.parse(qSalvo).questionario : {};
+            const tipoRefeicao = q.refeicao || 'almoco';
+
+            // Combinar biblioteca oficial + customizadas
+            let todasAsSugestoes = [...(cardapiosBiblioteca[tipoRefeicao] || [])];
+
+            // Carregar cardápios customizados
+            try {
+                const customizados = localStorage.getItem('eventocalc_cardapios_customizados');
+                if (customizados) {
+                    const custom = JSON.parse(customizados);
+                    if (custom[tipoRefeicao]) {
+                        // Adicionar marcador de customizado
+                        custom[tipoRefeicao].forEach(c => {
+                            c.customizado = true;
+                            todasAsSugestoes.push(c);
+                        });
+                    }
+                }
+            } catch(e) {}
+
+            const sugestoes = todasAsSugestoes.length > 0 ? todasAsSugestoes : cardapiosBiblioteca.almoco;
+            const html = sugestoes.map((sug, idx) => `
+                <div class="sugestao-card" onclick="carregarSugestao(${idx}, '${tipoRefeicao}')">
+                    <div class="sugestao-titulo">${sug.nome}${sug.customizado ? ' ⭐' : ''}</div>
+                    <div class="sugestao-desc">${sug.desc}</div>
+                    <div class="sugestao-itens">Total: ${Object.values(sug.itens).reduce((sum, cat) => sum + cat.length, 0)} itens</div>
+                </div>
+            `).join('');
+
+            document.getElementById('grilhaSugestoes').innerHTML = html;
+            document.getElementById('modalSugestoes').classList.add('show');
+        } catch(e) { console.error(e); }
+    }
+
+    function carregarSugestao(idx, tipoRefeicao) {
+        // Combinar biblioteca + customizadas (mesma lógica que abrirSugestoes)
+        let todasAsSugestoes = [...(cardapiosBiblioteca[tipoRefeicao] || [])];
+        try {
+            const customizados = localStorage.getItem('eventocalc_cardapios_customizados');
+            if (customizados) {
+                const custom = JSON.parse(customizados);
+                if (custom[tipoRefeicao]) {
+                    custom[tipoRefeicao].forEach(c => {
+                        c.customizado = true;
+                        todasAsSugestoes.push(c);
+                    });
+                }
+            }
+        } catch(e) {}
+
+        const sugestoes = todasAsSugestoes.length > 0 ? todasAsSugestoes : cardapiosBiblioteca.almoco;
+        const sugestao = sugestoes[idx];
+
+        if (!sugestao) {
+            alert('❌ Cardápio não encontrado.');
+            return;
+        }
+
+        // Carregar os itens da sugestão no cardápio
+        cardapio = JSON.parse(JSON.stringify(sugestao.itens));
+
+        // Salvar e renderizar
+        salvar();
+        renderizar();
+
+        // Fechar modal e mudar para aba Manual
+        document.getElementById('modalSugestoes').classList.remove('show');
+        mudarAbaCardapio('manual');
+
+        alert('✅ Cardápio sugerido carregado! Você pode editar conforme necessário.');
+    }
+
+    /* ── ALTERNAR ABAS CARDÁPIO ── */
+    function mudarAbaCardapio(aba) {
+        // Ocultar todas as abas
+        document.getElementById('abaManual').classList.remove('show');
+        document.getElementById('abaSugestoes').classList.remove('show');
+
+        // Remover classe active de todos os botões
+        document.getElementById('btnAbaManual').classList.remove('active');
+        document.getElementById('btnAbaSugestoes').classList.remove('active');
+
+        // Mostrar aba selecionada e ativar botão
+        if (aba === 'manual') {
+            document.getElementById('abaManual').classList.add('show');
+            document.getElementById('btnAbaManual').classList.add('active');
+            // Mostrar botão de salvar apenas na aba Manual
+            document.getElementById('btnSalvarCardapio').style.display = 'block';
+        } else if (aba === 'sugestoes') {
+            document.getElementById('abaSugestoes').classList.add('show');
+            document.getElementById('btnAbaSugestoes').classList.add('active');
+            // Ocultar botão de salvar na aba Sugestões
+            document.getElementById('btnSalvarCardapio').style.display = 'none';
+        }
+    }
+
+    /* ── SALVAR NOVO CARDÁPIO ── */
+    function abrirSalvarCardapio() {
+        // Validar se há pelo menos alguns itens
+        const totalItens = Object.values(cardapio).reduce((sum, cat) => sum + cat.length, 0);
+        if (totalItens === 0) {
+            alert('⚠️ Adicione pelo menos um item ao cardápio antes de salvar como sugestão.');
+            return;
+        }
+
+        // Limpar formulário
+        document.getElementById('inputNomeCardapio').value = '';
+        document.getElementById('textDescCardapio').value = '';
+        document.getElementById('selectTipoRefeicao').value = '';
+
+        // Abrir modal
+        document.getElementById('modalSalvarCardapio').classList.add('show');
+    }
+
+    function fecharSalvarCardapio() {
+        document.getElementById('modalSalvarCardapio').classList.remove('show');
+    }
+
+    function salvarNovoCardapio() {
+        const nome = document.getElementById('inputNomeCardapio').value.trim();
+        const descricao = document.getElementById('textDescCardapio').value.trim();
+        const tipoRefeicao = document.getElementById('selectTipoRefeicao').value;
+
+        // Validação
+        if (!nome) {
+            alert('❌ Digite o nome do cardápio');
+            return;
+        }
+        if (!descricao) {
+            alert('❌ Digite uma descrição para o cardápio');
+            return;
+        }
+        if (!tipoRefeicao) {
+            alert('❌ Selecione o tipo de refeição');
+            return;
+        }
+
+        // Criar novo objeto cardápio
+        const novoCardapio = {
+            nome: nome,
+            desc: descricao,
+            itens: JSON.parse(JSON.stringify(cardapio))
+        };
+
+        // Carregar cardápios customizados do localStorage
+        let customizados = {};
+        try {
+            const salvo = localStorage.getItem('eventocalc_cardapios_customizados');
+            if (salvo) customizados = JSON.parse(salvo);
+        } catch(e) {}
+
+        // Se a categoria não existe, criar array vazio
+        if (!customizados[tipoRefeicao]) {
+            customizados[tipoRefeicao] = [];
+        }
+
+        // Adicionar novo cardápio
+        customizados[tipoRefeicao].push(novoCardapio);
+
+        // Salvar no localStorage
+        localStorage.setItem('eventocalc_cardapios_customizados', JSON.stringify(customizados));
+
+        // Feedback visual
+        alert('✅ Cardápio "' + nome + '" salvo com sucesso!\n\nAparecerá nas sugestões para ' + capitalize(tipoRefeicao) + '.');
+
+        // Fechar modal
+        fecharSalvarCardapio();
+    }
+
+    /* ── UTILS ── */
+    function capitalize(str) { return str.charAt(0).toUpperCase() + str.slice(1); }
+    function escHtml(t) { return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+    // Ao carregar, definir aba inicial baseado se há cardápio
+    window.addEventListener('load', () => {
+        carregarCardapio();
+
+        // Se cardápio tem itens, mostrar aba Manual. Senão, mostrar Sugestões
+        const totalItens = Object.values(cardapio).reduce((sum, cat) => sum + cat.length, 0);
+        if (totalItens > 0) {
+            mudarAbaCardapio('manual');
+        } else {
+            mudarAbaCardapio('sugestoes');
+        }
+    });
+</script>
+</body>
+</html>

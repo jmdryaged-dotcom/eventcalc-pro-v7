@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EventCalc Pro v7 - Volumes</title>
+    <!-- 🔐 Sistema de Expiração Automática -->
+    <script src="sistema-expiracao.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Lora:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --dark-bg: #0a0a0a;
+            --dark-card: #242424;
+            --gold: #d4af37;
+            --red: #c41e3a;
+            --green: #4caf50;
+            --orange: #f59e0b;
+            --white: #ffffff;
+        }
+        body { font-family: 'Lora', serif; background: var(--dark-bg); color: var(--white); }
+        .container { max-width: 1600px; margin: 0 auto; padding: 20px; }
+
+        .header {
+            background: linear-gradient(135deg, #1a1a1a 0%, #242424 100%);
+            padding: 28px 40px; border-radius: 8px; margin-bottom: 16px;
+            border: 1px solid rgba(212,175,55,0.3); text-align: center;
+        }
+        .header h1 { font-family: 'Playfair Display'; font-size: 2rem; color: var(--gold); margin-bottom: 4px; }
+        .header p { color: #909090; font-size: 0.88rem; }
+        .header .cliente-info { color: var(--gold); font-size: 0.82rem; margin-top: 5px; font-style: italic; }
+
+        /* ── BARRA DE PROGRESSO ── */
+        .prog-bar {
+            display: flex; align-items: center; justify-content: center;
+            padding: 14px 20px; margin-bottom: 16px;
+            background: var(--dark-card);
+            border: 1px solid rgba(212,175,55,0.3); border-radius: 8px;
+        }
+        .prog-step { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        .prog-circle {
+            width: 32px; height: 32px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: bold; font-size: 0.82rem;
+            border: 2px solid rgba(212,175,55,0.2);
+            color: #555; background: transparent; transition: 0.2s;
+        }
+        .prog-circle.done { border-color: var(--gold); color: var(--gold); background: rgba(212,175,55,0.12); cursor: pointer; }
+        .prog-circle.done:hover { background: rgba(212,175,55,0.22); }
+        .prog-circle.active { border-color: var(--gold); color: #0a0a0a; background: var(--gold); }
+        .prog-label { font-size: 0.66rem; color: #555; text-align: center; white-space: nowrap; }
+        .prog-label.done, .prog-label.active { color: var(--gold); }
+        .prog-line { height: 2px; width: 48px; background: rgba(212,175,55,0.15); margin-bottom: 18px; flex-shrink: 0; }
+        .prog-line.done { background: rgba(212,175,55,0.5); }
+        @media (max-width: 500px) { .prog-line { width: 18px; } .prog-label { font-size: 0.58rem; } }
+
+        .progress {
+            background: var(--dark-card); padding: 14px 20px;
+            border-radius: 8px; margin-bottom: 16px;
+            border: 1px solid rgba(212,175,55,0.3); text-align: center;
+        }
+        .progress h3 { color: var(--gold); font-size: 0.93rem; }
+
+        .info-box {
+            background: rgba(212,175,55,0.06); border-left: 4px solid var(--gold);
+            padding: 14px 18px; border-radius: 6px; margin-bottom: 20px;
+        }
+        .info-box h3 { color: var(--gold); margin-bottom: 5px; font-size: 0.93rem; }
+        .info-box p { color: #c0c0c0; font-size: 0.85rem; line-height: 1.5; }
+
+        /* ── 3 COLUNAS ── */
+        .three-columns {
+            display: grid;
+            grid-template-columns: 1.6fr 1fr 1fr;
+            gap: 18px;
+            margin-bottom: 30px;
+        }
+        @media (max-width: 1100px) { .three-columns { grid-template-columns: 1fr; } }
+
+        .column-title {
+            font-family: 'Playfair Display'; font-size: 1.15rem; color: var(--gold);
+            margin-bottom: 12px; padding-bottom: 8px;
+            border-bottom: 2px solid rgba(212,175,55,0.3);
+        }
+
+        /* ── TABELA DE COMPRA ── */
+        .tabela-box {
+            background: var(--dark-card); border: 1px solid rgba(212,175,55,0.3);
+            border-radius: 8px; padding: 14px; overflow-x: auto;
+        }
+        table { width: 100%; font-size: 0.73rem; border-collapse: collapse; }
+        th {
+            background: rgba(212,175,55,0.1); color: var(--gold);
+            padding: 7px 6px; text-align: left;
+            border-bottom: 2px solid rgba(212,175,55,0.3); white-space: nowrap;
+        }
+        td { padding: 6px; border-bottom: 1px solid rgba(212,175,55,0.08); }
+        td input {
+            background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.15);
+            color: white; padding: 4px 5px; border-radius: 3px;
+            width: 100%; font-family: 'Lora'; font-size: 0.72rem;
+        }
+        td input:focus { outline: none; border-color: var(--gold); background: rgba(212,175,55,0.08); }
+        .calc-cell { color: #c0c0c0; font-weight: 600; font-size: 0.72rem; }
+        .total-cell { color: var(--gold); font-weight: 700; }
+
+        .btn-remove-row {
+            background: rgba(196,30,58,0.2); color: var(--red);
+            border: 1px solid rgba(196,30,58,0.35); padding: 3px 7px;
+            border-radius: 3px; cursor: pointer; font-size: 0.68rem;
+            font-weight: 700; width: 100%; transition: 0.2s;
+        }
+        .btn-remove-row:hover { background: var(--red); color: white; border-color: var(--red); }
+
+        .btn-add {
+            background: rgba(76,175,80,0.15); color: var(--green);
+            border: 2px solid var(--green); padding: 7px 14px;
+            border-radius: 6px; cursor: pointer; font-weight: 600;
+            font-size: 0.78rem; margin-top: 10px; width: 100%; transition: 0.2s;
+        }
+        .btn-add:hover { background: var(--green); color: white; }
+
+        .totals {
+            background: rgba(212,175,55,0.08); border: 1px solid rgba(212,175,55,0.3);
+            padding: 10px 12px; border-radius: 6px; margin-top: 10px;
+        }
+        .totals-item {
+            display: flex; justify-content: space-between;
+            padding: 5px 0; font-weight: 600; font-size: 0.82rem;
+            border-bottom: 1px solid rgba(212,175,55,0.1);
+        }
+        .totals-item:last-child { border-bottom: none; }
+        .totals-item span:last-child { color: var(--gold); }
+
+        /* ── RESUMO POR CATEGORIA ── */
+        .resumo-box {
+            background: var(--dark-card); border: 2px solid rgba(212,175,55,0.3);
+            border-radius: 8px; padding: 14px; height: fit-content;
+        }
+        .categoria-resumo {
+            background: rgba(255,255,255,0.02); border: 1px solid rgba(212,175,55,0.12);
+            padding: 9px 10px; border-radius: 4px; margin-bottom: 8px;
+        }
+        .categoria-nome { font-weight: 600; color: var(--gold); font-size: 0.82rem; margin-bottom: 3px; }
+        .categoria-valor { font-size: 1.05rem; font-weight: bold; color: var(--white); }
+
+        /* ── META / PROVA REAL ── */
+        .meta-box {
+            background: var(--dark-card); border: 2px solid var(--gold);
+            border-radius: 8px; padding: 14px; height: fit-content;
+        }
+        .meta-item { padding: 7px 0; border-bottom: 1px solid rgba(212,175,55,0.08); font-size: 0.82rem; }
+        .meta-item:last-child { border-bottom: none; }
+        .meta-label { color: #808080; font-size: 0.72rem; margin-bottom: 2px; }
+        .meta-valor { color: var(--gold); font-weight: bold; font-size: 0.9rem; }
+        .meta-delta { font-size: 0.72rem; margin-top: 2px; font-weight: 600; }
+        .delta-ok    { color: var(--green); }
+        .delta-baixo { color: var(--orange); }
+        .delta-neutro{ color: #707070; }
+
+        .meta-header-item { padding: 7px 0; border-bottom: 1px solid rgba(212,175,55,0.08); font-size: 0.82rem; }
+        .meta-header-valor { color: white; font-weight: 600; font-size: 0.88rem; }
+
+        .meta-total {
+            background: rgba(212,175,55,0.15); border: 1px solid var(--gold);
+            padding: 10px; border-radius: 4px; text-align: center; margin-top: 10px;
+        }
+        .meta-total-valor { font-family: 'Playfair Display'; font-size: 1.4rem; color: var(--gold); font-weight: bold; }
+
+        /* ── BOTÕES NAV ── */
+        .buttons { display: flex; gap: 12px; margin-top: 20px; }
+        .btn {
+            padding: 12px 22px; border: none; border-radius: 6px;
+            cursor: pointer; font-weight: 600; font-family: 'Lora';
+            text-transform: uppercase; flex: 1; transition: 0.3s; font-size: 0.88rem;
+        }
+        .btn-primary { background: linear-gradient(135deg, var(--red), #8b1428); color: white; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(196,30,58,0.4); }
+        .btn-secondary { background: transparent; color: var(--gold); border: 2px solid var(--gold); }
+        .btn-secondary:hover { background: rgba(212,175,55,0.1); }
+
+        /* ── BARRA DE PROGRESSO PERCENTUAL ── */
+        .percentage-bar-container {
+            display: flex; align-items: center; gap: 12px; margin-top: 10px;
+        }
+        .percentage-bar {
+            flex: 1; height: 8px; background: rgba(212,175,55,0.1);
+            border-radius: 4px; overflow: hidden; border: 1px solid rgba(212,175,55,0.2);
+        }
+        .percentage-bar-fill {
+            height: 100%; background: linear-gradient(90deg, var(--gold), #b8952a);
+            transition: width 0.3s ease; border-radius: 4px;
+        }
+        .percentage-text {
+            color: var(--gold); font-weight: 700; font-size: 0.9rem;
+            min-width: 45px; text-align: right; font-family: 'Playfair Display';
+        }
+
+        footer {
+            background: var(--dark-card); border-top: 1px solid rgba(212,175,55,0.3);
+            padding: 22px; text-align: center; color: #707070;
+            margin-top: 50px; font-size: 0.83rem;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <div class="header">
+        <h1>EventCalc Pro v7</h1>
+        <p>Tabela de Volumes</p>
+        <div class="cliente-info" id="clienteInfo"></div>
+    </div>
+
+    <!-- BARRA DE PROGRESSO -->
+    <div class="prog-bar">
+        <div class="prog-step">
+            <div class="prog-circle done" onclick="window.location.href='event_calculator_pro_v7_questionario.html'" title="Ir ao Questionário">1</div>
+            <div class="prog-label done">Questionário</div>
+        </div>
+        <div class="prog-line done"></div>
+        <div class="prog-step">
+            <div class="prog-circle done" onclick="window.location.href='event_calculator_pro_v7_cardapio.html'" title="Ir ao Cardápio">2</div>
+            <div class="prog-label done">Cardápio</div>
+        </div>
+        <div class="prog-line done"></div>
+        <div class="prog-step">
+            <div class="prog-circle done" onclick="window.location.href='event_calculator_pro_v7_cardapio_2b.html'" title="Cardápio Especial">2B</div>
+            <div class="prog-label done">Especial</div>
+        </div>
+        <div class="prog-line done"></div>
+        <div class="prog-step" id="progStep3B" style="display: none;">
+            <div class="prog-circle done" onclick="window.location.href='event_calculator_pro_v7_volumes_3b.html'" title="Volumes Especiais">3B</div>
+            <div class="prog-label done">Vol. Especial</div>
+        </div>
+        <div class="prog-line" id="progLine3B" style="display: none;"></div>
+        <div class="prog-step">
+            <div class="prog-circle active">3</div>
+            <div class="prog-label active">Volumes</div>
+        </div>
+        <div class="prog-line"></div>
+        <div class="prog-step">
+            <div class="prog-circle">4</div>
+            <div class="prog-label">Proposta</div>
+        </div>
+    </div>
+
+    <div class="progress">
+        <h3>📊 Etapa 3 de 4: VOLUMES E COMPRAS</h3>
+        <div class="percentage-bar-container">
+            <div class="percentage-bar">
+                <div class="percentage-bar-fill" id="progressBar" style="width: 0%"></div>
+            </div>
+            <div class="percentage-text" id="progressPercentage">0%</div>
+        </div>
+    </div>
+
+    <div class="info-box">
+        <h3>Como funciona</h3>
+        <p>
+            <strong>Esquerda:</strong> preencha kg e R$/kg de cada item — os campos "A Comprar" e "Total R$" calculam automaticamente.&nbsp;&nbsp;
+            <strong>Centro:</strong> resumo por categoria.&nbsp;&nbsp;
+            <strong>Direita:</strong> meta de consumo (vem da Etapa 1) com indicador de diferença em relação ao que você está comprando.
+        </p>
+    </div>
+
+    <div class="three-columns">
+
+        <!-- COLUNA 1: TABELA DE COMPRA -->
+        <div>
+            <div class="column-title">📋 Volumes para Compra</div>
+            <div class="tabela-box">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th>Kg</th>
+                            <th>R$/kg</th>
+                            <th>Perda%</th>
+                            <th>A Comprar</th>
+                            <th>Total R$</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody"></tbody>
+                </table>
+            </div>
+            <button class="btn-add" onclick="adicionarLinha()">+ Adicionar Item</button>
+            <div class="totals">
+                <div class="totals-item"><span>Total a Servir:</span>  <span id="totalServir">0,00 kg</span></div>
+                <div class="totals-item"><span>Total a Comprar:</span> <span id="totalComprar">0,00 kg</span></div>
+                <div class="totals-item"><span>Total em R$:</span>     <span id="totalValor">R$ 0,00</span></div>
+            </div>
+        </div>
+
+        <!-- COLUNA 2: RESUMO POR CATEGORIA -->
+        <div>
+            <div class="column-title">📊 Resumo por Categoria</div>
+            <div class="resumo-box">
+                <div class="categoria-resumo">
+                    <div class="categoria-nome">🥂 Aperitivo</div>
+                    <div class="categoria-valor" id="totalAperitivo">0,00 kg</div>
+                </div>
+                <div class="categoria-resumo">
+                    <div class="categoria-nome">🍖 Proteína</div>
+                    <div class="categoria-valor" id="totalProteina">0,00 kg</div>
+                </div>
+                <div class="categoria-resumo">
+                    <div class="categoria-nome">🥔 Carboidrato</div>
+                    <div class="categoria-valor" id="totalCarboidrato">0,00 kg</div>
+                </div>
+                <div class="categoria-resumo">
+                    <div class="categoria-nome">🥗 Salada</div>
+                    <div class="categoria-valor" id="totalSalada">0,00 kg</div>
+                </div>
+                <div class="categoria-resumo">
+                    <div class="categoria-nome">🍰 Sobremesa</div>
+                    <div class="categoria-valor" id="totalSobremesa">0,00 kg</div>
+                </div>
+                <div class="totals" style="margin-top:12px;">
+                    <div class="totals-item"><span>TOTAL SERVIR:</span><span id="totalGeralCategoria">0,00 kg</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- COLUNA 3: META / PROVA REAL (SEPARADA POR TIPO) -->
+        <div>
+            <div class="column-title">🎯 Prova Real (Meta)</div>
+            <div class="meta-box">
+                <div class="meta-header-item">
+                    <div class="meta-label">Refeição:</div>
+                    <div class="meta-header-valor" id="metaRefeicao">—</div>
+                </div>
+                <div class="meta-header-item">
+                    <div class="meta-label">Pessoas:</div>
+                    <div class="meta-header-valor" id="metaPessoas">—</div>
+                </div>
+
+                <div class="meta-item">
+                    <div class="meta-label">Aperitivo — meta:</div>
+                    <div class="meta-valor" id="metaAperitivo">—</div>
+                    <div class="meta-delta delta-neutro" id="deltaAperitivo"></div>
+                </div>
+                <div class="meta-item">
+                    <div class="meta-label">Proteína — meta:</div>
+                    <div class="meta-valor" id="metaProteina">—</div>
+                    <div class="meta-delta delta-neutro" id="deltaProteina"></div>
+                </div>
+                <div class="meta-item">
+                    <div class="meta-label">Carboidrato — meta:</div>
+                    <div class="meta-valor" id="metaCarboidrato">—</div>
+                    <div class="meta-delta delta-neutro" id="deltaCarboidrato"></div>
+                </div>
+                <div class="meta-item">
+                    <div class="meta-label">Salada — meta:</div>
+                    <div class="meta-valor" id="metaSalada">—</div>
+                    <div class="meta-delta delta-neutro" id="deltaSalada"></div>
+                </div>
+                <div class="meta-item">
+                    <div class="meta-label">Sobremesa — meta:</div>
+                    <div class="meta-valor" id="metaSobremesa">—</div>
+                    <div class="meta-delta delta-neutro" id="deltaSobremesa"></div>
+                </div>
+
+                <div class="meta-total">
+                    <div class="meta-label" style="margin-bottom:4px;">TOTAL NECESSÁRIO:</div>
+                    <div class="meta-total-valor" id="metaTotal">—</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="buttons">
+        <button type="button" class="btn btn-secondary" onclick="voltar()">← Voltar</button>
+        <button type="button" class="btn btn-primary" onclick="prosseguir()">Prosseguir para Proposta →</button>
+    </div>
+
+</div>
+
+<footer>
+    <p>EventCalc Pro v7 — Sistema Profissional de Orçamento para Eventos</p>
+</footer>
+
+<script>
+    let volumes    = [];
+    let volumesEspeciais = [];
+    let cardapio   = {};
+    let cardapioEspecial = {};
+    let questionario = {};
+
+    // Meta apenas para CARDÁPIO NORMAL (Celiaco/Lactose têm própria prova real em Tela 3B)
+    let metaKg = { aperitivo: 0, proteina: 0, carboidrato: 0, salada: 0, sobremesa: 0 };
+
+    const nomesRefeicao = {
+        cafe: 'Café da Manhã', almoco: 'Almoço',
+        lanche: 'Lanche / Petisco', jantar: 'Jantar'
+    };
+
+    /* ── ATUALIZAR PROGRESSÃO ── */
+    function atualizarProgressao() {
+        if (volumes.length === 0) {
+            document.getElementById('progressBar').style.width = '0%';
+            document.getElementById('progressPercentage').textContent = '0%';
+            return;
+        }
+        const comKg = volumes.filter(v => v.kg > 0).length;
+        const percentual = Math.round((comKg / volumes.length) * 100);
+        document.getElementById('progressBar').style.width = percentual + '%';
+        document.getElementById('progressPercentage').textContent = percentual + '%';
+    }
+
+    /* ── CARREGAR ── */
+    function carregar() {
+        try {
+            // Questionário
+            const qSalvo = localStorage.getItem('eventocalcData');
+            if (qSalvo) {
+                const dados = JSON.parse(qSalvo);
+                questionario = dados.questionario || {};
+            }
+
+            // Cardápio
+            const cardSalvo = localStorage.getItem('eventocalc_cardapio');
+            cardapio = cardSalvo ? JSON.parse(cardSalvo) : {};
+
+            // Cardápio Especial (para categorizar volumes especiais)
+            const cardEspSalvo = localStorage.getItem('eventocalc_cardapio_especial');
+            cardapioEspecial = cardEspSalvo ? JSON.parse(cardEspSalvo) : {};
+
+            // Volumes Especiais (se existirem)
+            const volEspSalvo = localStorage.getItem('eventocalc_volumes_especiais');
+            if (volEspSalvo) {
+                try {
+                    volumesEspeciais = JSON.parse(volEspSalvo);
+                    // Mostrar step 3B se houver volumes especiais
+                    if (volumesEspeciais && volumesEspeciais.length > 0) {
+                        document.getElementById('progStep3B').style.display = 'flex';
+                        document.getElementById('progLine3B').style.display = 'block';
+                    }
+                } catch(e) { }
+            }
+
+            // Info do cliente
+            if (questionario.nomeContratante) {
+                document.getElementById('clienteInfo').textContent =
+                    'Cliente: ' + questionario.nomeContratante +
+                    (questionario.numeroProposta ? '  |  ' + questionario.numeroProposta : '');
+            }
+
+        } catch(e) { console.error(e); }
+
+        // ── META NORMAL (cardápio principal) ──
+        const totalPessoas = (questionario.adultos || 20) + (questionario.criancas || 0);
+        const vols1 = questionario.volumes || {};
+        const ap_g  = vols1.aperitivo   ?? 120;
+        const pr_g  = vols1.proteina    ?? 450;
+        const ca_g  = vols1.carboidrato ?? 200;
+        const sa_g  = vols1.salada      ?? 100;
+        const so_g  = vols1.sobremesa   ?? 100;
+        const tot_g = vols1.total       ?? (ap_g + pr_g + ca_g + sa_g + so_g);
+
+        metaKg.aperitivo   = ap_g  * totalPessoas / 1000;
+        metaKg.proteina    = pr_g  * totalPessoas / 1000;
+        metaKg.carboidrato = ca_g  * totalPessoas / 1000;
+        metaKg.salada      = sa_g  * totalPessoas / 1000;
+        metaKg.sobremesa   = so_g  * totalPessoas / 1000;
+
+        document.getElementById('metaRefeicao').textContent = nomesRefeicao[questionario.refeicao] || questionario.refeicao || '—';
+        document.getElementById('metaPessoas').textContent  = totalPessoas + ' pessoas';
+        document.getElementById('metaAperitivo').textContent   = metaKg.aperitivo.toFixed(2)   + ' kg  (' + ap_g + 'g/pessoa)';
+        document.getElementById('metaProteina').textContent    = metaKg.proteina.toFixed(2)    + ' kg  (' + pr_g + 'g/pessoa)';
+        document.getElementById('metaCarboidrato').textContent = metaKg.carboidrato.toFixed(2) + ' kg  (' + ca_g + 'g/pessoa)';
+        document.getElementById('metaSalada').textContent      = metaKg.salada.toFixed(2)      + ' kg  (' + sa_g + 'g/pessoa)';
+        document.getElementById('metaSobremesa').textContent   = metaKg.sobremesa.toFixed(2)   + ' kg  (' + so_g + 'g/pessoa)';
+        document.getElementById('metaTotal').textContent       = (tot_g * totalPessoas / 1000).toFixed(2) + ' kg';
+
+        // ── VOLUMES: SEMPRE reconstruir em ordem de categoria, preservando valores anteriores ──
+        const volSalvo = localStorage.getItem('eventocalc_volumes');
+        let volumesSalvos = {};
+        if (volSalvo) {
+            try {
+                const old = JSON.parse(volSalvo);
+                old.forEach(v => {
+                    volumesSalvos[v.nome.toLowerCase()] = v;
+                });
+            } catch(e) { }
+        }
+
+        // Reconstruir volumes DO ZERO, respeitando ordem do cardápio, mas preservando valores
+        volumes = [];
+        const categoriaOrder = ['aperitivo', 'proteina', 'carboidrato', 'salada', 'sobremesa'];
+        categoriaOrder.forEach(cat => {
+            const itensCategoria = cardapio[cat] || [];
+            itensCategoria.forEach(nome => {
+                if (nome && nome.trim()) {
+                    const nomeLower = nome.toLowerCase();
+                    const saved = volumesSalvos[nomeLower];
+                    volumes.push({
+                        nome: nome.trim(),
+                        kg: saved ? saved.kg : 0,
+                        preco: saved ? saved.preco : 0,
+                        perda: saved ? saved.perda : 10
+                    });
+                }
+            });
+        });
+
+        if (volumes.length === 0) volumes.push({ nome: '', kg: 0, preco: 0, perda: 10 });
+        renderizar();
+    }
+
+    /* ── ADICIONAR LINHA ── */
+    function adicionarLinha() {
+        volumes.push({ nome: '', kg: 0, preco: 0, perda: 10 });
+        renderizar();
+    }
+
+    /* ── REMOVER LINHA ── */
+    function removerLinha(idx) {
+        volumes.splice(idx, 1);
+        renderizar();
+    }
+
+    /* ── RENDERIZAR ── */
+    // Validar campos numéricos (impedir negativos)
+    function validarNumeroPositivo(event) {
+        let valor = parseFloat(event.target.value) || 0;
+        if (valor < 0) {
+            event.target.value = 0;
+            console.warn('⚠️ Valores negativos não são permitidos');
+        }
+    }
+
+    function renderizar() {
+        const tbody = document.getElementById('tbody');
+        tbody.innerHTML = '';
+
+        volumes.forEach((vol, idx) => {
+            const aComprar = vol.kg > 0 ? vol.kg / (1 - (vol.perda || 0) / 100) : 0;
+            const total    = aComprar * (vol.preco || 0);
+            const tr = document.createElement('tr');
+            tr.innerHTML =
+                '<td><input type="text" value="' + escAttr(vol.nome) + '"' +
+                    ' onchange="volumes[' + idx + '].nome=this.value; salvarAuto();"' +
+                    ' placeholder="Item" /></td>' +
+                '<td><input type="number" value="' + vol.kg + '" step="0.01" min="0"' +
+                    ' oninput="validarNumeroPositivo(event); volumes[' + idx + '].kg=parseFloat(this.value)||0; atualizar();" /></td>' +
+                '<td><input type="number" value="' + vol.preco + '" step="0.01" min="0"' +
+                    ' oninput="validarNumeroPositivo(event); volumes[' + idx + '].preco=parseFloat(this.value)||0; atualizar();" /></td>' +
+                '<td><input type="number" value="' + vol.perda + '" step="1" min="0" max="99"' +
+                    ' oninput="validarNumeroPositivo(event); volumes[' + idx + '].perda=parseFloat(this.value)||0; atualizar();" /></td>' +
+                '<td class="calc-cell">' + aComprar.toFixed(2) + '</td>' +
+                '<td class="total-cell">R$ ' + total.toFixed(2) + '</td>' +
+                '<td><button type="button" class="btn-remove-row" onclick="removerLinha(' + idx + ')">✕</button></td>';
+            tbody.appendChild(tr);
+        });
+
+        atualizar();
+    }
+
+    /* ── ATUALIZAR TOTAIS + DELTA ── */
+    function atualizar() {
+        let totalServir  = 0;
+        let totalComprar = 0;
+        let totalValor   = 0;
+
+        const resumosCat = { aperitivo: 0, proteina: 0, carboidrato: 0, salada: 0, sobremesa: 0 };
+
+        // ── Volumes NORMAIS ──
+        volumes.forEach(vol => {
+            if (vol.kg > 0) {
+                totalServir += vol.kg;
+                const aComprar = vol.kg / (1 - (vol.perda || 0) / 100);
+                totalComprar  += aComprar;
+                totalValor    += aComprar * (vol.preco || 0);
+
+                // Classificar por categoria via cardápio
+                for (const [cat, itens] of Object.entries(cardapio)) {
+                    if (Array.isArray(itens) && itens.map(i => i.toLowerCase()).includes(vol.nome.toLowerCase())) {
+                        if (resumosCat[cat] !== undefined) { resumosCat[cat] += vol.kg; }
+                        break;
+                    }
+                }
+            }
+        });
+
+        // ── Volumes ESPECIAIS (se existirem) — incluir na tabela de compra, mas NÃO na Prova Real ──
+        // IMPORTANTE: Em Tela 3B, vol.kg já armazena em KG (não grams)
+        // A Prova Real de Celiaco/Lactose está em Tela 3B
+        volumesEspeciais.forEach(vol => {
+            const kgReal = vol.kg || 0; // Já em kg, sem conversão necessária
+            if (kgReal > 0) {
+                totalServir += kgReal;
+                const aComprar = kgReal / (1 - (vol.perda || 0) / 100);
+                totalComprar  += aComprar;
+                totalValor    += aComprar * (vol.preco || 0);
+
+                // Procurar categoria no cardápio especial para agrupar na coluna 2
+                let encontrou = false;
+                const tipoEspecial = vol.tipoEspecial; // celiaco, lactose, vegano, vegetariano
+                const tiposAChecar = ['celiaco', 'lactose', 'vegano', 'vegetariano'];
+
+                for (const tipo of tiposAChecar) {
+                    if (vol.tipoEspecial === tipo) {
+                        for (const [cat, itens] of Object.entries(cardapioEspecial[tipo] || {})) {
+                            if (Array.isArray(itens) && itens.map(i => i.toLowerCase()).includes(vol.nome.toLowerCase())) {
+                                if (resumosCat[cat] !== undefined) {
+                                    resumosCat[cat] += kgReal;
+                                    encontrou = true;
+                                }
+                                break;
+                            }
+                        }
+                        break;
+                    }
+                }
+                // Se não encontrou categoria, somar à proteína (padrão)
+                if (!encontrou) { resumosCat.proteina += kgReal; }
+            }
+        });
+
+        // Totais coluna 1
+        document.getElementById('totalServir').textContent  = totalServir.toFixed(2)  + ' kg';
+        document.getElementById('totalComprar').textContent = totalComprar.toFixed(2) + ' kg';
+        document.getElementById('totalValor').textContent   = 'R$ ' + totalValor.toFixed(2);
+
+        // Resumo coluna 2
+        ['aperitivo','proteina','carboidrato','salada','sobremesa'].forEach(cat => {
+            document.getElementById('total' + cap(cat)).textContent = resumosCat[cat].toFixed(2) + ' kg';
+        });
+        document.getElementById('totalGeralCategoria').textContent = totalServir.toFixed(2) + ' kg';
+
+        // Delta coluna 3 (apenas para CARDÁPIO NORMAL)
+        ['aperitivo','proteina','carboidrato','salada','sobremesa'].forEach(cat => {
+            const el   = document.getElementById('delta' + cap(cat));
+            const meta = metaKg[cat];
+            if (!el) return;
+            if (meta <= 0) { el.textContent = ''; el.className = 'meta-delta delta-neutro'; return; }
+
+            const comprado = resumosCat[cat];
+            const diff     = comprado - meta;
+            const sign     = diff >= 0 ? '+' : '';
+            el.textContent = 'Compra: ' + comprado.toFixed(2) + ' kg  (' + sign + diff.toFixed(2) + ' kg)';
+            el.className   = 'meta-delta ' + (diff < -0.01 ? 'delta-baixo' : 'delta-ok');
+        });
+
+        atualizarProgressao();
+        salvarAuto();
+    }
+
+    /* ── SALVAR AUTOMÁTICO ── */
+    function salvarAuto() {
+        localStorage.setItem('eventocalc_volumes', JSON.stringify(volumes));
+    }
+
+    /* ── NAV ── */
+    function voltar()    { window.location.href = 'event_calculator_pro_v7_cardapio_2b.html'; }
+
+    function prosseguir() {
+        const temKg = volumes.some(v => v.kg > 0);
+        if (!temKg) {
+            alert('❌ Preencha pelo menos um item com quantidade (kg)!');
+            return;
+        }
+        salvarAuto();
+        setTimeout(() => { window.location.href = 'event_calculator_pro_v7_proposta.html'; }, 200);
+    }
+
+    /* ── UTILS ── */
+    function cap(str)    { return str.charAt(0).toUpperCase() + str.slice(1); }
+    function escAttr(t)  { return (t||'').replace(/"/g, '&quot;'); }
+
+    window.addEventListener('load', carregar);
+</script>
+</body>
+</html>

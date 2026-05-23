@@ -1,0 +1,2211 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EventCalc Pro v7 - Proposta Final</title>
+    <!-- 🔐 Sistema de Expiração Automática -->
+    <script src="sistema-expiracao.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Lora:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- HTML2PDF Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --dark-bg: #0a0a0a;
+            --dark-card: #242424;
+            --dark-surface: #1a1a1a;
+            --gold: #d4af37;
+            --gold-light: rgba(212,175,55,0.15);
+            --gold-border: rgba(212,175,55,0.3);
+            --red: #c41e3a;
+            --white: #ffffff;
+        }
+        body { font-family: 'Lora', serif; background: var(--dark-bg); color: var(--white); }
+        .container { max-width: 1050px; margin: 0 auto; padding: 20px; }
+
+        /* ── HEADER ── */
+        .header {
+            background: linear-gradient(135deg, #1a1a1a 0%, #242424 100%);
+            padding: 28px 40px; border-radius: 8px; margin-bottom: 16px;
+            border: 1px solid var(--gold-border); text-align: center;
+        }
+        .header h1 { font-family: 'Playfair Display'; font-size: 2rem; color: var(--gold); margin-bottom: 4px; }
+        .header p { color: #909090; font-size: 0.88rem; }
+        .header .cliente-info { color: var(--gold); font-size: 0.82rem; margin-top: 5px; font-style: italic; }
+
+        /* ── BARRA DE PROGRESSO ── */
+        .prog-bar {
+            display: flex; align-items: center; justify-content: center;
+            padding: 14px 20px; margin-bottom: 16px;
+            background: var(--dark-card); border: 1px solid var(--gold-border); border-radius: 8px;
+        }
+        .prog-step { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        .prog-circle {
+            width: 32px; height: 32px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: bold; font-size: 0.82rem;
+            border: 2px solid rgba(212,175,55,0.2); color: #555; background: transparent; transition: 0.2s;
+        }
+        .prog-circle.done { border-color: var(--gold); color: var(--gold); background: var(--gold-light); cursor: pointer; }
+        .prog-circle.done:hover { background: rgba(212,175,55,0.22); }
+        .prog-circle.active { border-color: var(--gold); color: #0a0a0a; background: var(--gold); }
+        .prog-label { font-size: 0.66rem; color: #555; text-align: center; white-space: nowrap; }
+        .prog-label.done, .prog-label.active { color: var(--gold); }
+        .prog-line { height: 2px; width: 48px; background: rgba(212,175,55,0.15); margin-bottom: 18px; flex-shrink: 0; }
+        .prog-line.done { background: rgba(212,175,55,0.5); }
+        @media (max-width: 500px) { .prog-line { width: 18px; } .prog-label { font-size: 0.58rem; } }
+
+        /* ── TABS ── */
+        .tabs-nav {
+            display: flex; background: var(--dark-card);
+            border: 1px solid var(--gold-border); border-radius: 8px;
+            overflow: hidden; margin-bottom: 20px;
+        }
+        .tab-btn {
+            flex: 1; padding: 14px 10px; border: none;
+            background: transparent; color: #707070;
+            cursor: pointer; font-family: 'Lora'; font-weight: 600;
+            font-size: 0.82rem; transition: 0.25s; text-align: center;
+            border-right: 1px solid var(--gold-border);
+        }
+        .tab-btn:last-child { border-right: none; }
+        .tab-btn:hover { background: rgba(212,175,55,0.06); color: #b0b0b0; }
+        .tab-btn.active { background: rgba(212,175,55,0.12); color: var(--gold); border-bottom: 3px solid var(--gold); }
+
+        /* ── ABA 1: CALCULAR CUSTOS ── */
+        #aba1 { display: block; }
+        #aba2, #aba3 { display: none; }
+
+        .custos-wrapper { }
+        .evento-pill {
+            background: rgba(212,175,55,0.08); border: 1px solid var(--gold-border);
+            border-radius: 6px; padding: 10px 16px; margin-bottom: 18px;
+            font-size: 0.82rem; color: #c0c0c0; text-align: center;
+        }
+        .evento-pill strong { color: var(--gold); }
+
+        .custos-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;
+        }
+        @media (max-width: 640px) { .custos-grid { grid-template-columns: 1fr; } }
+
+        .custo-campo {
+            background: var(--dark-card); border: 1px solid var(--gold-border);
+            border-radius: 8px; padding: 14px 16px; margin-bottom: 12px;
+        }
+        .custo-campo label { display: block; color: var(--gold); font-size: 0.82rem; font-weight: 600; margin-bottom: 6px; }
+        .custo-campo input {
+            width: 100%; background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(212,175,55,0.15); color: white;
+            padding: 9px 10px; border-radius: 5px; font-family: 'Lora'; font-size: 0.9rem;
+        }
+        .custo-campo input:focus { outline: none; border-color: var(--gold); background: rgba(212,175,55,0.08); }
+        .custo-campo input[readonly] { background: rgba(212,175,55,0.06); color: var(--gold); cursor: not-allowed; }
+        .custo-campo small { color: #666; font-size: 0.75rem; display: block; margin-top: 4px; }
+        /* Remove spinner do input number */
+        .custo-campo input[type="number"]::-webkit-outer-spin-button,
+        .custo-campo input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        .custo-campo input[type="number"] {
+            -moz-appearance: textfield;
+        }
+
+        /* RESUMO LIVE */
+        .resumo-live {
+            background: var(--dark-card); border: 2px solid var(--gold-border);
+            border-radius: 8px; padding: 18px 22px; margin-bottom: 18px;
+        }
+        .resumo-live-title {
+            font-family: 'Playfair Display'; color: var(--gold);
+            font-size: 1.1rem; margin-bottom: 14px;
+            border-bottom: 1px solid var(--gold-border); padding-bottom: 8px;
+        }
+        .rl-linha {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 6px 0; border-bottom: 1px solid rgba(212,175,55,0.07); font-size: 0.88rem;
+        }
+        .rl-linha:last-child { border-bottom: none; }
+        .rl-linha span { color: #a0a0a0; }
+        .rl-linha strong { color: var(--white); }
+        .rl-sep { border-top: 1px solid var(--gold-border); margin: 8px 0; }
+        .rl-subtotal { background: rgba(212,175,55,0.06); border-radius: 4px; padding: 7px 8px; margin: 4px 0; }
+        .rl-subtotal span { color: #c0c0c0; font-weight: 600; }
+        .rl-subtotal strong { color: var(--gold); }
+        .rl-final { background: rgba(212,175,55,0.14); border: 1px solid var(--gold-border); border-radius: 6px; padding: 10px 12px; margin-top: 8px; }
+        .rl-final span { color: var(--gold); font-weight: 700; font-size: 1rem; }
+        .rl-final strong { color: var(--gold); font-family: 'Playfair Display'; font-size: 1.25rem; }
+        .rl-pessoa { margin-top: 8px; background: rgba(0,0,0,0.2); border-radius: 4px; padding: 7px 8px; }
+        .rl-pessoa span { color: #808080; }
+        .rl-pessoa strong { color: #c0c0c0; }
+
+        .aba-acoes {
+            display: flex; gap: 12px; margin-top: 6px;
+        }
+        .btn-aba {
+            flex: 1; padding: 11px 16px; border-radius: 6px;
+            cursor: pointer; font-weight: 600; font-family: 'Lora';
+            font-size: 0.85rem; transition: 0.3s; text-transform: uppercase;
+        }
+        .btn-aba-sec { background: transparent; color: var(--gold); border: 2px solid var(--gold); }
+        .btn-aba-sec:hover { background: rgba(212,175,55,0.1); }
+        .btn-aba-gold { background: linear-gradient(135deg, #d4af37, #b8952a); color: #0a0a0a; border: none; }
+        .btn-aba-gold:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(212,175,55,0.4); }
+
+        /* ── ABA 2: RELATÓRIO ASSADOR (dark, gold) ── */
+        .doc-assador {
+            background: var(--dark-surface); color: #d0d0d0;
+            padding: 28px 32px; border-radius: 8px;
+            border: 1px solid var(--gold-border);
+        }
+        .doc-assador h1 { font-family: 'Playfair Display'; color: var(--gold); font-size: 1.7rem; text-align: center; margin-bottom: 4px; }
+        .doc-assador .doc-sub { text-align: center; color: #707070; font-size: 0.82rem; margin-bottom: 20px; }
+        .doc-assador h2 { font-family: 'Playfair Display'; color: var(--gold); font-size: 1.1rem; margin: 18px 0 10px; padding-bottom: 6px; border-bottom: 1px solid var(--gold-border); }
+        .doc-assador h3 { color: var(--gold); font-size: 0.9rem; margin: 12px 0 6px; text-transform: uppercase; letter-spacing: 0.05em; }
+        .doc-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 18px; }
+        .doc-info-item .lbl { color: #606060; font-size: 0.75rem; }
+        .doc-info-item .val { color: var(--white); font-weight: 600; font-size: 0.9rem; }
+        .doc-item { padding: 6px 0; border-bottom: 1px solid rgba(212,175,55,0.08); color: #c0c0c0; font-size: 0.88rem; }
+        .doc-item:last-child { border-bottom: none; }
+        .doc-linha-custo {
+            display: flex; justify-content: space-between; padding: 7px 0;
+            border-bottom: 1px solid rgba(212,175,55,0.08); font-size: 0.88rem;
+        }
+        .doc-linha-custo:last-child { border-bottom: none; }
+        .doc-linha-custo span { color: #a0a0a0; }
+        .doc-linha-custo strong { color: var(--white); }
+        .doc-subtotal { background: rgba(212,175,55,0.07); padding: 8px 10px; border-radius: 4px; margin: 6px 0; }
+        .doc-subtotal span { color: #c0c0c0; font-weight: 600; }
+        .doc-subtotal strong { color: var(--gold); }
+        .doc-total-final {
+            background: rgba(212,175,55,0.15); border: 1px solid var(--gold-border);
+            padding: 14px 16px; border-radius: 6px; margin-top: 12px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .doc-total-final span { color: var(--gold); font-weight: 700; font-size: 1rem; }
+        .doc-total-final strong { font-family: 'Playfair Display'; font-size: 1.6rem; color: var(--gold); }
+        .doc-pessoa-box {
+            display: flex; gap: 16px; margin-top: 10px;
+        }
+        .doc-pessoa-item {
+            flex: 1; background: rgba(0,0,0,0.3); border-radius: 6px;
+            padding: 10px 12px; text-align: center;
+        }
+        .doc-pessoa-item .lbl { color: #606060; font-size: 0.72rem; }
+        .doc-pessoa-item .val { color: var(--gold); font-weight: 700; font-size: 1.05rem; }
+        .doc-acao {
+            margin-top: 18px; text-align: right;
+        }
+
+        /* ── ABA 3: PROPOSTA CLIENTE (light, gold/grey — SEM VERMELHO) ── */
+        .doc-cliente {
+            background: #ffffff; color: #333;
+            padding: 40px 48px; border-radius: 8px;
+            font-family: 'Lora', serif; line-height: 1.8;
+        }
+        @media (max-width: 600px) { .doc-cliente { padding: 24px 20px; } }
+
+        .dc-header { text-align: center; margin-bottom: 24px; padding-bottom: 20px; border-bottom: 3px solid #d4af37; }
+        .dc-logo { font-size: 2rem; margin-bottom: 8px; }
+        .dc-title { font-family: 'Playfair Display'; font-size: 1.9rem; color: #d4af37; margin-bottom: 4px; }
+        .dc-numero { color: #999; font-size: 0.82rem; }
+
+        .dc-info-bar {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+            margin-bottom: 24px;
+        }
+        @media (max-width: 500px) { .dc-info-bar { grid-template-columns: 1fr; } }
+        .dc-info-item .dc-lbl { color: #888; font-size: 0.78rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+        .dc-info-item .dc-val { color: #333; font-size: 0.93rem; }
+
+        .dc-section { margin-bottom: 26px; padding-bottom: 20px; border-bottom: 1.5px solid #e8d97a; }
+        .dc-section:last-child { border-bottom: none; }
+        .dc-section h2 { font-family: 'Playfair Display'; font-size: 1.2rem; color: #555; margin-bottom: 12px; }
+
+        .dc-cat-title { font-family: 'Playfair Display'; color: #d4af37; font-size: 1rem; margin: 12px 0 6px; } /* GOLD, não vermelho */
+        .dc-item { padding: 6px 0; color: #555; font-size: 0.92rem; border-bottom: 1px solid #f0f0f0; }
+        .dc-item:last-child { border-bottom: none; }
+
+        .dc-consumo-row {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 9px 12px; background: #f9f8f3; border-radius: 4px; margin-bottom: 6px; font-size: 0.92rem;
+        }
+        .dc-consumo-row span { color: #555; }
+        .dc-consumo-row strong { color: #d4af37; } /* GOLD */
+
+        .dc-consumo-total {
+            background: #f3eed9; border-left: 4px solid #d4af37;
+            padding: 10px 14px; border-radius: 4px; margin-top: 10px;
+            display: flex; justify-content: space-between; font-weight: 700;
+        }
+        .dc-consumo-total span { color: #555; }
+        .dc-consumo-total strong { color: #d4af37; }
+
+        .dc-valor-box {
+            background: linear-gradient(135deg, rgba(212,175,55,0.1), rgba(212,175,55,0.05));
+            border: 2px solid rgba(212,175,55,0.4);
+            border-radius: 10px; padding: 28px; text-align: center;
+            margin-bottom: 20px;
+        }
+        .dc-valor-label { color: #999; font-size: 0.85rem; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.06em; }
+        .dc-valor-num { font-family: 'Playfair Display'; font-size: 2.8rem; color: #d4af37; font-weight: bold; } /* GOLD, não vermelho */
+        .dc-valor-por-pessoa { color: #aaa; font-size: 0.8rem; margin-top: 6px; }
+
+        .dc-pgto h3 { color: #d4af37; font-family: 'Playfair Display'; margin-top: 14px; margin-bottom: 6px; font-size: 1rem; }
+        .dc-pgto p { color: #555; font-size: 0.88rem; }
+        .dc-pgto .nota { color: #aaa; font-size: 0.78rem; margin-top: 6px; font-style: italic; }
+
+        .dc-incluso { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        @media (max-width: 500px) { .dc-incluso { grid-template-columns: 1fr; } }
+        .dc-incluso h3 { color: #d4af37; font-family: 'Playfair Display'; font-size: 0.95rem; margin-bottom: 8px; }
+        .dc-incluso-item { color: #555; font-size: 0.85rem; padding: 4px 0; }
+
+        .dc-image-section {
+            margin: 24px 0;
+            text-align: center;
+        }
+
+        .dc-image-section img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 12px 0;
+        }
+
+        .dc-two-cols {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            align-items: start;
+            margin: 24px 0;
+        }
+
+        .dc-two-cols img {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+        }
+
+        @media (max-width: 600px) {
+            .dc-two-cols {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .dc-assinatura {
+            margin-top: 24px; padding-top: 20px;
+            text-align: center; color: #666; font-size: 0.88rem;
+        }
+        .dc-assinatura img {
+            width: 120px;
+            height: auto;
+            margin: 16px 0;
+            border-radius: 8px;
+        }
+        .dc-assinatura strong { color: #333; font-size: 1rem; display: block; margin: 12px 0 4px; }
+        .dc-assinatura .cargo { color: #999; font-size: 0.78rem; margin-bottom: 10px; }
+        .dc-assinatura .contatos { color: #777; font-size: 0.82rem; }
+        .dc-validade { color: #aaa; font-size: 0.78rem; margin-top: 12px; font-style: italic; }
+
+        /* ── BOTÃO DE PDF ── */
+        .doc-acao-btn {
+            background: rgba(212,175,55,0.12); color: var(--gold);
+            border: 2px solid var(--gold-border); padding: 9px 20px;
+            border-radius: 6px; cursor: pointer; font-family: 'Lora';
+            font-weight: 600; font-size: 0.82rem; transition: 0.2s;
+        }
+        .doc-acao-btn:hover { background: rgba(212,175,55,0.2); border-color: var(--gold); }
+
+        /* ── BOTÕES PRINCIPAIS ── */
+        .buttons { display: flex; gap: 12px; margin-top: 20px; }
+        .btn {
+            padding: 12px 22px; border: none; border-radius: 6px;
+            cursor: pointer; font-weight: 600; font-family: 'Lora';
+            text-transform: uppercase; flex: 1; transition: 0.3s; font-size: 0.88rem;
+        }
+        .btn-primary { background: linear-gradient(135deg, var(--red), #8b1428); color: white; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(196,30,58,0.4); }
+        .btn-secondary { background: transparent; color: var(--gold); border: 2px solid var(--gold); }
+        .btn-secondary:hover { background: rgba(212,175,55,0.1); }
+
+        /* ── BARRA DE PROGRESSO PERCENTUAL ── */
+        .percentage-bar-container {
+            display: flex; align-items: center; gap: 12px; margin-top: 10px;
+        }
+        .percentage-bar {
+            flex: 1; height: 8px; background: rgba(212,175,55,0.1);
+            border-radius: 4px; overflow: hidden; border: 1px solid rgba(212,175,55,0.2);
+        }
+        .percentage-bar-fill {
+            height: 100%; background: linear-gradient(90deg, var(--gold), #b8952a);
+            transition: width 0.3s ease; border-radius: 4px;
+        }
+        .percentage-text {
+            color: var(--gold); font-weight: 700; font-size: 0.9rem;
+            min-width: 45px; text-align: right; font-family: 'Playfair Display';
+        }
+
+        footer {
+            background: var(--dark-card); border-top: 1px solid var(--gold-border);
+            padding: 22px; text-align: center; color: #707070;
+            margin-top: 50px; font-size: 0.83rem;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <div class="header">
+        <h1>EventCalc Pro v7</h1>
+        <p>Proposta Final</p>
+        <div class="cliente-info" id="clienteInfo"></div>
+    </div>
+
+    <!-- BARRA DE PROGRESSO -->
+    <div class="prog-bar">
+        <div class="prog-step">
+            <div class="prog-circle done" onclick="window.location.href='event_calculator_pro_v7_questionario.html'" title="Questionário">1</div>
+            <div class="prog-label done">Questionário</div>
+        </div>
+        <div class="prog-line done"></div>
+        <div class="prog-step">
+            <div class="prog-circle done" onclick="window.location.href='event_calculator_pro_v7_cardapio.html'" title="Cardápio">2</div>
+            <div class="prog-label done">Cardápio</div>
+        </div>
+        <div class="prog-line done"></div>
+        <div class="prog-step">
+            <div class="prog-circle done" onclick="window.location.href='event_calculator_pro_v7_volumes.html'" title="Volumes">3</div>
+            <div class="prog-label done">Volumes</div>
+        </div>
+        <div class="prog-line done"></div>
+        <div class="prog-step">
+            <div class="prog-circle active">4</div>
+            <div class="prog-label active">Proposta</div>
+        </div>
+    </div>
+
+    <!-- TABS -->
+    <div class="tabs-nav">
+        <button class="tab-btn active" id="btn1" onclick="mudarAba(1)">💰 Calcular Custos</button>
+        <button class="tab-btn" id="btn2" onclick="mudarAba(2)">🍖 Relatório Assador</button>
+        <button class="tab-btn" id="btn3" onclick="mudarAba(3)">👥 Proposta Cliente</button>
+    </div>
+
+    <div class="progress" style="margin-bottom: 16px;">
+        <div class="percentage-bar-container">
+            <div class="percentage-bar">
+                <div class="percentage-bar-fill" id="progressBar" style="width: 0%"></div>
+            </div>
+            <div class="percentage-text" id="progressPercentage">0%</div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════
+         ABA 1 — CALCULAR CUSTOS
+    ═══════════════════════════════════════════ -->
+    <div id="aba1">
+        <div class="custos-wrapper">
+
+            <div class="evento-pill" id="eventoPill">Carregando dados do evento…</div>
+
+            <div class="custos-grid">
+                <!-- COLUNA ESQUERDA -->
+                <div>
+                    <div class="custo-campo">
+                        <label>📦 Matéria-Prima (auto)</label>
+                        <input type="number" id="cMateria" readonly onchange="return false;" />
+                        <small>Calculado automaticamente da Tela 3 (Volumes)</small>
+                    </div>
+                    <div class="custo-campo">
+                        <label>🔥 Carvão (R$)</label>
+                        <input type="number" id="cCarvao" min="0" step="0.01" oninput="validarNumeroPositivo(event); calcularCustos()" />
+                    </div>
+                    <div class="custo-campo">
+                        <label>🧂 Temperos e Condimentos (R$)</label>
+                        <input type="number" id="cTemperos" min="0" step="0.01" oninput="validarNumeroPositivo(event); calcularCustos()" />
+                    </div>
+                    <div class="custo-campo">
+                        <label>🥤 Descartáveis e Utensílios (R$)</label>
+                        <input type="number" id="cDescartaveis" min="0" step="0.01" oninput="validarNumeroPositivo(event); calcularCustos()" />
+                    </div>
+                    <div class="custo-campo">
+                        <label>🚗 Deslocamento (R$)</label>
+                        <input type="number" id="cDeslocamento" min="0" step="0.01" oninput="validarNumeroPositivo(event); calcularCustos()" />
+                        <small>Transporte e combustível</small>
+                    </div>
+                    <div class="custo-campo">
+                        <label>⏰ Valor por Hora Excedente (R$)</label>
+                        <input type="number" id="cHoraExcedente" min="0" step="0.01" value="200" oninput="validarNumeroPositivo(event); calcularCustos()" />
+                        <small>Cobrado por cada hora além da duração contratada</small>
+                    </div>
+                </div>
+                <!-- COLUNA DIREITA -->
+                <div>
+                    <div class="custo-campo">
+                        <label>👨‍🍳 Seu Honorário / Chef (R$)</label>
+                        <input type="number" id="cChef" min="0" step="0.01" value="400" oninput="validarNumeroPositivo(event); calcularCustos()" />
+                    </div>
+                    <div class="custo-campo">
+                        <label>👥 Auxiliares — Valor Individual (R$)</label>
+                        <input type="number" id="cAuxiliaresValor" min="0" step="0.01" value="100" oninput="validarNumeroPositivo(event); calcularCustos()" />
+                        <small>Valor por auxiliar</small>
+                    </div>
+                    <div class="custo-campo">
+                        <label>👥 Auxiliares — Quantidade</label>
+                        <input type="number" id="cAuxiliaresQtd" min="0" step="1" value="1" oninput="validarNumeroPositivo(event); calcularCustos()" />
+                    </div>
+                    <div class="custo-campo">
+                        <label>👥 Auxiliares — Total (auto)</label>
+                        <input type="number" id="cAuxiliaresTotal" readonly onchange="return false;" />
+                        <small>Calculado automaticamente</small>
+                    </div>
+                    <div class="custo-campo">
+                        <label>🏠 Aluguel do Local (R$)</label>
+                        <input type="number" id="cAluguelLocal" min="0" step="0.01" oninput="validarNumeroPositivo(event); calcularCustos()" />
+                        <small>Se cobrar uso do espaço</small>
+                    </div>
+                    <div class="custo-campo">
+                        <label>⚙️ Aluguel de Equipamentos (R$)</label>
+                        <input type="number" id="cAluguelEquip" min="0" step="0.01" oninput="validarNumeroPositivo(event); calcularCustos()" />
+                        <small>Churrasqueira, forno, etc</small>
+                    </div>
+                    <div class="custo-campo">
+                        <label>🍽️ Aluguel de Louças (R$)</label>
+                        <input type="number" id="cAluguelLoucas" min="0" step="0.01" oninput="validarNumeroPositivo(event); calcularCustos()" />
+                        <small>Pratos, copos, talheres</small>
+                    </div>
+                    <div class="custo-campo">
+                        <label>🧹 Taxa de Limpeza (R$)</label>
+                        <input type="number" id="cLimpeza" min="0" step="0.01" oninput="validarNumeroPositivo(event); calcularCustos()" />
+                        <small>Aparece no orçamento do cliente quando preenchida</small>
+                    </div>
+                    <div class="custo-campo">
+                        <label>📊 Regime Tributário</label>
+                        <select id="cTributacao" onchange="atualizarTributacao()">
+                            <option value="11">MEI (pior cenário ≈ 11%)</option>
+                            <option value="16">SIMPLES (pior cenário ≈ 16%)</option>
+                            <option value="15" selected>LUCRO REAL (≈ 15%)</option>
+                            <option value="32">LUCRO PRESUMIDO (pior cenário ≈ 32%)</option>
+                        </select>
+                        <small>Pior cenário por regime</small>
+                    </div>
+                    <div class="custo-campo">
+                        <label>🔧 Taxa Personalizada (%)</label>
+                        <input type="number" id="cTributacaoCustom" min="0" max="100" step="0.1" value="15" oninput="validarNumeroPositivo(event); calcularCustos()" />
+                        <small>Caso não concorde com a taxa de tributação acima, edite aqui que substituirá a taxa automática</small>
+                    </div>
+                    <div class="custo-campo">
+                        <label>💹 Margem de Lucro (%)</label>
+                        <input type="number" id="cLucro" min="0" max="500" step="0.1" value="25" oninput="validarNumeroPositivo(event); calcularCustos()" />
+                    </div>
+                </div>
+            </div>
+
+            <!-- CARDÁPIOS ESPECIAIS -->
+            <div id="a1Cardapios" style="margin: 30px 0; padding: 20px; background: rgba(212,175,55,0.08); border-left: 4px solid #d4af37; border-radius: 6px; display: none;">
+                <div style="font-family: 'Playfair Display'; font-size: 1.3rem; color: #d4af37; margin-bottom: 15px;">🥘 Cardápios Especiais</div>
+                <div id="a1CardapiosContent" style="font-size: 0.95rem; line-height: 1.8; color: #c0c0c0;"></div>
+            </div>
+
+            <!-- RESUMO EM TEMPO REAL -->
+            <div class="resumo-live">
+                <div class="resumo-live-title">📋 Resumo Automático em Tempo Real</div>
+                <div class="rl-linha"><span>Matéria-Prima:</span>        <strong id="rMateria">R$ 0,00</strong></div>
+                <div class="rl-linha"><span>Carvão:</span>               <strong id="rCarvao">R$ 0,00</strong></div>
+                <div class="rl-linha"><span>Temperos:</span>             <strong id="rTemperos">R$ 0,00</strong></div>
+                <div class="rl-linha"><span>Descartáveis:</span>         <strong id="rDescartaveis">R$ 0,00</strong></div>
+                <div class="rl-linha"><span>Deslocamento:</span>         <strong id="rDeslocamento">R$ 0,00</strong></div>
+                <div class="rl-linha"><span>Honorário Chef:</span>       <strong id="rChef">R$ 0,00</strong></div>
+                <div class="rl-linha"><span>Auxiliares:</span>           <strong id="rAuxiliares">R$ 0,00</strong></div>
+                <div class="rl-linha"><span>Aluguel Local:</span>        <strong id="rAluguelLocal">R$ 0,00</strong></div>
+                <div class="rl-linha"><span>Aluguel Equipamentos:</span> <strong id="rAluguelEquip">R$ 0,00</strong></div>
+                <div class="rl-linha"><span>Aluguel Louças:</span>       <strong id="rAluguelLoucas">R$ 0,00</strong></div>
+                <div class="rl-linha"><span>Taxa de Limpeza:</span>      <strong id="rLimpeza">R$ 0,00</strong></div>
+                <div class="rl-sep"></div>
+                <div class="rl-linha rl-subtotal"><span>SUBTOTAL:</span>  <strong id="rSubtotal">R$ 0,00</strong></div>
+                <div class="rl-linha"><span id="lblLucro">+ Lucro (25%):</span>          <strong id="rLucro">R$ 0,00</strong></div>
+                <div class="rl-linha"><span id="lblTrib">+ Tributação (15%):</span>      <strong id="rTributacao">R$ 0,00</strong></div>
+                <div class="rl-linha rl-final"><span>VALOR FINAL:</span>  <strong id="rFinal">R$ 0,00</strong></div>
+                <div class="rl-linha rl-pessoa"><span>Custo / pessoa:</span>         <strong id="rCustoPessoa">—</strong></div>
+                <div class="rl-linha rl-pessoa"><span>Valor proposta / pessoa:</span> <strong id="rValorPessoa">—</strong></div>
+            </div>
+
+            <div class="aba-acoes">
+                <button class="btn-aba btn-aba-sec" onclick="mudarAba(2)">🍖 Ver Relatório Assador</button>
+                <button class="btn-aba btn-aba-gold" onclick="mudarAba(3)">👥 Ver Proposta Cliente</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════
+         ABA 2 — RELATÓRIO ASSADOR (dark, gold, sem vermelho)
+    ═══════════════════════════════════════════ -->
+    <div id="aba2">
+        <div class="doc-assador" id="docAssador">
+            <h1>RELATÓRIO DE CUSTOS</h1>
+            <div class="doc-sub">⚙️ Documento Interno — Assador</div>
+
+            <div class="doc-info-grid" id="a2InfoGrid"></div>
+
+            <h2>Cardápio</h2>
+            <div id="a2Cardapio"></div>
+
+            <h2>Lista de Compras</h2>
+            <div id="a2Compras"></div>
+
+            <h2>Análise de Custos</h2>
+            <div id="a2Custos"></div>
+
+            <div class="doc-pessoa-box" id="a2PessoaBox"></div>
+
+            <div class="doc-acao">
+                <button class="doc-acao-btn" onclick="exportarPDF('assador')">📥 Exportar PDF Assador</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════
+         ABA 3 — PROPOSTA CLIENTE (light, gold, SEM VERMELHO)
+    ═══════════════════════════════════════════ -->
+    <div id="aba3">
+        <div class="doc-cliente" id="docCliente">
+
+            <!-- CABEÇALHO -->
+            <div class="dc-header">
+                <div class="dc-logo">🔥</div>
+                <div class="dc-title">ORÇAMENTO PARA O EVENTO</div>
+                <div class="dc-numero" id="c3Numero"></div>
+            </div>
+
+            <!-- INFO DO EVENTO -->
+            <div class="dc-info-bar" id="c3InfoBar"></div>
+
+            <!-- CARDÁPIO -->
+            <div class="dc-section">
+                <h2>Cardápio</h2>
+                <p style="color:#888;font-size:0.85rem;margin-bottom:12px;" id="c3NotaPessoas"></p>
+                <div id="c3Cardapio"></div>
+            </div>
+
+            <!-- PREVISÃO DE CONSUMO -->
+            <div class="dc-section">
+                <h2>Previsão de Consumo</h2>
+                <p style="color:#888;font-size:0.85rem;margin-bottom:12px;">Quantidade estimada por pessoa:</p>
+                <div id="c3Consumo"></div>
+                <div class="dc-consumo-total">
+                    <span>Total por pessoa:</span>
+                    <strong id="c3TotalPessoa">— g</strong>
+                </div>
+            </div>
+
+            <!-- VALOR -->
+            <div class="dc-section">
+                <h2>Valor do Evento</h2>
+                <div class="dc-valor-box">
+                    <div class="dc-valor-label">Valor Total do Serviço</div>
+                    <div class="dc-valor-num" id="c3Valor">R$ 0,00</div>
+                </div>
+            </div>
+
+            <!-- CONDIÇÕES -->
+            <div class="dc-section dc-pgto">
+                <h2>Condições de Pagamento</h2>
+                <h3>Forma de pagamento</h3>
+                <p>50% no fechamento do contrato (sinal)<br>50% no dia do evento, até o horário combinado de chegada</p>
+                <p class="nota">* O segundo pagamento é condição imprescindível para o início da prestação do serviço. Qualquer atraso poderá resultar em suspensão da execução do evento.</p>
+
+                <h3 style="margin-top:16px;">Alterações de convidados</h3>
+                <p id="p3ValorPersona">Qualquer variação no número de convidados confirmados resultará em ajuste de preço proporcional. Cada pessoa adicional será cobrada conforme o valor por pessoa desta proposta.</p>
+
+                <h3 style="margin-top:16px;">Cancelamento e remarcação</h3>
+                <p>• Com 30 dias ou mais de antecedência: reembolso integral do sinal (50%).<br>
+                • Entre 10 e 29 dias: perda de 50% do sinal; 50% creditado como crédito para nova data.<br>
+                • Menos de 15 dias: perda integral do sinal (50%), sem reembolso ou crédito.</p>
+
+                <div id="c3AvisoHoraExcedente" style="display:none;"></div>
+
+                <p style="color:#aaa;font-size:0.8rem;margin-top:16px;" id="c3Validade"></p>
+            </div>
+
+            <!-- INCLUSO / NÃO INCLUSO -->
+            <div class="dc-section">
+                <h2>Detalhes do Serviço</h2>
+                <div class="dc-incluso">
+                    <div>
+                        <h3>✅ Está incluso</h3>
+                        <div class="dc-incluso-item">• Cardápio completo conforme combinado</div>
+                        <div class="dc-incluso-item">• Carvão de qualidade e temperos especiais</div>
+                        <div class="dc-incluso-item">• Equipamentos necessários</div>
+                        <div class="dc-incluso-item">• Mão de obra especializada (chef e auxiliares)</div>
+                        <div class="dc-incluso-item">• Utensílios e material descartável</div>
+                        <div class="dc-incluso-item">• Logística e transporte</div>
+                        <div class="dc-incluso-item" id="c3LimpezaIncluso" style="display:none;">• Limpeza pós-evento</div>
+                    </div>
+                    <div>
+                        <h3 style="color:#888;">❌ Não incluso</h3>
+                        <div class="dc-incluso-item">• Bebidas (a combinar)</div>
+                        <div class="dc-incluso-item" id="c3LimpezaNaoIncluso">• Limpeza pós-evento</div>
+                        <div class="dc-incluso-item">• Serviço de garçons / garçonetes</div>
+                        <div class="dc-incluso-item">• Mobiliário, decoração ou estrutura</div>
+                        <div class="dc-incluso-item">• Transporte de convidados</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ASSINATURA -->
+            <div class="dc-assinatura">
+                <div id="c3AssinaturaProfissional"></div>
+            </div>
+
+        </div>
+
+        <div class="doc-acao" style="margin-top:14px;text-align:right;">
+            <button class="doc-acao-btn" onclick="exportarPDF('cliente')">📥 Exportar PDF Cliente</button>
+        </div>
+    </div>
+
+    <!-- NAVEGAÇÃO -->
+    <div class="buttons">
+        <button type="button" class="btn btn-secondary" onclick="window.location.href='event_calculator_pro_v7_volumes.html'">← Voltar</button>
+    </div>
+
+</div>
+
+<footer>
+    <p>EventCalc Pro v7 — Sistema Profissional de Orçamento para Eventos</p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+    /* ───────────────────────────────────────────
+       DADOS
+    ─────────────────────────────────────────── */
+    let volumes     = [];
+    let cardapio    = {};
+    let cardapioEspecial = {};
+    let questionario= {};
+    let totalMateria= 0;
+    let totalPessoas= 0;
+
+    const nomesRefeicao = {
+        cafe: 'Café da Manhã', almoco: 'Almoço',
+        lanche: 'Lanche / Petisco', jantar: 'Jantar'
+    };
+
+    const nomesCat = {
+        aperitivo: '🥂 Aperitivos', proteina: '🍖 Proteínas',
+        carboidrato: '🥔 Carboidratos', salada: '🥗 Saladas', sobremesa: '🍰 Sobremesas'
+    };
+
+    /* ───────────────────────────────────────────
+       ATUALIZAR PROGRESSÃO
+    ─────────────────────────────────────────── */
+    function atualizarProgressao() {
+        const campos = [
+            'cCarvao', 'cTemperos', 'cDescartaveis', 'cDeslocamento', 'cChef',
+            'cAuxiliaresValor', 'cAuxiliaresQtd', 'cAluguelLocal', 'cAluguelEquip',
+            'cAluguelLoucas', 'cLucro'
+        ];
+        let preenchidos = 0;
+        campos.forEach(campoId => {
+            const val = getVal(campoId);
+            if (val > 0) preenchidos++;
+        });
+        const percentual = Math.round((preenchidos / campos.length) * 100);
+        document.getElementById('progressBar').style.width = percentual + '%';
+        document.getElementById('progressPercentage').textContent = percentual + '%';
+    }
+
+    /* ───────────────────────────────────────────
+       CARREGAR
+    ─────────────────────────────────────────── */
+    function carregarDados() {
+        try {
+            const vSalvo = localStorage.getItem('eventocalc_volumes');
+            volumes = vSalvo ? JSON.parse(vSalvo) : [];
+
+            const cSalvo = localStorage.getItem('eventocalc_cardapio');
+            cardapio = cSalvo ? JSON.parse(cSalvo) : {};
+
+            const cEspecialSalvo = localStorage.getItem('eventocalc_cardapio_especial');
+            cardapioEspecial = cEspecialSalvo ? JSON.parse(cEspecialSalvo) : {};
+
+            const qSalvo = localStorage.getItem('eventocalcData');
+            if (qSalvo) questionario = JSON.parse(qSalvo).questionario || {};
+        } catch(e) { console.error(e); }
+
+        // Proteger campos calculados contra manipulação
+        protegerCamposReadonly();
+
+        totalPessoas = (questionario.adultos || 0) + (questionario.criancas || 0);
+        totalMateria = calcTotalMateria();
+
+        // Header
+        if (questionario.nomeContratante) {
+            document.getElementById('clienteInfo').textContent =
+                'Cliente: ' + questionario.nomeContratante +
+                (questionario.numeroProposta ? '  |  ' + questionario.numeroProposta : '');
+        }
+
+        // Pill do evento
+        const dataFmt = questionario.data
+            ? new Date(questionario.data + 'T00:00:00').toLocaleDateString('pt-BR')
+            : '—';
+        document.getElementById('eventoPill').innerHTML =
+            '<strong>' + (questionario.nomeContratante || '—') + '</strong>' +
+            '&nbsp;&nbsp;|&nbsp;&nbsp;' + dataFmt +
+            '&nbsp;&nbsp;|&nbsp;&nbsp;' + (nomesRefeicao[questionario.refeicao] || questionario.refeicao || '—') +
+            '&nbsp;&nbsp;|&nbsp;&nbsp;' + totalPessoas + ' pessoas';
+
+        initCustos();
+        renderAssador();
+        renderCliente();
+    }
+
+    /* ───────────────────────────────────────────
+       CALC MATÉRIA-PRIMA (inclui especiais)
+    ─────────────────────────────────────────── */
+    function calcTotalMateria() {
+        let total = 0;
+
+        // Volumes normais
+        total = volumes.reduce((s, v) => {
+            if (v.kg > 0) {
+                const aComprar = v.kg / (1 - (v.perda || 0) / 100);
+                return s + aComprar * (v.preco || 0);
+            }
+            return s;
+        }, 0);
+
+        // Volumes especiais (se existirem)
+        // IMPORTANTE: Em Tela 3B, v.kg já armazena em KG (não grams)
+        try {
+            const volEspSalvo = localStorage.getItem('eventocalc_volumes_especiais');
+            if (volEspSalvo) {
+                const volEspeciais = JSON.parse(volEspSalvo);
+                if (Array.isArray(volEspeciais)) {
+                    volEspeciais.forEach(v => {
+                        const kgReal = v.kg || 0; // Já em kg, sem conversão necessária
+                        if (kgReal > 0) {
+                            const aComprar = kgReal / (1 - (v.perda || 0) / 100);
+                            total += aComprar * (v.preco || 0);
+                        }
+                    });
+                }
+            }
+        } catch(e) { }
+
+        return total;
+    }
+
+    /* ───────────────────────────────────────────
+       ABA 1 — INICIAR CUSTOS (restaura ou usa defaults)
+    ─────────────────────────────────────────── */
+    function initCustos() {
+        const salvo = localStorage.getItem('eventocalc_custos');
+        if (salvo) {
+            try {
+                const c = JSON.parse(salvo);
+                setVal('cCarvao',            c.carvao);
+                setVal('cTemperos',          c.temperos);
+                setVal('cDescartaveis',      c.descartaveis);
+                setVal('cDeslocamento',      c.deslocamento);
+                setVal('cChef',              c.chef);
+                setVal('cAuxiliaresValor',   c.auxiliaresValor);
+                setVal('cAuxiliaresQtd',     c.auxiliaresQtd);
+                setVal('cHoraExcedente',     c.horaExcedente);
+                setVal('cAluguelLocal',      c.aluguelLocal);
+                setVal('cAluguelEquip',      c.aluguelEquip);
+                setVal('cAluguelLoucas',     c.aluguelLoucas);
+                setVal('cLimpeza',           c.limpeza);
+                setVal('cTributacaoCustom',  c.tributacao);
+                setVal('cLucro',             c.lucro);
+            } catch(e) { setDefaults(); }
+        } else {
+            setDefaults();
+        }
+        // Matéria sempre vem da Tela 3
+        document.getElementById('cMateria').value = totalMateria.toFixed(2);
+        calcularCustos();
+    }
+
+    function setDefaults() {
+        setVal('cCarvao',            Math.round(totalMateria * 0.10));
+        setVal('cTemperos',          Math.round(totalMateria * 0.05));
+        setVal('cDescartaveis',      Math.round(totalMateria * 0.08));
+        setVal('cDeslocamento',      0);
+        setVal('cChef',              400);
+        setVal('cAuxiliaresValor',   100);
+        setVal('cAuxiliaresQtd',     1);
+        setVal('cHoraExcedente',     200);
+        setVal('cAluguelLocal',      0);
+        setVal('cAluguelEquip',      0);
+        setVal('cAluguelLoucas',     0);
+        setVal('cLimpeza',           0);
+        setVal('cTributacaoCustom',  15);
+        setVal('cLucro',             25);
+    }
+
+    function setVal(id, v) {
+        const el = document.getElementById(id);
+        if (el && !el.hasAttribute('readonly')) {
+            el.value = (v ?? 0);
+        }
+    }
+
+    function getVal(id)    {
+        const el = document.getElementById(id);
+        if (!el) return 0;
+        return parseFloat(el.value) || 0;
+    }
+
+    // Proteger campos readonly contra manipulação via console
+    function protegerCamposReadonly() {
+        const camposReadonly = ['cMateria', 'cAuxiliaresTotal'];
+        camposReadonly.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.addEventListener('input', (e) => {
+                    e.preventDefault();
+                    return false;
+                });
+            }
+        });
+    }
+
+    // Validar campos numéricos (impedir negativos)
+    function validarNumeroPositivo(event) {
+        const input = event.target;
+        let valor = parseFloat(input.value) || 0;
+
+        if (valor < 0) {
+            input.value = 0;
+            console.warn('⚠️ Valores negativos não são permitidos');
+        }
+    }
+
+    function atualizarTributacao() {
+        const regime = document.getElementById('cTributacao').value;
+        document.getElementById('cTributacaoCustom').value = regime;
+        calcularCustos();
+    }
+
+    /* ───────────────────────────────────────────
+       ABA 1 — CALCULAR EM TEMPO REAL
+    ─────────────────────────────────────────── */
+    function calcularCustos() {
+        const materia           = totalMateria;
+        const carvao            = getVal('cCarvao');
+        const temperos          = getVal('cTemperos');
+        const descartaveis      = getVal('cDescartaveis');
+        const deslocamento      = getVal('cDeslocamento');
+        const chef              = getVal('cChef');
+        const auxiliaresValor   = getVal('cAuxiliaresValor');
+        const auxiliaresQtd     = getVal('cAuxiliaresQtd');
+        const auxiliares        = auxiliaresValor * auxiliaresQtd;
+        const aluguelLocal      = getVal('cAluguelLocal');
+        const aluguelEquip      = getVal('cAluguelEquip');
+        const aluguelLoucas     = getVal('cAluguelLoucas');
+        const limpeza           = getVal('cLimpeza');
+        const pctTrib           = getVal('cTributacaoCustom');
+        const pctLucro          = getVal('cLucro');
+
+        // Atualizar campo total de auxiliares
+        document.getElementById('cAuxiliaresTotal').value = auxiliares.toFixed(2);
+
+        const subtotal    = materia + carvao + temperos + descartaveis + deslocamento + chef + auxiliares + aluguelLocal + aluguelEquip + aluguelLoucas + limpeza;
+        const valorLucro  = subtotal * (pctLucro  / 100);
+        const valorTrib   = subtotal * (pctTrib   / 100);
+        const valorFinal  = subtotal + valorLucro + valorTrib;
+        const custoPessoa = totalPessoas > 0 ? subtotal  / totalPessoas : 0;
+        const valorPessoa = totalPessoas > 0 ? valorFinal / totalPessoas : 0;
+
+        // Atualizar resumo
+        setText('rMateria',        brl(materia));
+        setText('rCarvao',         brl(carvao));
+        setText('rTemperos',       brl(temperos));
+        setText('rDescartaveis',   brl(descartaveis));
+        setText('rDeslocamento',   brl(deslocamento));
+        setText('rChef',           brl(chef));
+        setText('rAuxiliares',     brl(auxiliares));
+        setText('rAluguelLocal',   brl(aluguelLocal));
+        setText('rAluguelEquip',   brl(aluguelEquip));
+        setText('rAluguelLoucas',  brl(aluguelLoucas));
+        setText('rLimpeza',        brl(limpeza));
+        setText('rSubtotal',       brl(subtotal));
+        setText('rLucro',          brl(valorLucro));
+        setText('rTributacao',     brl(valorTrib));
+        setText('rFinal',          brl(valorFinal));
+        setText('lblLucro',        '+ Lucro (' + pctLucro + '%):');
+        setText('lblTrib',         '+ Tributação (' + pctTrib + '%):');
+        setText('rCustoPessoa',    totalPessoas > 0 ? brl(custoPessoa) + ' / pessoa' : '—');
+        setText('rValorPessoa',    totalPessoas > 0 ? brl(valorPessoa) + ' / pessoa' : '—');
+
+        // Salvar custos no localStorage
+        const horaExcedente = getVal('cHoraExcedente');
+        localStorage.setItem('eventocalc_custos', JSON.stringify({
+            carvao, temperos, descartaveis, deslocamento, chef,
+            auxiliaresValor, auxiliaresQtd, horaExcedente,
+            aluguelLocal, aluguelEquip, aluguelLoucas, limpeza,
+            tributacao: pctTrib, lucro: pctLucro
+        }));
+
+        // Atualizar as outras abas com o novo valor final
+        const c3ValorEl = document.getElementById('c3Valor');
+        if (c3ValorEl) c3ValorEl.textContent = brl(valorFinal);
+
+        const c3ValorPessoaEl = document.getElementById('c3ValorPessoa');
+        if (c3ValorPessoaEl) c3ValorPessoaEl.textContent =
+            totalPessoas > 0 ? brl(valorPessoa) + ' / pessoa' : '';
+
+        // Aba 2: valor final no doc assador
+        const vfEl = document.getElementById('a2ValorFinal');
+        if (vfEl) vfEl.textContent = brl(valorFinal);
+        const cpEl = document.getElementById('a2CustoPessoa');
+        if (cpEl) cpEl.textContent = brl(custoPessoa);
+        const vpEl = document.getElementById('a2ValorPessoa');
+        if (vpEl) vpEl.textContent = brl(valorPessoa);
+
+        // Renderizar cardápios especiais na Aba 1
+        let cardapiEspHtml = '';
+        if (cardapioEspecial.celiaco && (questionario.restricoes?.celiaco > 0)) {
+            cardapiEspHtml += '<div style="margin-bottom: 12px;"><strong style="color: #d4af37;">🌾 Celiaco:</strong> ' + Object.values(cardapioEspecial.celiaco).flat().filter(i => i).join(', ') + '</div>';
+        }
+        if (cardapioEspecial.lactose && (questionario.restricoes?.lactose > 0)) {
+            cardapiEspHtml += '<div style="margin-bottom: 12px;"><strong style="color: #d4af37;">🥛 Lactose:</strong> ' + Object.values(cardapioEspecial.lactose).flat().filter(i => i).join(', ') + '</div>';
+        }
+        if (cardapioEspecial.vegano && (questionario.veganos > 0)) {
+            cardapiEspHtml += '<div style="margin-bottom: 12px;"><strong style="color: #d4af37;">🥬 Vegano:</strong> ' + Object.values(cardapioEspecial.vegano).flat().filter(i => i).join(', ') + '</div>';
+        }
+        if (cardapioEspecial.vegetariano && (questionario.vegetarianos > 0)) {
+            cardapiEspHtml += '<div style="margin-bottom: 12px;"><strong style="color: #d4af37;">🥦 Vegetariano:</strong> ' + Object.values(cardapioEspecial.vegetariano).flat().filter(i => i).join(', ') + '</div>';
+        }
+
+        const a1CardEl = document.getElementById('a1Cardapios');
+        const a1CardContentEl = document.getElementById('a1CardapiosContent');
+        if (cardapiEspHtml && a1CardEl && a1CardContentEl) {
+            a1CardEl.style.display = 'block';
+            a1CardContentEl.innerHTML = cardapiEspHtml;
+        } else if (a1CardEl) {
+            a1CardEl.style.display = 'none';
+        }
+
+        atualizarProgressao();
+    }
+
+    /* ───────────────────────────────────────────
+       ABA 2 — RENDERIZAR RELATÓRIO ASSADOR
+    ─────────────────────────────────────────── */
+    function renderAssador() {
+        const dataFmt = questionario.data
+            ? new Date(questionario.data + 'T00:00:00').toLocaleDateString('pt-BR')
+            : '—';
+
+        // Info Grid
+        document.getElementById('a2InfoGrid').innerHTML =
+            docInfoItem('Contratante',  questionario.nomeContratante || '—') +
+            docInfoItem('Nº Proposta',  questionario.numeroProposta  || '—') +
+            docInfoItem('Local',        questionario.local           || '—') +
+            docInfoItem('Data',         dataFmt) +
+            docInfoItem('Refeição',     nomesRefeicao[questionario.refeicao] || questionario.refeicao || '—') +
+            docInfoItem('Pessoas',      totalPessoas + ' pessoas') +
+            docInfoItem('Horário',      (questionario.horario || '—') + (questionario.duracao ? '  (' + questionario.duracao + 'h)' : '')) +
+            docInfoItem('Chegada',      (questionario.horarioChegada || '—')) +
+            docInfoItem('Saída',        (questionario.horarioSaida || '—')) +
+            docInfoItem('Veganos',      (questionario.veganos || 0) + ' pessoa(s)') +
+            docInfoItem('Vegetarianos', (questionario.vegetarianos || 0) + ' pessoa(s)') +
+            (questionario.restricoes && (questionario.restricoes.celiaco > 0 || questionario.restricoes.lactose > 0) ?
+                docInfoItem('Celíacos',   (questionario.restricoes.celiaco || 0) + ' pessoa(s)') +
+                docInfoItem('Lactose',    (questionario.restricoes.lactose || 0) + ' pessoa(s)') : '') +
+            docInfoItem('Cardápio',     questionario.tipoCardapio || '—');
+
+        // Cardápio
+        let cHtml = '';
+        Object.keys(cardapio).forEach(cat => {
+            const itens = (cardapio[cat] || []).filter(i => i);
+            if (itens.length > 0) {
+                cHtml += '<h3>' + (nomesCat[cat] || cat) + '</h3>';
+                itens.forEach(i => { cHtml += '<div class="doc-item">• ' + esc(i) + '</div>'; });
+            }
+        });
+
+        // Adicionar cardápio especial (Tela 2B) se existir
+        if (cardapioEspecial.celiaco || cardapioEspecial.lactose || cardapioEspecial.vegano || cardapioEspecial.vegetariano) {
+            if (cardapioEspecial.celiaco && (questionario.restricoes?.celiaco > 0)) {
+                cHtml += '<h3 style="margin-top:14px;border-top:1px solid rgba(212,175,55,0.2);padding-top:8px;">🥘 Cardápio Especial — Celíacos</h3>';
+                Object.keys(cardapioEspecial.celiaco).forEach(cat => {
+                    const itens = (cardapioEspecial.celiaco[cat] || []).filter(i => i);
+                    if (itens.length > 0) {
+                        cHtml += '<div style="font-size:0.82rem;color:#a8a8a8;">' + (nomesCat[cat] || cat) + '</div>';
+                        itens.forEach(i => { cHtml += '<div class="doc-item">• ' + esc(i) + '</div>'; });
+                    }
+                });
+            }
+            if (cardapioEspecial.lactose && (questionario.restricoes?.lactose > 0)) {
+                cHtml += '<h3 style="margin-top:14px;border-top:1px solid rgba(212,175,55,0.2);padding-top:8px;">🥘 Cardápio Especial — Intolerantes à Lactose</h3>';
+                Object.keys(cardapioEspecial.lactose).forEach(cat => {
+                    const itens = (cardapioEspecial.lactose[cat] || []).filter(i => i);
+                    if (itens.length > 0) {
+                        cHtml += '<div style="font-size:0.82rem;color:#a8a8a8;">' + (nomesCat[cat] || cat) + '</div>';
+                        itens.forEach(i => { cHtml += '<div class="doc-item">• ' + esc(i) + '</div>'; });
+                    }
+                });
+            }
+            if (cardapioEspecial.vegano && (questionario.veganos > 0)) {
+                cHtml += '<h3 style="margin-top:14px;border-top:1px solid rgba(212,175,55,0.2);padding-top:8px;">🥬 Cardápio Especial — Veganos</h3>';
+                Object.keys(cardapioEspecial.vegano).forEach(cat => {
+                    const itens = (cardapioEspecial.vegano[cat] || []).filter(i => i);
+                    if (itens.length > 0) {
+                        cHtml += '<div style="font-size:0.82rem;color:#a8a8a8;">' + (nomesCat[cat] || cat) + '</div>';
+                        itens.forEach(i => { cHtml += '<div class="doc-item">• ' + esc(i) + '</div>'; });
+                    }
+                });
+            }
+            if (cardapioEspecial.vegetariano && (questionario.vegetarianos > 0)) {
+                cHtml += '<h3 style="margin-top:14px;border-top:1px solid rgba(212,175,55,0.2);padding-top:8px;">🥦 Cardápio Especial — Vegetarianos</h3>';
+                Object.keys(cardapioEspecial.vegetariano).forEach(cat => {
+                    const itens = (cardapioEspecial.vegetariano[cat] || []).filter(i => i);
+                    if (itens.length > 0) {
+                        cHtml += '<div style="font-size:0.82rem;color:#a8a8a8;">' + (nomesCat[cat] || cat) + '</div>';
+                        itens.forEach(i => { cHtml += '<div class="doc-item">• ' + esc(i) + '</div>'; });
+                    }
+                });
+            }
+        }
+
+        document.getElementById('a2Cardapio').innerHTML = cHtml || '<p style="color:#666;font-size:0.85rem;">Nenhum item no cardápio.</p>';
+
+        // Compras
+        let comprasHtml = '';
+        let totCompras  = 0;
+        volumes.forEach(vol => {
+            if (vol.kg > 0) {
+                const aComprar = vol.kg / (1 - (vol.perda || 0) / 100);
+                const sub = aComprar * (vol.preco || 0);
+                totCompras += sub;
+                comprasHtml +=
+                    '<div class="doc-linha-custo">' +
+                    '<span>' + esc(vol.nome) + '  —  ' + aComprar.toFixed(2) + ' kg  @  R$ ' + (vol.preco || 0).toFixed(2) + '/kg = R$ ' + sub.toFixed(2) + '</span>' +
+                    '<strong>R$ ' + sub.toFixed(2) + '</strong>' +
+                    '</div>';
+            }
+        });
+        if (!comprasHtml) comprasHtml = '<p style="color:#666;font-size:0.85rem;">Nenhum volume preenchido.</p>';
+        document.getElementById('a2Compras').innerHTML = comprasHtml;
+
+        // Custos detalhados
+        const carvao            = getVal('cCarvao');
+        const temperos          = getVal('cTemperos');
+        const descartaveis      = getVal('cDescartaveis');
+        const deslocamento      = getVal('cDeslocamento');
+        const chef              = getVal('cChef');
+        const auxiliaresValor   = getVal('cAuxiliaresValor');
+        const auxiliaresQtd     = getVal('cAuxiliaresQtd');
+        const auxiliares        = auxiliaresValor * auxiliaresQtd;
+        const aluguelLocal      = getVal('cAluguelLocal');
+        const aluguelEquip      = getVal('cAluguelEquip');
+        const aluguelLoucas     = getVal('cAluguelLoucas');
+        const pctTrib           = getVal('cTributacaoCustom');
+        const pctLucro          = getVal('cLucro');
+        const subtotal     = totalMateria + carvao + temperos + descartaveis + deslocamento + chef + auxiliares + aluguelLocal + aluguelEquip + aluguelLoucas;
+        const valorLucro   = subtotal * (pctLucro / 100);
+        const valorTrib    = subtotal * (pctTrib  / 100);
+        const valorFinal   = subtotal + valorLucro + valorTrib;
+        const custoPessoa  = totalPessoas > 0 ? subtotal   / totalPessoas : 0;
+        const valorPessoa  = totalPessoas > 0 ? valorFinal / totalPessoas : 0;
+
+        document.getElementById('a2Custos').innerHTML =
+            '<h3>Matéria-Prima</h3>' +
+            linha2('Carnes e Insumos (Tela 3)', brl(totalMateria)) +
+            '<h3>Custos Operacionais</h3>' +
+            linha2('Carvão', brl(carvao)) +
+            linha2('Temperos e Condimentos', brl(temperos)) +
+            linha2('Descartáveis e Utensílios', brl(descartaveis)) +
+            linha2('Deslocamento', brl(deslocamento)) +
+            linha2('Aluguel Local', brl(aluguelLocal)) +
+            linha2('Aluguel Equipamentos', brl(aluguelEquip)) +
+            linha2('Aluguel Louças', brl(aluguelLoucas)) +
+            '<h3>Mão de Obra</h3>' +
+            linha2('Honorário Chef / Assador', brl(chef)) +
+            linha2('Auxiliares', brl(auxiliares)) +
+            '<div class="doc-subtotal" style="display:flex;justify-content:space-between;">' +
+            '<span>SUBTOTAL:</span><strong>' + brl(subtotal) + '</strong></div>' +
+            linha2('+ Lucro (' + pctLucro + '%)', brl(valorLucro)) +
+            linha2('+ Tributação (' + pctTrib + '%)', brl(valorTrib)) +
+            '<div class="doc-total-final">' +
+            '<span>VALOR FINAL PROPOSTO:</span><strong id="a2ValorFinal">' + brl(valorFinal) + '</strong>' +
+            '</div>';
+
+        document.getElementById('a2PessoaBox').innerHTML =
+            '<div class="doc-pessoa-item"><div class="lbl">Custo / pessoa</div><div class="val" id="a2CustoPessoa">' + brl(custoPessoa) + '</div></div>' +
+            '<div class="doc-pessoa-item"><div class="lbl">Valor proposta / pessoa</div><div class="val" id="a2ValorPessoa">' + brl(valorPessoa) + '</div></div>' +
+            '<div class="doc-pessoa-item"><div class="lbl">Total pessoas</div><div class="val">' + totalPessoas + '</div></div>';
+    }
+
+    /* ───────────────────────────────────────────
+       ABA 3 — RENDERIZAR PROPOSTA CLIENTE (SEM VERMELHO)
+    ─────────────────────────────────────────── */
+    function renderCliente() {
+        // Carregar imagens do localStorage
+        let imgProfissional = null;
+        let imgCarnes = null;
+        let imgAmbiente = null;
+        let imgAcao = null;
+
+        try {
+            const profData = localStorage.getItem('eventCalcProfissional');
+            if (profData) {
+                const prof = JSON.parse(profData);
+                imgProfissional = prof.imgProfissional;
+                imgCarnes = prof.imgCarnes;
+                imgAmbiente = prof.imgAmbiente;
+                imgAcao = prof.imgAcao;
+            }
+        } catch(e) { console.error('Erro ao carregar imagens:', e); }
+
+        const dataFmt = questionario.data
+            ? new Date(questionario.data + 'T00:00:00').toLocaleDateString('pt-BR')
+            : '—';
+        const valFmt = questionario.validadeProposta
+            ? new Date(questionario.validadeProposta + 'T00:00:00').toLocaleDateString('pt-BR')
+            : '—';
+
+        // Nº e validade
+        document.getElementById('c3Numero').textContent =
+            (questionario.numeroProposta ? questionario.numeroProposta + '  ·  ' : '') +
+            'Emitido em ' + new Date().toLocaleDateString('pt-BR');
+
+        // Info bar
+        document.getElementById('c3InfoBar').innerHTML =
+            dcInfoItem('Para',     questionario.nomeContratante || '—') +
+            dcInfoItem('Local',    questionario.local           || '—') +
+            dcInfoItem('Data',     dataFmt) +
+            dcInfoItem('Horário',  (questionario.horario || '—') + (questionario.duracao ? ' (' + questionario.duracao + 'h)' : '')) +
+            dcInfoItem('Chegada',  (questionario.horarioChegada || '—')) +
+            dcInfoItem('Saída',    (questionario.horarioSaida || '—')) +
+            dcInfoItem('Refeição', nomesRefeicao[questionario.refeicao] || questionario.refeicao || '—') +
+            dcInfoItem('Pessoas',  totalPessoas + ' pessoas') +
+            (questionario.veganos > 0 ? dcInfoItem('Veganos', questionario.veganos + ' pessoa(s)') : '') +
+            (questionario.vegetarianos > 0 ? dcInfoItem('Vegetarianos', questionario.vegetarianos + ' pessoa(s)') : '') +
+            (questionario.restricoes && questionario.restricoes.celiaco > 0 ? dcInfoItem('Celíacos', questionario.restricoes.celiaco + ' pessoa(s)') : '') +
+            (questionario.restricoes && questionario.restricoes.lactose > 0 ? dcInfoItem('Lactose', questionario.restricoes.lactose + ' pessoa(s)') : '');
+
+        // Nota sobre número de pessoas para o cardápio
+        const notaEl = document.getElementById('c3NotaPessoas');
+        if (notaEl) {
+            notaEl.textContent = '📌 Este cardapio foi computado exclusivamente para ' + totalPessoas + ' pessoa(s) conforme informado no questionario inicial.';
+        }
+
+        // Cardápio — títulos em DOURADO
+        let cHtml = '';
+        Object.keys(cardapio).forEach(cat => {
+            const itens = (cardapio[cat] || []).filter(i => i);
+            if (itens.length > 0) {
+                cHtml += '<div class="dc-cat-title">' + (nomesCat[cat] || cat) + '</div>';
+                itens.forEach(i => { cHtml += '<div class="dc-item">• ' + esc(i) + '</div>'; });
+            }
+        });
+
+        // Cardápios Especiais
+        if (cardapioEspecial.celiaco && (questionario.restricoes?.celiaco > 0)) {
+            cHtml += '<div style="margin-top:18px;border-top:1px solid rgba(212,175,55,0.3);padding-top:12px;"><div class="dc-cat-title" style="color:#d4af37;">🌾 Cardápio Especial — Celíacos</div>';
+            Object.keys(cardapioEspecial.celiaco).forEach(cat => {
+                const itens = (cardapioEspecial.celiaco[cat] || []).filter(i => i);
+                if (itens.length > 0) {
+                    cHtml += '<div style="font-size:0.85rem;color:#888;margin-top:6px;">' + (nomesCat[cat] || cat) + '</div>';
+                    itens.forEach(i => { cHtml += '<div class="dc-item">• ' + esc(i) + '</div>'; });
+                }
+            });
+            cHtml += '</div>';
+        }
+
+        if (cardapioEspecial.lactose && (questionario.restricoes?.lactose > 0)) {
+            cHtml += '<div style="margin-top:18px;border-top:1px solid rgba(212,175,55,0.3);padding-top:12px;"><div class="dc-cat-title" style="color:#d4af37;">🥛 Cardápio Especial — Intolerantes à Lactose</div>';
+            Object.keys(cardapioEspecial.lactose).forEach(cat => {
+                const itens = (cardapioEspecial.lactose[cat] || []).filter(i => i);
+                if (itens.length > 0) {
+                    cHtml += '<div style="font-size:0.85rem;color:#888;margin-top:6px;">' + (nomesCat[cat] || cat) + '</div>';
+                    itens.forEach(i => { cHtml += '<div class="dc-item">• ' + esc(i) + '</div>'; });
+                }
+            });
+            cHtml += '</div>';
+        }
+
+        if (cardapioEspecial.vegano && (questionario.veganos > 0)) {
+            cHtml += '<div style="margin-top:18px;border-top:1px solid rgba(212,175,55,0.3);padding-top:12px;"><div class="dc-cat-title" style="color:#d4af37;">🥬 Cardápio Especial — Veganos</div>';
+            Object.keys(cardapioEspecial.vegano).forEach(cat => {
+                const itens = (cardapioEspecial.vegano[cat] || []).filter(i => i);
+                if (itens.length > 0) {
+                    cHtml += '<div style="font-size:0.85rem;color:#888;margin-top:6px;">' + (nomesCat[cat] || cat) + '</div>';
+                    itens.forEach(i => { cHtml += '<div class="dc-item">• ' + esc(i) + '</div>'; });
+                }
+            });
+            cHtml += '</div>';
+        }
+
+        if (cardapioEspecial.vegetariano && (questionario.vegetarianos > 0)) {
+            cHtml += '<div style="margin-top:18px;border-top:1px solid rgba(212,175,55,0.3);padding-top:12px;"><div class="dc-cat-title" style="color:#d4af37;">🥦 Cardápio Especial — Vegetarianos</div>';
+            Object.keys(cardapioEspecial.vegetariano).forEach(cat => {
+                const itens = (cardapioEspecial.vegetariano[cat] || []).filter(i => i);
+                if (itens.length > 0) {
+                    cHtml += '<div style="font-size:0.85rem;color:#888;margin-top:6px;">' + (nomesCat[cat] || cat) + '</div>';
+                    itens.forEach(i => { cHtml += '<div class="dc-item">• ' + esc(i) + '</div>'; });
+                }
+            });
+            cHtml += '</div>';
+        }
+
+        // Adicionar imagem de carnes se existir
+        if (imgCarnes) {
+            cHtml += '<div class="dc-image-section"><img src="' + imgCarnes + '" alt="Carnes e Pratos" style="max-height:250px;object-fit:cover;"></div>';
+        }
+
+        document.getElementById('c3Cardapio').innerHTML = cHtml || '<p style="color:#aaa;font-size:0.85rem;">Nenhum item cadastrado.</p>';
+
+        // Consumo
+        const vols1 = questionario.volumes || {};
+        const consumoItems = [
+            { nome: 'Aperitivo',   g: vols1.aperitivo   ?? 120 },
+            { nome: 'Proteína',    g: vols1.proteina    ?? 450 },
+            { nome: 'Carboidrato', g: vols1.carboidrato ?? 200 },
+            { nome: 'Salada',      g: vols1.salada      ?? 100 },
+            { nome: 'Sobremesa',   g: vols1.sobremesa   ?? 100 }
+        ];
+        let consumoHtml = '';
+        consumoItems.forEach(it => {
+            if (it.g > 0) {
+                consumoHtml +=
+                    '<div class="dc-consumo-row">' +
+                    '<span>' + it.nome + '</span>' +
+                    '<strong>' + it.g + ' g / pessoa</strong>' +
+                    '</div>';
+            }
+        });
+
+        // Adicionar imagem de ambiente se existir
+        if (imgAmbiente) {
+            consumoHtml += '<div class="dc-image-section"><img src="' + imgAmbiente + '" alt="Ambiente" style="max-height:200px;object-fit:cover;"></div>';
+        }
+
+        document.getElementById('c3Consumo').innerHTML = consumoHtml;
+
+        const totalG = vols1.total || consumoItems.reduce((s, i) => s + (i.g || 0), 0);
+        document.getElementById('c3TotalPessoa').textContent = totalG + ' g / pessoa';
+
+        // Valor (calculado da Aba 1)
+        const valorFinal  = calcValorFinalAtual();
+        const valorPessoa = totalPessoas > 0 ? valorFinal / totalPessoas : 0;
+        document.getElementById('c3Valor').textContent      = brl(valorFinal);
+
+        // Atualizar parágrafo com valor por pessoa dinâmico
+        if (totalPessoas > 0) {
+            document.getElementById('p3ValorPersona').textContent =
+                'Qualquer variação no número de convidados confirmados resultará em ajuste de preço proporcional. Cada pessoa adicional será cobrada conforme ' + brl(valorPessoa) + ' (valor por pessoa desta proposta).';
+        }
+
+        // Validade
+        const textoVal = 'Proposta válida até ' + valFmt;
+        document.getElementById('c3Validade').textContent = textoVal;
+
+        // ── Taxa de Limpeza + Aviso de Hora Excedente ──
+        let custosSalvos = {};
+        try {
+            custosSalvos = JSON.parse(localStorage.getItem('eventocalc_custos') || '{}');
+        } catch(e) { custosSalvos = {}; }
+
+        // Taxa de Limpeza: mover dinamicamente entre ✅ Incluso / ❌ Não Incluso
+        const limpezaValor = parseFloat(custosSalvos.limpeza) || 0;
+        const elLimpInc = document.getElementById('c3LimpezaIncluso');
+        const elLimpNao = document.getElementById('c3LimpezaNaoIncluso');
+        if (limpezaValor > 0) {
+            if (elLimpInc) elLimpInc.style.display = 'block';
+            if (elLimpNao) elLimpNao.style.display = 'none';
+        } else {
+            if (elLimpInc) elLimpInc.style.display = 'none';
+            if (elLimpNao) elLimpNao.style.display = 'block';
+        }
+
+        // Aviso de Hora Excedente
+        const horaExc = parseFloat(custosSalvos.horaExcedente) || 0;
+        const duracaoEv = questionario.duracao || '—';
+        const elAviso = document.getElementById('c3AvisoHoraExcedente');
+        if (elAviso) {
+            if (horaExc > 0) {
+                elAviso.innerHTML =
+                    '<h3 style="margin-top:16px;">⏰ Horas Adicionais</h3>' +
+                    '<p>O valor contratado refere-se à duração de <strong>' + duracaoEv + ' hora(s)</strong>. ' +
+                    'Caso o evento exceda esse tempo, será cobrado <strong>' + brl(horaExc) + ' por hora adicional</strong>, ajustada proporcionalmente.</p>';
+                elAviso.style.display = 'block';
+            } else {
+                elAviso.style.display = 'none';
+            }
+        }
+
+        // 🔑 Carregar dados do profissional (sem valores padrão!)
+        let profissionalCompleto = false;
+        let nomeProf = '';
+        let cargoProf = '';
+        let contatosProf = '';
+
+        try {
+            const profData = localStorage.getItem('eventCalcProfissional');
+            if (profData) {
+                const prof = JSON.parse(profData);
+                // Só usar dados se estiverem PREENCHIDOS
+                if (prof.nome && prof.email) {
+                    profissionalCompleto = true;
+                    nomeProf = prof.nome;
+                    cargoProf = prof.profissao || '';
+                    const whats = prof.whatsapp || '';
+                    const email = prof.email || '';
+                    const local = prof.localizacao || '';
+                    const insta = prof.instagram || '';
+                    contatosProf = [whats, email, local, insta].filter(x => x).join(' &nbsp;|&nbsp; ');
+                }
+            }
+        } catch(e) { console.error('Erro ao carregar dados profissionais:', e); }
+
+        // Assinatura com foto do profissional
+        let assHTML = '';
+        if (imgProfissional) {
+            assHTML += '<img src="' + imgProfissional + '" alt="Profissional">';
+        }
+
+        if (profissionalCompleto) {
+            // ✅ Mostrar dados do profissional (SÓ OS PREENCHIDOS)
+            assHTML += '<strong id="assinaturaNome">' + nomeProf + '</strong>';
+            if (cargoProf) {
+                assHTML += '<div class="cargo" id="assinaturaCargo">' + cargoProf + '</div>';
+            }
+            if (contatosProf) {
+                assHTML += '<div class="contatos" id="assinaturaContatos">' + contatosProf + '</div>';
+            }
+            assHTML += '<div class="dc-validade">' + textoVal + '</div>';
+        } else {
+            // ⚠️ Aviso: dados não preenchidos
+            assHTML += '<strong style="color: #d4af37;">⚠️ DADOS NÃO PREENCHIDOS</strong>' +
+                      '<div class="cargo" style="color: #999;">Preencha seus dados na página inicial antes de gerar a proposta.</div>' +
+                      '<div class="dc-validade">' + textoVal + '</div>';
+        }
+
+        document.getElementById('c3AssinaturaProfissional').innerHTML = assHTML;
+    }
+
+    function calcValorFinalAtual() {
+        const auxiliaresValor = getVal('cAuxiliaresValor');
+        const auxiliaresQtd   = getVal('cAuxiliaresQtd');
+        const auxiliares      = auxiliaresValor * auxiliaresQtd;
+        const subtotal   = totalMateria + getVal('cCarvao') + getVal('cTemperos') +
+                           getVal('cDescartaveis') + getVal('cDeslocamento') + getVal('cChef') +
+                           auxiliares + getVal('cAluguelLocal') + getVal('cAluguelEquip') +
+                           getVal('cAluguelLoucas');
+        const valorLucro = subtotal * (getVal('cLucro')            / 100);
+        const valorTrib  = subtotal * (getVal('cTributacaoCustom') / 100);
+        return subtotal + valorLucro + valorTrib;
+    }
+
+    /* ───────────────────────────────────────────
+       TROCAR ABA
+    ─────────────────────────────────────────── */
+    function mudarAba(n) {
+        [1,2,3].forEach(i => {
+            document.getElementById('aba' + i).style.display = (i === n) ? 'block' : 'none';
+            document.getElementById('btn' + i).className = 'tab-btn' + (i === n ? ' active' : '');
+        });
+        if (n === 1) calcularCustos();
+        if (n === 2) renderAssador();
+        if (n === 3) renderCliente();
+    }
+
+    /* ───────────────────────────────────────────
+       EXPORTAR PDF
+    ─────────────────────────────────────────── */
+    function exportarPDF(tipo) {
+        // Sanitizar nome para arquivo
+        const nomeBase = (questionario.nomeContratante || questionario.local || 'Orcamento')
+            .replace(/[\\/:*?"<>|]/g, '-').replace(/\s+/g, '_').substring(0, 40);
+        const nomeArq = (tipo === 'assador' ? 'Assador_' : 'Proposta_') + nomeBase + '.pdf';
+
+        // Define cores ANTES de usar (disponível para ambos os tipos)
+        const GOLD   = [212, 175, 55];
+        const GREY   = [100, 100, 100];
+        const DARK   = [60, 60, 60];
+        const BLACK  = [30, 30, 30];
+
+        // 🔑 CARREGAR DADOS PROFISSIONAIS DO LOCALSTORAGE (SEM PADRÃO) - DISPONÍVEL PARA AMBOS OS TIPOS
+        let dadosProfissional = null;
+        try {
+            const prof = JSON.parse(localStorage.getItem('eventCalcProfissional') || '{}');
+            // Só usar dados se REALMENTE estiverem preenchidos
+            if (prof.nome && prof.email) {
+                dadosProfissional = prof;
+            }
+        } catch(e) { console.error('Erro ao carregar dados profissionais:', e); }
+
+        // ══════════════════════════════════════════
+        // EXPORTAR CLIENTE COM JSPDF (Design melhorado)
+        // ══════════════════════════════════════════
+        if (tipo === 'cliente') {
+            try {
+                // ⚠️ Se dados não foram preenchidos, avisar e abortar
+                if (!dadosProfissional) {
+                    alert('⚠️ AVISO: Preencha seus dados profissionais na página inicial antes de gerar o PDF!');
+                    return;
+                }
+
+                // Inicializar jsPDF
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF('p', 'mm', 'a4');
+                const pw = doc.internal.pageSize.getWidth();
+                const ph = doc.internal.pageSize.getHeight();
+                const mg = 15;
+                let y = mg;
+                const checkY = (h) => { if (y + h > ph - mg) { doc.addPage(); y = mg; } };
+
+                // Usar jsPDF com design visual melhorado
+                doc.setFillColor(255, 255, 255);
+                doc.rect(0, 0, pw, ph, 'F');
+
+                // Título
+                doc.setFontSize(18); doc.setTextColor(...GOLD);
+                checkY(10); doc.text('ORÇAMENTO PARA O EVENTO', pw / 2, y, { align: 'center' }); y += 8;
+
+                // Data de emissão e número da proposta
+                doc.setFontSize(8); doc.setTextColor(...GREY);
+                const numeroPropText = questionario.numeroProposta ? 'Nº ' + questionario.numeroProposta + '  •  ' : '';
+                const dataText = 'Emitido em ' + new Date().toLocaleDateString('pt-BR');
+                checkY(4); doc.text(numeroPropText + dataText, pw / 2, y, { align: 'center' }); y += 6;
+
+                // Linha separadora
+                doc.setDrawColor(...GOLD);
+                doc.setLineWidth(0.5);
+                doc.line(mg, y, pw - mg, y); y += 8;
+
+                // Info do evento
+                doc.setFontSize(9); doc.setTextColor(...DARK);
+                const infoText = [
+                    'Para: ' + (questionario.nomeContratante || '-'),
+                    'Local: ' + (questionario.local || '-') + '          Data: ' + (questionario.data ? new Date(questionario.data + 'T00:00:00').toLocaleDateString('pt-BR') : '-'),
+                    'Refeição: ' + (nomesRefeicaoSafe[questionario.refeicao] || '-') + '          Pessoas: ' + totalPessoas,
+                    'Horário: ' + (questionario.horario || '-') + ' (' + (questionario.duracao || '-') + 'h)          Chegada: ' + (questionario.horarioChegada || '-'),
+                    'Saída: ' + (questionario.horarioSaida || '-') +
+                    (questionario.veganos > 0 || questionario.vegetarianos > 0 || (questionario.restricoes && (questionario.restricoes.celiaco > 0 || questionario.restricoes.lactose > 0)) ?
+                        '          Restrições: ' +
+                        (questionario.veganos > 0 ? questionario.veganos + ' vegano(s) ' : '') +
+                        (questionario.vegetarianos > 0 ? questionario.vegetarianos + ' vegetariano(s) ' : '') +
+                        (questionario.restricoes?.celiaco > 0 ? questionario.restricoes.celiaco + ' celiáco(s) ' : '') +
+                        (questionario.restricoes?.lactose > 0 ? questionario.restricoes.lactose + ' intolerante(s) lactose' : '')
+                        : '')
+                ];
+                infoText.forEach(ln => { checkY(5); doc.text(ln, mg + 2, y); y += 5; });
+                y += 6;
+
+                // Cardápio
+                doc.setFontSize(11); doc.setTextColor(...GOLD);
+                checkY(8); doc.text('CARDÁPIO', mg, y); y += 8;
+
+                const cardapio = JSON.parse(localStorage.getItem('eventocalc_cardapio') || '{}');
+                doc.setFontSize(8); doc.setTextColor(...DARK);
+                Object.keys(cardapio).forEach(cat => {
+                    const itens = (cardapio[cat] || []).filter(i => i);
+                    if (itens.length > 0) {
+                        checkY(5); doc.text((nomesCatSafe[cat] || cat).toUpperCase() + ':', mg + 2, y); y += 4;
+                        itens.forEach(item => { checkY(4); doc.text('  • ' + item, mg + 5, y); y += 4; });
+                        y += 3;
+                    }
+                });
+
+                // Cardápio Especial - Celiácos
+                if (cardapioEspecial.celiaco && (questionario.restricoes?.celiaco > 0)) {
+                    y += 4;
+                    doc.setFontSize(8); doc.setTextColor(...GOLD);
+                    checkY(6); doc.text('CARDÁPIO ESPECIAL - CELIÁCOS (SEM GLÚTEN)', mg + 2, y); y += 5;
+                    doc.setFontSize(7); doc.setTextColor(...DARK);
+                    Object.keys(cardapioEspecial.celiaco).forEach(cat => {
+                        const itens = (cardapioEspecial.celiaco[cat] || []).filter(i => i);
+                        if (itens.length > 0) {
+                            checkY(4); doc.text((nomesCatSafe[cat] || cat).toUpperCase(), mg + 5, y); y += 4;
+                            itens.forEach(item => { checkY(3); doc.text('  • ' + item, mg + 8, y); y += 3; });
+                        }
+                    });
+                }
+
+                // Cardápio Especial - Lactose
+                if (cardapioEspecial.lactose && (questionario.restricoes?.lactose > 0)) {
+                    y += 4;
+                    doc.setFontSize(8); doc.setTextColor(...GOLD);
+                    checkY(6); doc.text('CARDÁPIO ESPECIAL - LACTOSE (SEM LEITE)', mg + 2, y); y += 5;
+                    doc.setFontSize(7); doc.setTextColor(...DARK);
+                    Object.keys(cardapioEspecial.lactose).forEach(cat => {
+                        const itens = (cardapioEspecial.lactose[cat] || []).filter(i => i);
+                        if (itens.length > 0) {
+                            checkY(4); doc.text((nomesCatSafe[cat] || cat).toUpperCase(), mg + 5, y); y += 4;
+                            itens.forEach(item => { checkY(3); doc.text('  • ' + item, mg + 8, y); y += 3; });
+                        }
+                    });
+                }
+
+                // Cardápio Especial - Vegano
+                if (cardapioEspecial.vegano && (questionario.veganos > 0)) {
+                    y += 4;
+                    doc.setFontSize(8); doc.setTextColor(...GOLD);
+                    checkY(6); doc.text('CARDÁPIO ESPECIAL - VEGANO', mg + 2, y); y += 5;
+                    doc.setFontSize(7); doc.setTextColor(...DARK);
+                    Object.keys(cardapioEspecial.vegano).forEach(cat => {
+                        const itens = (cardapioEspecial.vegano[cat] || []).filter(i => i);
+                        if (itens.length > 0) {
+                            checkY(4); doc.text((nomesCatSafe[cat] || cat).toUpperCase(), mg + 5, y); y += 4;
+                            itens.forEach(item => { checkY(3); doc.text('  • ' + item, mg + 8, y); y += 3; });
+                        }
+                    });
+                }
+
+                // Cardápio Especial - Vegetariano
+                if (cardapioEspecial.vegetariano && (questionario.vegetarianos > 0)) {
+                    y += 4;
+                    doc.setFontSize(8); doc.setTextColor(...GOLD);
+                    checkY(6); doc.text('CARDÁPIO ESPECIAL - VEGETARIANO', mg + 2, y); y += 5;
+                    doc.setFontSize(7); doc.setTextColor(...DARK);
+                    Object.keys(cardapioEspecial.vegetariano).forEach(cat => {
+                        const itens = (cardapioEspecial.vegetariano[cat] || []).filter(i => i);
+                        if (itens.length > 0) {
+                            checkY(4); doc.text((nomesCatSafe[cat] || cat).toUpperCase(), mg + 5, y); y += 4;
+                            itens.forEach(item => { checkY(3); doc.text('  • ' + item, mg + 8, y); y += 3; });
+                        }
+                    });
+                }
+
+                y += 4;
+
+                // Previsão de consumo
+                y += 6; // Espaço antes da seção
+                doc.setFontSize(11); doc.setTextColor(...GOLD);
+                checkY(8); doc.text('PREVISÃO DE CONSUMO', mg, y); y += 8;
+
+                doc.setFontSize(8); doc.setTextColor(...DARK);
+                const volumes = JSON.parse(localStorage.getItem('eventocalc_volumes') || '[]');
+                const vols = JSON.parse(localStorage.getItem('eventocalcData') || '{}').questionario?.volumes || {};
+                const consumoItens = [
+                    { n: 'Aperitivo', g: vols.aperitivo ?? 120 },
+                    { n: 'Proteína', g: vols.proteina ?? 450 },
+                    { n: 'Carboidrato', g: vols.carboidrato ?? 200 },
+                    { n: 'Salada', g: vols.salada ?? 100 },
+                    { n: 'Sobremesa', g: vols.sobremesa ?? 100 }
+                ];
+                consumoItens.forEach(it => {
+                    if (it.g > 0) { checkY(4); doc.text('  • ' + it.n + ': ' + it.g + 'g/pessoa', mg + 2, y); y += 4; }
+                });
+                const totalG = consumoItens.reduce((s, i) => s + i.g, 0);
+                doc.setFontSize(10); doc.setTextColor(...GOLD); doc.setFont('helvetica', 'bold');
+                checkY(6); doc.text('TOTAL: ' + totalG + 'g/pessoa', mg + 2, y); y += 10;
+                doc.setFont('helvetica', 'normal');
+
+                // Valor final
+                const valorFinal = calcValorFinalAtual();
+                const valPessoa = totalPessoas > 0 ? valorFinal / totalPessoas : 0;
+
+                y += 6; // Espaço antes da seção
+                doc.setFontSize(11); doc.setTextColor(...GOLD);
+                checkY(8); doc.text('VALOR DO EVENTO', mg, y); y += 8;
+
+                doc.setDrawColor(...GOLD);
+                doc.setLineWidth(0.5);
+                doc.rect(mg + 5, y, pw - 2*mg - 10, 16);
+                doc.setFontSize(9); doc.setTextColor(...DARK);
+                doc.text('Valor Total: ' + brl(valorFinal), pw / 2, y + 5, { align: 'center' });
+                doc.setFontSize(8); doc.setTextColor(...GREY);
+                doc.text('Por pessoa: ' + brl(valPessoa), pw / 2, y + 10, { align: 'center' });
+                y += 20;
+
+                // Condições de pagamento
+                y += 6; // Espaço antes da seção
+                doc.setFontSize(11); doc.setTextColor(...GOLD);
+                checkY(8); doc.text('CONDIÇÕES DE PAGAMENTO', mg, y); y += 8;
+
+                doc.setFontSize(8); doc.setTextColor(...DARK);
+                checkY(5); doc.text('• 50% no fechamento do contrato (sinal)', mg + 2, y); y += 5;
+                checkY(5); doc.text('• 50% no dia do evento, até o horário combinado', mg + 2, y); y += 5;
+                checkY(5); doc.text('• Alterações: cobrar o valor por pessoa desta proposta', mg + 2, y); y += 5;
+                checkY(5); doc.text('• Cancelamento: 30+ dias = 100% reembolso | 10-29 dias = 50% crédito', mg + 2, y); y += 5;
+                checkY(5); doc.text('  Menos de 15 dias = perda do sinal (50%), sem reembolso', mg + 2, y); y += 10;
+
+                // ── Carregar custos para Hora Excedente e Limpeza ──
+                let custosPDF = {};
+                try { custosPDF = JSON.parse(localStorage.getItem('eventocalc_custos') || '{}'); } catch(e) {}
+                const horaExcPDF = parseFloat(custosPDF.horaExcedente) || 0;
+                const limpezaPDF = parseFloat(custosPDF.limpeza) || 0;
+
+                // Aviso de Hora Excedente
+                if (horaExcPDF > 0) {
+                    const duracaoPDF = questionario.duracao || '-';
+                    doc.setFontSize(9); doc.setTextColor(...GOLD);
+                    checkY(6); doc.text('HORAS ADICIONAIS', mg, y); y += 5;
+                    doc.setFontSize(8); doc.setTextColor(...DARK);
+                    checkY(5); doc.text('O valor contratado refere-se a ' + duracaoPDF + ' hora(s) de evento.', mg + 2, y); y += 4;
+                    checkY(5); doc.text('Horas adicionais: ' + brl(horaExcPDF) + ' por hora, ajustada proporcionalmente.', mg + 2, y); y += 8;
+                }
+
+                // ── DADOS DE PAGAMENTO (PIX e Banco) ──
+                const temPix = dadosProfissional.pixChave && dadosProfissional.pixChave.trim();
+                const temBanco = dadosProfissional.bancoNome && dadosProfissional.bancoNome.trim();
+                if (temPix || temBanco) {
+                    doc.setFontSize(10); doc.setTextColor(...GOLD);
+                    checkY(8); doc.text('DADOS PARA PAGAMENTO', mg, y); y += 6;
+                    doc.setFontSize(8); doc.setTextColor(...DARK);
+                    if (temPix) {
+                        const tipoPix = dadosProfissional.pixTipo ? '(' + dadosProfissional.pixTipo + ')' : '';
+                        checkY(5); doc.text('PIX ' + tipoPix + ': ' + dadosProfissional.pixChave, mg + 2, y); y += 5;
+                    }
+                    if (temBanco) {
+                        let bancoLinha = dadosProfissional.bancoNome;
+                        if (dadosProfissional.bancoAgencia) bancoLinha += ' • Ag ' + dadosProfissional.bancoAgencia;
+                        if (dadosProfissional.bancoConta) bancoLinha += ' • CC ' + dadosProfissional.bancoConta;
+                        checkY(5); doc.text(bancoLinha, mg + 2, y); y += 5;
+                        if (dadosProfissional.bancoTitular) {
+                            checkY(5); doc.text('Titular: ' + dadosProfissional.bancoTitular, mg + 2, y); y += 5;
+                        }
+                    }
+                    y += 5;
+                }
+
+                // Validade
+                doc.setFontSize(8); doc.setTextColor(...GREY);
+                const valFmt = questionario.validadeProposta ? new Date(questionario.validadeProposta + 'T00:00:00').toLocaleDateString('pt-BR') : '-';
+                checkY(6); doc.text('Proposta válida até: ' + valFmt, mg, y); y += 10;
+
+                // Seção de O que está incluso / não está
+                y += 8; // Espaço antes da seção
+                doc.setFontSize(10); doc.setTextColor(...GOLD);
+                checkY(8); doc.text('O QUE ESTÁ INCLUSO', mg, y); y += 6;
+                doc.setFontSize(7); doc.setTextColor(...DARK);
+                const inclusos = [
+                    'Cardápio completo conforme combinado',
+                    'Carvão de qualidade e temperos especiais',
+                    'Equipamentos necessários',
+                    'Mão de obra especializada (chef e auxiliares)',
+                    'Utensílios e material descartável',
+                    'Logística e transporte'
+                ];
+                if (limpezaPDF > 0) inclusos.push('Limpeza pós-evento');
+                inclusos.forEach(item => {
+                    checkY(4); doc.text('✓ ' + item, mg + 2, y); y += 4;
+                });
+
+                y += 6; // Espaço entre seções
+                doc.setFontSize(10); doc.setTextColor(...GOLD);
+                checkY(8); doc.text('O QUE NÃO ESTÁ INCLUSO', mg, y); y += 6;
+                doc.setFontSize(7); doc.setTextColor(...DARK);
+                const naoInclusos = [
+                    'Bebidas (a combinar)',
+                    'Serviço de garçons / garçonetes',
+                    'Mobiliário, decoração ou estrutura',
+                    'Transporte de convidados'
+                ];
+                if (limpezaPDF <= 0) naoInclusos.splice(1, 0, 'Limpeza pós-evento');
+                naoInclusos.forEach(item => {
+                    checkY(4); doc.text('✗ ' + item, mg + 2, y); y += 4;
+                });
+
+                // Assinatura (com dados do localStorage)
+                y += 8; // Espaço antes da assinatura
+                doc.setLineWidth(0.3);
+                doc.line(mg + 10, y, pw - mg - 10, y); y += 6;
+
+                doc.setFontSize(10); doc.setTextColor(...GOLD);
+                checkY(5); doc.text((dadosProfissional.nome || 'Juliomar Meskiu').toUpperCase(), pw / 2, y, { align: 'center' }); y += 4;
+                doc.setFontSize(7); doc.setTextColor(...GREY);
+                checkY(4); doc.text(dadosProfissional.profissao || 'Médico Veterinário • Mestre Churrasqueiro', pw / 2, y, { align: 'center' }); y += 3;
+                const contatosPDF = (dadosProfissional.whatsapp || '+55 47 99668-1010') + ' | ' + (dadosProfissional.email || 'jm.dryaged@gmail.com') + ' | ' + (dadosProfissional.localizacao || 'Itapema, SC');
+                checkY(4); doc.text(contatosPDF, pw / 2, y, { align: 'center' });
+
+                doc.save(nomeArq);
+                console.log('✅ PDF Cliente exportado com sucesso!');
+            } catch(e) {
+                console.error('❌ Erro na exportação:', e);
+                alert('❌ Erro: ' + e.message);
+            }
+            return;
+        }
+
+        // ══════════════════════════════════════════
+        // EXPORTAR ASSADOR COM JSPDF (original)
+        // ══════════════════════════════════════════
+        const { jsPDF } = window.jspdf;
+        const doc       = new jsPDF('p', 'mm', 'a4');
+        const pw        = doc.internal.pageSize.getWidth();
+        const ph        = doc.internal.pageSize.getHeight();
+        const mg        = 15;
+        const mxw       = pw - mg * 2;
+        let y           = mg;
+
+        const novaPag = () => { doc.addPage(); y = mg; };
+        const checkY  = (h) => { if (y + h > ph - mg) novaPag(); };
+
+        const dataFmt = questionario.data
+            ? new Date(questionario.data + 'T00:00:00').toLocaleDateString('pt-BR')
+            : '-';
+        const valFmt = questionario.validadeProposta
+            ? new Date(questionario.validadeProposta + 'T00:00:00').toLocaleDateString('pt-BR')
+            : '-';
+
+        if (tipo === 'assador') {
+            // ── ASSADOR PDF ──
+            doc.setFontSize(16); doc.setTextColor(...GOLD);
+            doc.text('RELATORIO DE CUSTOS - ASSADOR', pw / 2, y, { align: 'center' }); y += 7;
+
+            doc.setFontSize(8); doc.setTextColor(...GREY);
+            doc.text('Documento Interno - Confidencial', pw / 2, y, { align: 'center' }); y += 10;
+
+            // Info
+            doc.setFontSize(9); doc.setTextColor(...DARK);
+            const infoLines = [
+                'Para: '      + (questionario.nomeContratante || '-'),
+                'N. Proposta: '+ (questionario.numeroProposta  || '-'),
+                'Local: '     + (questionario.local            || '-'),
+                'Data: '      + dataFmt + '  |  Refeicao: ' + (nomesRefeicaoSafe[questionario.refeicao] || questionario.refeicao || '-'),
+                'Pessoas: '   + totalPessoas + '  |  Chegada: ' + (questionario.horarioChegada || '-') + '  |  Saida: ' + (questionario.horarioSaida || '-')
+            ];
+            if (questionario.veganos > 0 || questionario.vegetarianos > 0) {
+                infoLines.push('Veganos: ' + (questionario.veganos || 0) + '  |  Vegetarianos: ' + (questionario.vegetarianos || 0));
+            }
+            if (questionario.restricoes && (questionario.restricoes.celiaco > 0 || questionario.restricoes.lactose > 0)) {
+                infoLines.push('Celiaco: ' + (questionario.restricoes.celiaco || 0) + '  |  Lactose: ' + (questionario.restricoes.lactose || 0));
+            }
+            infoLines.forEach(ln => { checkY(5); doc.text(ln, mg, y); y += 5; });
+            y += 4;
+
+            // Cardápio
+            doc.setFontSize(11); doc.setTextColor(...GOLD);
+            checkY(8); doc.text('CARDAPIO', mg, y); y += 7;
+            Object.keys(cardapio).forEach(cat => {
+                const itens = (cardapio[cat] || []).filter(i => i);
+                if (itens.length > 0) {
+                    doc.setFontSize(8); doc.setTextColor(...GOLD);
+                    checkY(5); doc.text((nomesCatSafe[cat] || cat).toUpperCase(), mg + 3, y); y += 5;
+                    doc.setFontSize(8); doc.setTextColor(...GREY);
+                    itens.forEach(item => { checkY(4); doc.text('• ' + item, mg + 8, y); y += 4; });
+                    y += 2;
+                }
+            });
+
+            // Cardápio Especial
+            if (cardapioEspecial.celiaco && (questionario.restricoes?.celiaco > 0)) {
+                y += 2;
+                doc.setFontSize(8); doc.setTextColor(...GOLD);
+                checkY(6); doc.text('CARDAPIO ESPECIAL - CELIACO (SEM GLUTEN)', mg + 3, y); y += 5;
+                Object.keys(cardapioEspecial.celiaco).forEach(cat => {
+                    const itens = (cardapioEspecial.celiaco[cat] || []).filter(i => i);
+                    if (itens.length > 0) {
+                        doc.setFontSize(7); doc.setTextColor(...GREY);
+                        checkY(4); doc.text((nomesCatSafe[cat] || cat).toUpperCase(), mg + 6, y); y += 4;
+                        itens.forEach(item => { checkY(3); doc.text('• ' + item, mg + 10, y); y += 3; });
+                    }
+                });
+            }
+
+            if (cardapioEspecial.lactose && (questionario.restricoes?.lactose > 0)) {
+                y += 2;
+                doc.setFontSize(8); doc.setTextColor(...GOLD);
+                checkY(6); doc.text('CARDAPIO ESPECIAL - LACTOSE (SEM LEITE)', mg + 3, y); y += 5;
+                Object.keys(cardapioEspecial.lactose).forEach(cat => {
+                    const itens = (cardapioEspecial.lactose[cat] || []).filter(i => i);
+                    if (itens.length > 0) {
+                        doc.setFontSize(7); doc.setTextColor(...GREY);
+                        checkY(4); doc.text((nomesCatSafe[cat] || cat).toUpperCase(), mg + 6, y); y += 4;
+                        itens.forEach(item => { checkY(3); doc.text('• ' + item, mg + 10, y); y += 3; });
+                    }
+                });
+            }
+
+            if (cardapioEspecial.vegano && (questionario.veganos > 0)) {
+                y += 2;
+                doc.setFontSize(8); doc.setTextColor(...GOLD);
+                checkY(6); doc.text('CARDAPIO ESPECIAL - VEGANO', mg + 3, y); y += 5;
+                Object.keys(cardapioEspecial.vegano).forEach(cat => {
+                    const itens = (cardapioEspecial.vegano[cat] || []).filter(i => i);
+                    if (itens.length > 0) {
+                        doc.setFontSize(7); doc.setTextColor(...GREY);
+                        checkY(4); doc.text((nomesCatSafe[cat] || cat).toUpperCase(), mg + 6, y); y += 4;
+                        itens.forEach(item => { checkY(3); doc.text('• ' + item, mg + 10, y); y += 3; });
+                    }
+                });
+            }
+
+            if (cardapioEspecial.vegetariano && (questionario.vegetarianos > 0)) {
+                y += 2;
+                doc.setFontSize(8); doc.setTextColor(...GOLD);
+                checkY(6); doc.text('CARDAPIO ESPECIAL - VEGETARIANO', mg + 3, y); y += 5;
+                Object.keys(cardapioEspecial.vegetariano).forEach(cat => {
+                    const itens = (cardapioEspecial.vegetariano[cat] || []).filter(i => i);
+                    if (itens.length > 0) {
+                        doc.setFontSize(7); doc.setTextColor(...GREY);
+                        checkY(4); doc.text((nomesCatSafe[cat] || cat).toUpperCase(), mg + 6, y); y += 4;
+                        itens.forEach(item => { checkY(3); doc.text('• ' + item, mg + 10, y); y += 3; });
+                    }
+                });
+            }
+
+            y += 4;
+
+            // Compras
+            doc.setFontSize(11); doc.setTextColor(...GOLD);
+            checkY(8); doc.text('LISTA DE COMPRAS', mg, y); y += 7;
+            doc.setFontSize(8); doc.setTextColor(...DARK);
+
+            // Volumes Normais
+            volumes.forEach(vol => {
+                if (vol.kg > 0) {
+                    const aComprar = vol.kg / (1 - (vol.perda || 0) / 100);
+                    const sub      = aComprar * (vol.preco || 0);
+                    checkY(5);
+                    doc.text(vol.nome + ': ' + aComprar.toFixed(2) + ' kg @ R$' + (vol.preco||0).toFixed(2) + ' = R$' + sub.toFixed(2), mg + 3, y);
+                    y += 5;
+                }
+            });
+
+            // Volumes Especiais (se existirem)
+            try {
+                const volEspSalvo = localStorage.getItem('eventocalc_volumes_especiais');
+                if (volEspSalvo) {
+                    const volEspeciais = JSON.parse(volEspSalvo);
+                    const temEsp = volEspeciais && volEspeciais.some(v => v.kg > 0);
+                    if (temEsp) {
+                        y += 2;
+                        doc.setFontSize(8); doc.setTextColor(...GOLD);
+                        checkY(5); doc.text('VOLUMES ESPECIAIS:', mg + 3, y); y += 5;
+                        doc.setFontSize(8); doc.setTextColor(...DARK);
+                        volEspeciais.forEach(vol => {
+                            const kgReal = (vol.kg || 0) / 1000; // Converter gramas para kg
+                            if (kgReal > 0) {
+                                const aComprar = kgReal / (1 - (vol.perda || 0) / 100);
+                                const sub      = aComprar * (vol.preco || 0);
+                                checkY(5);
+                                doc.text(vol.nome + ': ' + aComprar.toFixed(2) + ' kg @ R$' + (vol.preco||0).toFixed(2) + ' = R$' + sub.toFixed(2), mg + 3, y);
+                                y += 5;
+                            }
+                        });
+                    }
+                }
+            } catch(e) { }
+
+            y += 6;
+
+            // Custos
+            const carvao            = getVal('cCarvao');
+            const temperos          = getVal('cTemperos');
+            const descartaveis      = getVal('cDescartaveis');
+            const deslocamento      = getVal('cDeslocamento');
+            const chef              = getVal('cChef');
+            const auxiliaresValor   = getVal('cAuxiliaresValor');
+            const auxiliaresQtd     = getVal('cAuxiliaresQtd');
+            const auxiliares        = auxiliaresValor * auxiliaresQtd;
+            const aluguelLocal      = getVal('cAluguelLocal');
+            const aluguelEquip      = getVal('cAluguelEquip');
+            const aluguelLoucas     = getVal('cAluguelLoucas');
+            const pctTrib           = getVal('cTributacaoCustom');
+            const pctLucro          = getVal('cLucro');
+            const subtotal          = totalMateria + carvao + temperos + descartaveis + deslocamento + chef + auxiliares + aluguelLocal + aluguelEquip + aluguelLoucas;
+            const valorLucro   = subtotal * (pctLucro / 100);
+            const valorTrib    = subtotal * (pctTrib  / 100);
+            const valorFinal   = subtotal + valorLucro + valorTrib;
+            const custoPessoa  = totalPessoas > 0 ? subtotal   / totalPessoas : 0;
+            const valorPessoa  = totalPessoas > 0 ? valorFinal / totalPessoas : 0;
+
+            doc.setFontSize(11); doc.setTextColor(...GOLD);
+            checkY(8); doc.text('CUSTOS DETALHADOS', mg, y); y += 7;
+            doc.setFontSize(8); doc.setTextColor(...DARK);
+
+            const custoLinhas = [
+                ['Materia-Prima',   brl(totalMateria)],
+                ['Carvao',          brl(carvao)],
+                ['Temperos',        brl(temperos)],
+                ['Descartaveis',    brl(descartaveis)],
+                ['Deslocamento',    brl(deslocamento)],
+                ['Aluguel Local',   brl(aluguelLocal)],
+                ['Aluguel Equip',   brl(aluguelEquip)],
+                ['Aluguel Loucas',  brl(aluguelLoucas)],
+                ['Honorario Chef',  brl(chef)],
+                ['Auxiliares',      brl(auxiliares)],
+                ['SUBTOTAL',        brl(subtotal)],
+                ['+ Lucro (' + pctLucro + '%)', brl(valorLucro)],
+                ['+ Tributacao (' + pctTrib + '%)', brl(valorTrib)]
+            ];
+            custoLinhas.forEach(([k, v]) => {
+                checkY(5);
+                doc.text(k + ':', mg + 3, y);
+                doc.text(v, pw - mg, y, { align: 'right' });
+                y += 5;
+            });
+
+            y += 6;
+            doc.setFontSize(13); doc.setTextColor(...GOLD);
+            checkY(10);
+            doc.text('VALOR FINAL: ' + brl(valorFinal), pw / 2, y, { align: 'center' }); y += 8;
+
+            doc.setFontSize(8); doc.setTextColor(...GREY);
+            checkY(5);
+            doc.text('Custo/pessoa: ' + brl(custoPessoa) + '  |  Valor proposta/pessoa: ' + brl(valorPessoa), pw / 2, y, { align: 'center' });
+
+        } else {
+            // ── CLIENTE PDF (SEM VERMELHO — só dourado e cinza) ──
+            // Logo/Marca da empresa com DADOS DO PROFISSIONAL
+            doc.setFontSize(10); doc.setTextColor(...GOLD);
+            const logoPDF = (dadosProfissional.nome + ' - ESPECIALISTA EM CHURRASCOS').toUpperCase();
+            doc.text(logoPDF, pw / 2, y, { align: 'center' }); y += 3;
+
+            // Linha separadora
+            doc.setDrawColor(212, 175, 55);
+            doc.setLineWidth(0.8);
+            doc.line(mg + 10, y + 1, pw - mg - 10, y + 1); y += 8;
+
+            // Título principal
+            doc.setFontSize(20); doc.setTextColor(...GOLD);
+            checkY(10); doc.text('ORCAMENTO PARA O EVENTO', pw / 2, y, { align: 'center' }); y += 9;
+
+            // Info de emissão
+            doc.setFontSize(8); doc.setTextColor(...GREY);
+            const num = questionario.numeroProposta ? 'Proposta Nº ' + questionario.numeroProposta + '  |  ' : '';
+            doc.text(num + 'Emitido em ' + new Date().toLocaleDateString('pt-BR'), pw / 2, y, { align: 'center' }); y += 14;
+
+            // Info com caixa visual
+            y += 3; // espaço antes da caixa
+            doc.setDrawColor(212, 175, 55);
+            doc.setLineWidth(0.5);
+            doc.rect(mg - 2, y, pw - 2*mg + 4, 35); // altura corrigida para 35
+
+            doc.setFontSize(9); doc.setTextColor(...DARK);
+            y += 3; // espaço interno da caixa
+            const cli = [
+                'Para: '      + (questionario.nomeContratante || '-'),
+                'Local: '     + (questionario.local            || '-'),
+                'Data: '      + dataFmt,
+                'Refeicao: '  + (nomesRefeicaoSafe[questionario.refeicao] || questionario.refeicao || '-'),
+                'Pessoas: '   + totalPessoas + '  |  Horario: ' + (questionario.horario || '-') + (questionario.duracao ? ' (' + questionario.duracao + 'h)' : '') +
+                    '  |  Chegada: ' + (questionario.horarioChegada || '-') + '  |  Saida: ' + (questionario.horarioSaida || '-')
+            ];
+            cli.forEach(ln => { checkY(5); doc.text(ln, mg + 2, y); y += 5; });
+            y += 5; // espaço após conteúdo da caixa
+
+            // Seção Cardápio
+            y += 2;
+            doc.setDrawColor(212, 175, 55);
+            doc.setLineWidth(0.5);
+            doc.line(mg, y, pw - mg, y); y += 5;
+
+            doc.setFontSize(12); doc.setTextColor(...GOLD);
+            checkY(8); doc.text('CARDAPIO', mg, y); y += 8;
+
+            // Nota sobre número de pessoas
+            doc.setFontSize(7); doc.setTextColor(...GREY);
+            checkY(4); doc.text('Nota: Este cardapio foi computado exclusivamente para ' + totalPessoas + ' pessoa(s) conforme informado no questionario inicial.', mg + 2, y); y += 6;
+
+            Object.keys(cardapio).forEach(cat => {
+                const itens = (cardapio[cat] || []).filter(i => i);
+                if (itens.length > 0) {
+                    doc.setFontSize(8); doc.setTextColor(...GOLD); // GOLD não vermelho
+                    checkY(5); doc.text((nomesCatSafe[cat] || cat).toUpperCase(), mg + 3, y); y += 5;
+                    doc.setFontSize(8); doc.setTextColor(...GREY);
+                    itens.forEach(item => { checkY(4); doc.text('• ' + item, mg + 8, y); y += 4; });
+                    y += 2;
+                }
+            });
+
+            // Cardápio Especial
+            if (cardapioEspecial.celiaco && (questionario.restricoes?.celiaco > 0)) {
+                y += 2;
+                doc.setFontSize(8); doc.setTextColor(...GOLD);
+                checkY(6); doc.text('CARDAPIO ESPECIAL - CELIACO (SEM GLUTEN)', mg + 3, y); y += 5;
+                Object.keys(cardapioEspecial.celiaco).forEach(cat => {
+                    const itens = (cardapioEspecial.celiaco[cat] || []).filter(i => i);
+                    if (itens.length > 0) {
+                        doc.setFontSize(7); doc.setTextColor(...GREY);
+                        checkY(4); doc.text((nomesCatSafe[cat] || cat).toUpperCase(), mg + 6, y); y += 4;
+                        itens.forEach(item => { checkY(3); doc.text('• ' + item, mg + 10, y); y += 3; });
+                    }
+                });
+            }
+
+            if (cardapioEspecial.lactose && (questionario.restricoes?.lactose > 0)) {
+                y += 2;
+                doc.setFontSize(8); doc.setTextColor(...GOLD);
+                checkY(6); doc.text('CARDAPIO ESPECIAL - LACTOSE (SEM LEITE)', mg + 3, y); y += 5;
+                Object.keys(cardapioEspecial.lactose).forEach(cat => {
+                    const itens = (cardapioEspecial.lactose[cat] || []).filter(i => i);
+                    if (itens.length > 0) {
+                        doc.setFontSize(7); doc.setTextColor(...GREY);
+                        checkY(4); doc.text((nomesCatSafe[cat] || cat).toUpperCase(), mg + 6, y); y += 4;
+                        itens.forEach(item => { checkY(3); doc.text('• ' + item, mg + 10, y); y += 3; });
+                    }
+                });
+            }
+
+            if (cardapioEspecial.vegano && (questionario.veganos > 0)) {
+                y += 2;
+                doc.setFontSize(8); doc.setTextColor(...GOLD);
+                checkY(6); doc.text('CARDAPIO ESPECIAL - VEGANO', mg + 3, y); y += 5;
+                Object.keys(cardapioEspecial.vegano).forEach(cat => {
+                    const itens = (cardapioEspecial.vegano[cat] || []).filter(i => i);
+                    if (itens.length > 0) {
+                        doc.setFontSize(7); doc.setTextColor(...GREY);
+                        checkY(4); doc.text((nomesCatSafe[cat] || cat).toUpperCase(), mg + 6, y); y += 4;
+                        itens.forEach(item => { checkY(3); doc.text('• ' + item, mg + 10, y); y += 3; });
+                    }
+                });
+            }
+
+            if (cardapioEspecial.vegetariano && (questionario.vegetarianos > 0)) {
+                y += 2;
+                doc.setFontSize(8); doc.setTextColor(...GOLD);
+                checkY(6); doc.text('CARDAPIO ESPECIAL - VEGETARIANO', mg + 3, y); y += 5;
+                Object.keys(cardapioEspecial.vegetariano).forEach(cat => {
+                    const itens = (cardapioEspecial.vegetariano[cat] || []).filter(i => i);
+                    if (itens.length > 0) {
+                        doc.setFontSize(7); doc.setTextColor(...GREY);
+                        checkY(4); doc.text((nomesCatSafe[cat] || cat).toUpperCase(), mg + 6, y); y += 4;
+                        itens.forEach(item => { checkY(3); doc.text('• ' + item, mg + 10, y); y += 3; });
+                    }
+                });
+            }
+
+            y += 6;
+
+            // Seção Consumo
+            doc.setDrawColor(212, 175, 55);
+            doc.setLineWidth(0.5);
+            doc.line(mg, y, pw - mg, y); y += 5;
+
+            doc.setFontSize(12); doc.setTextColor(...GOLD);
+            checkY(8); doc.text('PREVISAO DE CONSUMO', mg, y); y += 8;
+            doc.setFontSize(8); doc.setTextColor(...GREY);
+            const vols1 = questionario.volumes || {};
+            const consumoLista = [
+                { n: 'Aperitivo',   g: vols1.aperitivo   ?? 120 },
+                { n: 'Proteina',    g: vols1.proteina    ?? 450 },
+                { n: 'Carboidrato', g: vols1.carboidrato ?? 200 },
+                { n: 'Salada',      g: vols1.salada      ?? 100 },
+                { n: 'Sobremesa',   g: vols1.sobremesa   ?? 100 }
+            ];
+            consumoLista.forEach(it => {
+                if (it.g > 0) { checkY(5); doc.text('  • ' + it.n + ': ' + it.g + 'g / pessoa', mg + 3, y); y += 5; }
+            });
+            const totalG = vols1.total || consumoLista.reduce((s, i) => s + (i.g||0), 0);
+            y += 3;
+            doc.setFontSize(10); doc.setTextColor(...GOLD);
+            checkY(6); doc.text('TOTAL: ' + totalG + 'g / pessoa', mg + 5, y); y += 12;
+
+            // Valor com destaque visual PREMIUM
+            const valorFinal = calcValorFinalAtual();
+            const valPessoa  = totalPessoas > 0 ? valorFinal / totalPessoas : 0;
+
+            // Seção de valor
+            y += 4;
+            doc.setDrawColor(212, 175, 55);
+            doc.setLineWidth(0.5);
+            doc.line(mg, y, pw - mg, y); y += 8;
+
+            // Caixa de destaque para valor final (melhorada)
+            doc.setDrawColor(212, 175, 55);
+            doc.setFillColor(212, 175, 55);
+            doc.setLineWidth(2);
+            doc.rect(mg + 5, y, pw - 2*mg - 10, 28, 'FD');
+
+            doc.setFontSize(11); doc.setTextColor(...DARK);
+            checkY(6); doc.text('VALOR TOTAL DA PROPOSTA', pw / 2, y + 4, { align: 'center' });
+            doc.setFontSize(20); doc.setTextColor(...DARK);
+            doc.setFont('Playfair Display', 'bold');
+            checkY(12); doc.text(brl(valorFinal), pw / 2, y + 14, { align: 'center' });
+            doc.setFont('Lora', 'normal');
+            y += 32;
+
+            // Valor por pessoa
+            doc.setFontSize(9); doc.setTextColor(...GOLD);
+            checkY(5); doc.text('Valor por pessoa: ' + brl(valPessoa), pw / 2, y, { align: 'center' }); y += 12;
+
+            // Condições com destaque
+            y += 4; // espaço antes da caixa de condições
+            doc.setDrawColor(212, 175, 55);
+            doc.setLineWidth(0.5);
+            doc.line(mg, y, pw - mg, y); y += 5;
+
+            doc.rect(mg - 2, y, pw - 2*mg + 4, 48);
+            y += 3;
+
+            doc.setFontSize(9); doc.setTextColor(...DARK);
+            checkY(8); doc.text('CONDICOES DE PAGAMENTO:', mg + 3, y); y += 5;
+            doc.setFontSize(8); doc.setTextColor(...DARK);
+            checkY(4); doc.text('• 50% no fechamento do contrato (sinal) | 50% no dia do evento, ate chegada combinada', mg + 5, y); y += 5;
+            checkY(4); doc.text('• O segundo pagamento é condicao imprescindivel para inicio do servico.', mg + 5, y); y += 5;
+            checkY(4); doc.text('• Alteracoes: qualquer pessoa adicional deve-se cobrar o valor por pessoa.', mg + 5, y); y += 5;
+            checkY(4); doc.text('• Cancelamento: 30+ dias = 100% reembolso | 10-29 dias = 50% + credito | menos de 15 dias = perda integral do sinal (50%), sem reembolso ou credito', mg + 5, y); y += 8;
+
+            doc.setFontSize(9); doc.setTextColor(...DARK);
+            checkY(5); doc.text('Validade da proposta: ' + valFmt, mg + 3, y); y += 10;
+
+            // Footer com separador
+            y += 2;
+            doc.setDrawColor(212, 175, 55);
+            doc.setLineWidth(0.5);
+            doc.line(mg + 10, y, pw - mg - 10, y); y += 10;
+
+            // Assinatura com dados do profissional (MOSTRA SÓ SE PREENCHIDO)
+            if (dadosProfissional?.nome) {
+                doc.setFontSize(9); doc.setTextColor(...GOLD);
+                checkY(5); doc.text(dadosProfissional.nome.toUpperCase(), pw/2, y, { align:'center' }); y += 4;
+            }
+
+            if (dadosProfissional?.profissao) {
+                doc.setFontSize(7); doc.setTextColor(...GREY);
+                checkY(4); doc.text(dadosProfissional.profissao, pw/2, y, { align:'center' }); y += 5;
+            }
+
+            // Contatos (só mostra o que foi preenchido)
+            const contatosPDFAssador = [];
+            if (dadosProfissional?.whatsapp) contatosPDFAssador.push(dadosProfissional.whatsapp);
+            if (dadosProfissional?.email) contatosPDFAssador.push(dadosProfissional.email);
+            if (dadosProfissional?.localizacao) contatosPDFAssador.push(dadosProfissional.localizacao);
+
+            if (contatosPDFAssador.length > 0) {
+                doc.setFontSize(7); doc.setTextColor(...GREY);
+                checkY(5); doc.text(contatosPDFAssador.join('  |  '), pw/2, y, { align:'center' }); y += 4;
+            }
+
+            if (dadosProfissional?.instagram) {
+                doc.setFontSize(7); doc.setTextColor(...GREY);
+                checkY(5); doc.text(dadosProfissional.instagram, pw/2, y, { align:'center' });
+            }
+        }
+
+        doc.save(nomeArq);
+    }
+
+    /* ───────────────────────────────────────────
+       HELPERS
+    ─────────────────────────────────────────── */
+    const nomesRefeicaoSafe = {
+        cafe: 'Cafe da Manha', almoco: 'Almoco', lanche: 'Lanche/Petisco', jantar: 'Jantar'
+    };
+    const nomesCatSafe = {
+        aperitivo: 'Aperitivos', proteina: 'Proteinas',
+        carboidrato: 'Carboidratos', salada: 'Saladas', sobremesa: 'Sobremesas'
+    };
+
+    function brl(v)   { return 'R$ ' + (v || 0).toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.'); }
+    function esc(t)   { return (t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+    function setText(id, txt) { const el = document.getElementById(id); if (el) el.textContent = txt; }
+
+    function docInfoItem(lbl, val) {
+        return '<div class="doc-info-item"><div class="lbl">' + lbl + '</div><div class="val">' + esc(val) + '</div></div>';
+    }
+    function dcInfoItem(lbl, val) {
+        return '<div class="dc-info-item"><div class="dc-lbl">' + lbl + '</div><div class="dc-val">' + esc(val) + '</div></div>';
+    }
+    function linha2(lbl, val) {
+        return '<div class="doc-linha-custo"><span>' + lbl + '</span><strong>' + val + '</strong></div>';
+    }
+
+    window.addEventListener('load', carregarDados);
+</script>
+</body>
+</html>

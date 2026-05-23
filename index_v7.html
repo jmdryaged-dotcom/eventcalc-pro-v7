@@ -1,0 +1,1689 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EventCalc Pro v7 - Sistema Profissional de Orçamento para Eventos</title>
+    <!-- 🔐 Sistema de Expiração Automática -->
+    <script src="sistema-expiracao.js"></script>
+    <!-- 📄 jsPDF para geração de PDFs -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Lora:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --dark-bg: #0a0a0a;
+            --dark-surface: #1a1a1a;
+            --dark-card: #242424;
+            --gold-light: #d4af37;
+            --red-primary: #c41e3a;
+            --red-dark: #8b1428;
+            --border-gold: rgba(212,175,55,0.3);
+            --text-primary: #ffffff;
+            --text-secondary: #d0d0d0;
+        }
+        
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Lora', serif;
+            background: var(--dark-bg);
+            color: var(--text-primary);
+        }
+        
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+        
+        header {
+            background: linear-gradient(180deg, rgba(26,26,26,0.95) 0%, rgba(10,10,10,0.8) 100%);
+            border-bottom: 1px solid var(--border-gold);
+            padding: 20px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        nav { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+        }
+        
+        .logo { 
+            font-family: 'Playfair Display', serif; 
+            font-size: 1.8rem; 
+            color: var(--gold-light); 
+            font-weight: 900; 
+        }
+        
+        nav a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            margin-right: 30px;
+            transition: 0.3s;
+        }
+        
+        nav a:hover {
+            color: var(--gold-light);
+        }
+        
+        .hero {
+            padding: 100px 0;
+            text-align: center;
+            background: linear-gradient(135deg, rgba(36,36,36,0.3) 0%, rgba(26,26,26,0.3) 100%);
+        }
+        
+        .hero h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 4rem;
+            margin-bottom: 20px;
+            color: var(--gold-light);
+        }
+        
+        .hero .subtitle { 
+            font-size: 1.4rem; 
+            color: var(--text-secondary); 
+            margin-bottom: 30px; 
+        }
+        
+        .hero .description { 
+            font-size: 1.1rem; 
+            color: #909090; 
+            max-width: 700px; 
+            margin: 0 auto 40px; 
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 16px 40px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin: 0 10px;
+            border: 2px solid;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--red-primary), var(--red-dark));
+            color: white;
+            border-color: var(--red-primary);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(196,30,58,0.5);
+        }
+        
+        .btn-secondary {
+            background: transparent;
+            color: var(--gold-light);
+            border-color: var(--gold-light);
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(212,175,55,0.1);
+        }
+        
+        .features { padding: 100px 0; }
+        
+        .section-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.8rem;
+            text-align: center;
+            margin-bottom: 60px;
+            color: var(--gold-light);
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 40px;
+        }
+        
+        .feature-card {
+            background: linear-gradient(135deg, rgba(36,36,36,0.5) 0%, rgba(26,26,26,0.5) 100%);
+            border: 1px solid var(--border-gold);
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        
+        .feature-card:hover {
+            border-color: var(--gold-light);
+            transform: translateY(-10px);
+        }
+        
+        .feature-icon { font-size: 3.5rem; margin-bottom: 20px; }
+        
+        .feature-card h3 {
+            font-family: 'Playfair Display', serif;
+            color: var(--gold-light);
+            margin-bottom: 15px;
+        }
+        
+        .feature-card p { color: var(--text-secondary); }
+        
+        .profissional-section {
+            padding: 100px 0;
+            background: linear-gradient(135deg, rgba(36,36,36,0.3) 0%, rgba(26,26,26,0.3) 100%);
+        }
+        
+        .profissional-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+            margin-bottom: 60px;
+        }
+        
+        .foto-box {
+            text-align: center;
+        }
+        
+        .foto-container {
+            width: 300px;
+            height: 300px;
+            margin: 0 auto;
+            border: 3px solid var(--border-gold);
+            border-radius: 12px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, rgba(212,175,55,0.2), rgba(196,30,58,0.2));
+        }
+        
+        .foto-placeholder {
+            text-align: center;
+            color: #909090;
+        }
+        
+        .foto-placeholder-icon {
+            font-size: 4rem;
+            margin-bottom: 10px;
+        }
+        
+        .foto-placeholder p {
+            font-size: 0.9rem;
+            color: #707070;
+        }
+        
+        .profissional-info {
+            color: var(--text-secondary);
+        }
+        
+        .profissional-info h3 {
+            font-family: 'Playfair Display';
+            font-size: 2rem;
+            color: var(--gold-light);
+            margin-bottom: 15px;
+        }
+        
+        .profissao {
+            font-size: 1.1rem;
+            color: var(--gold-light);
+            margin-bottom: 20px;
+        }
+        
+        .curriculo-box {
+            background: rgba(212,175,55,0.1);
+            border-left: 4px solid var(--gold-light);
+            padding: 20px;
+            border-radius: 6px;
+            margin-bottom: 30px;
+        }
+        
+        .curriculo-box h4 {
+            color: var(--gold-light);
+            margin-bottom: 15px;
+            font-family: 'Playfair Display';
+            font-size: 1.1rem;
+        }
+        
+        .curriculo-box p {
+            margin-bottom: 12px;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+        
+        .contatos-box {
+            background: rgba(196,30,58,0.1);
+            border-left: 4px solid var(--red-primary);
+            padding: 20px;
+            border-radius: 6px;
+        }
+        
+        .contatos-box h4 {
+            color: var(--red-primary);
+            margin-bottom: 15px;
+            font-family: 'Playfair Display';
+            font-size: 1.1rem;
+        }
+        
+        .contatos-box p {
+            margin-bottom: 10px;
+            font-size: 0.95rem;
+        }
+        
+        .contato-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        
+        .contato-emoji {
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+        
+        .contato-link {
+            color: var(--gold-light);
+            text-decoration: none;
+        }
+        
+        .contato-link:hover {
+            text-decoration: underline;
+        }
+        
+        .pricing {
+            padding: 100px 0;
+            background: linear-gradient(135deg, rgba(36,36,36,0.3) 0%, rgba(26,26,26,0.3) 100%);
+        }
+        
+        .pricing-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 40px;
+        }
+        
+        .pricing-card {
+            background: var(--dark-card);
+            border: 2px solid var(--border-gold);
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .pricing-card.featured {
+            border-color: var(--red-primary);
+            transform: scale(1.05);
+        }
+        
+        .pricing-card h3 {
+            font-family: 'Playfair Display', serif;
+            margin-bottom: 20px;
+            color: var(--gold-light);
+        }
+        
+        .pricing-card .price {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            color: var(--gold-light);
+            margin-bottom: 10px;
+        }
+        
+        .pricing-card ul {
+            list-style: none;
+            margin-bottom: 30px;
+            text-align: left;
+        }
+        
+        .pricing-card li {
+            color: var(--text-secondary);
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(212,175,55,0.1);
+        }
+        
+        footer {
+            background: var(--dark-card);
+            border-top: 1px solid var(--border-gold);
+            padding: 50px 0;
+            text-align: center;
+            color: #909090;
+        }
+        
+        /* ── MODO EDIÇÃO ── */
+        .edit-mode-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--red-primary), var(--red-dark));
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 24px rgba(196,30,58,0.4);
+            transition: all 0.3s;
+            z-index: 200;
+        }
+
+        .edit-mode-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 12px 32px rgba(196,30,58,0.6);
+        }
+
+        .edit-mode-btn.active {
+            background: linear-gradient(135deg, var(--gold-light), #b8952a);
+            color: #0a0a0a;
+        }
+
+        .edit-panel {
+            display: none;
+            position: fixed;
+            bottom: 100px;
+            right: 30px;
+            background: var(--dark-card);
+            border: 2px solid var(--border-gold);
+            border-radius: 12px;
+            padding: 20px;
+            min-width: 300px;
+            max-height: 70vh;
+            overflow-y: auto;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.8);
+            z-index: 201;
+        }
+
+        .edit-panel.show { display: block; }
+
+        .edit-panel h4 {
+            color: var(--gold-light);
+            margin-bottom: 12px;
+            font-size: 0.95rem;
+        }
+
+        .edit-field {
+            margin-bottom: 16px;
+        }
+
+        .edit-field label {
+            display: block;
+            color: #c0c0c0;
+            font-size: 0.8rem;
+            margin-bottom: 4px;
+            font-weight: 600;
+        }
+
+        .edit-field input,
+        .edit-field textarea {
+            width: 100%;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(212,175,55,0.15);
+            color: white;
+            padding: 8px 10px;
+            border-radius: 4px;
+            font-family: 'Lora', serif;
+            font-size: 0.85rem;
+        }
+
+        .edit-field textarea {
+            resize: vertical;
+            min-height: 70px;
+            max-height: 120px;
+        }
+
+        .edit-field input:focus,
+        .edit-field textarea:focus {
+            outline: none;
+            border-color: var(--gold-light);
+            background: rgba(212,175,55,0.08);
+        }
+
+        .edit-file-input {
+            display: none;
+        }
+
+        .upload-photo-btn {
+            display: inline-block;
+            background: rgba(212,175,55,0.15);
+            color: var(--gold-light);
+            border: 1px solid var(--border-gold);
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            width: 100%;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .upload-photo-btn:hover {
+            background: rgba(212,175,55,0.25);
+            border-color: var(--gold-light);
+        }
+
+        .edit-buttons {
+            display: flex;
+            gap: 8px;
+            margin-top: 16px;
+        }
+
+        .edit-btn-save,
+        .edit-btn-cancel {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: all 0.3s;
+        }
+
+        .edit-btn-save {
+            background: linear-gradient(135deg, var(--gold-light), #b8952a);
+            color: #0a0a0a;
+        }
+
+        .edit-btn-save:hover {
+            transform: translateY(-2px);
+        }
+
+        .edit-btn-cancel {
+            background: rgba(196,30,58,0.2);
+            color: var(--red-primary);
+            border: 1px solid rgba(196,30,58,0.35);
+        }
+
+        .edit-btn-cancel:hover {
+            background: rgba(196,30,58,0.35);
+        }
+
+        .foto-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* ── MODAL DE LEADS ── */
+        .leads-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 10, 10, 0.9);
+            z-index: 500;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .leads-modal.active {
+            display: flex;
+        }
+
+        .leads-modal-content {
+            background: var(--dark-card);
+            border: 2px solid var(--border-gold);
+            border-radius: 12px;
+            padding: 40px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9);
+        }
+
+        .leads-modal-close {
+            float: right;
+            font-size: 1.5rem;
+            color: var(--gold-light);
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 0;
+            margin-top: -10px;
+        }
+
+        .leads-modal-close:hover {
+            color: var(--red-primary);
+        }
+
+        .leads-modal h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            color: var(--gold-light);
+            margin-bottom: 10px;
+            clear: both;
+        }
+
+        .leads-modal-subtitle {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin-bottom: 30px;
+        }
+
+        .leads-form-group {
+            margin-bottom: 20px;
+        }
+
+        .leads-form-group label {
+            display: block;
+            color: var(--gold-light);
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .leads-form-group input {
+            width: 100%;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 6px;
+            color: white;
+            font-family: 'Lora', serif;
+            font-size: 0.95rem;
+            transition: all 0.3s;
+        }
+
+        .leads-form-group input:focus {
+            outline: none;
+            border-color: var(--gold-light);
+            background: rgba(212, 175, 55, 0.1);
+        }
+
+        .leads-form-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 30px;
+        }
+
+        .leads-btn-submit,
+        .leads-btn-cancel {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .leads-btn-submit {
+            background: linear-gradient(135deg, var(--gold-light), #b8952a);
+            color: #0a0a0a;
+        }
+
+        .leads-btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(212, 175, 55, 0.4);
+        }
+
+        .leads-btn-cancel {
+            background: transparent;
+            color: var(--gold-light);
+            border: 1px solid var(--border-gold);
+        }
+
+        .leads-btn-cancel:hover {
+            background: rgba(212, 175, 55, 0.1);
+        }
+
+        .leads-success-message {
+            display: none;
+            background: rgba(76, 175, 80, 0.2);
+            border-left: 4px solid #4caf50;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            color: #c8e6c9;
+            text-align: center;
+        }
+
+        .leads-success-message.show {
+            display: block;
+        }
+
+        /* CTA para leads no hero */
+        .leads-cta {
+            margin-top: 15px;
+        }
+
+        .leads-cta a {
+            display: inline-block;
+            padding: 12px 28px;
+            background: rgba(212, 175, 55, 0.15);
+            color: var(--gold-light);
+            border: 2px solid var(--gold-light);
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .leads-cta a:hover {
+            background: rgba(212, 175, 55, 0.25);
+            transform: translateY(-3px);
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2.5rem; }
+            .pricing-card.featured { transform: scale(1); }
+            .profissional-grid { grid-template-columns: 1fr; }
+            .edit-panel { min-width: 280px; right: 10px; bottom: 90px; }
+            .leads-modal-content { padding: 30px 20px; }
+        }
+    </style>
+</head>
+<body>
+    <!-- HEADER -->
+    <header>
+        <div class="container">
+            <nav>
+                <div class="logo">EventCalc Pro v7</div>
+                <div style="flex: 1;"></div>
+                <a href="#recursos">Recursos</a>
+                <a href="#profissional">Profissional</a>
+                <a href="#precos">Preços</a>
+                <a href="event_calculator_pro_v7_questionario.html" class="btn btn-primary" style="margin: 0;">Começar</a>
+            </nav>
+        </div>
+    </header>
+    
+    <!-- HERO -->
+    <section class="hero">
+        <div class="container">
+            <h1>EventCalc Pro v7</h1>
+            <p class="subtitle">Sistema Profissional de Orçamento para Eventos</p>
+            <p class="description">
+                Crie orçamentos IMPECÁVEIS com volumes customizáveis, cálculos de custos completos,
+                previsão de consumo e propostas que conquistam clientes.
+            </p>
+            <div>
+                <a href="event_calculator_pro_v7_questionario.html" class="btn btn-primary">Começar Agora</a>
+                <a href="#precos" class="btn btn-secondary">Ver Planos</a>
+            </div>
+
+            <!-- CTA para Receber Tutorial -->
+            <div class="leads-cta" style="margin-top: 25px;">
+                <a href="#" onclick="abrirModalLeads(); return false;">📚 Receber Tutorial Gratuito</a>
+            </div>
+        </div>
+    </section>
+    
+    <!-- FEATURES -->
+    <section class="features" id="recursos">
+        <div class="container">
+            <h2 class="section-title">Recursos Profissionais</h2>
+            
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">📋</div>
+                    <h3>Questionário Inteligente</h3>
+                    <p>10 perguntas + volumes customizáveis por tipo de assador para máxima precisão.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">🍖</div>
+                    <h3>Cardápio Dinâmico</h3>
+                    <p>Crie cardápios 100% personalizados em 5 categorias diferentes.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3>Tabela de Volumes Avançada</h3>
+                    <p>3 colunas integradas: Compra | Resumo | Meta com cálculos automáticos de perda.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">💰</div>
+                    <h3>Cálculo de Custos Completo</h3>
+                    <p>Matéria-prima, carvão, temperos, mão de obra, impostos e lucro em um só lugar.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">👥</div>
+                    <h3>Previsão de Consumo</h3>
+                    <p>Mostre g/cabeça por item e total em kg - totalmente customizável.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">📄</div>
+                    <h3>PDFs Profissionais</h3>
+                    <p>2 relatórios (Assador interno + Proposta Cliente) com exportação perfeita.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- BOTÃO EDIÇÃO FLUTUANTE -->
+    <button class="edit-mode-btn" id="editModeBtn" onclick="toggleEditMode()" title="Modo Edição">✏️</button>
+
+    <!-- PAINEL DE EDIÇÃO -->
+    <div class="edit-panel" id="editPanel">
+        <h4>Editar Informações do Profissional</h4>
+
+        <div class="edit-field">
+            <label>Foto</label>
+            <input type="file" id="fotoFile" class="edit-file-input" accept="image/*" onchange="previewFoto()">
+            <button class="upload-photo-btn" onclick="document.getElementById('fotoFile').click()">📸 Selecionar Foto</button>
+            <small style="color:#666;display:block;margin-top:6px;">JPG, PNG (300x300px recomendado)</small>
+        </div>
+
+        <div class="edit-field">
+            <label>Nome</label>
+            <input type="text" id="editNome" placeholder="Seu nome completo">
+        </div>
+
+        <div class="edit-field">
+            <label>Profissões (separar por •)</label>
+            <input type="text" id="editProfissao" placeholder="Ex: Médico Veterinário • Mestre Churrasqueiro">
+        </div>
+
+        <div class="edit-field">
+            <label>Currículo / Biografia</label>
+            <textarea id="editCurriculo" placeholder="Suas experiências, formações, certificados..."></textarea>
+        </div>
+
+        <div class="edit-field">
+            <label>WhatsApp</label>
+            <input type="text" id="editWhatsapp" placeholder="+55 47 99668-1010">
+        </div>
+
+        <div class="edit-field">
+            <label>Email</label>
+            <input type="email" id="editEmail" placeholder="seu.email@exemplo.com">
+        </div>
+
+        <div class="edit-field">
+            <label>Localização</label>
+            <input type="text" id="editLocalizacao" placeholder="Cidade, Estado">
+        </div>
+
+        <div class="edit-field">
+            <label>Instagram</label>
+            <input type="text" id="editInstagram" placeholder="@seu.usuario">
+        </div>
+
+        <hr style="border:none;border-top:1px solid rgba(212,175,55,0.2);margin:16px 0;">
+
+        <div class="edit-field">
+            <label>💳 Dados para Pagamento</label>
+            <small style="color:#666;display:block;margin-bottom:10px;">Aparecerão no PDF da Proposta do Cliente (deixe vazio se não quiser exibir)</small>
+        </div>
+
+        <div class="edit-field">
+            <label>Tipo de Chave PIX</label>
+            <select id="editPixTipo" style="width:100%;padding:8px;background:#1a1a1a;border:1px solid rgba(212,175,55,0.3);color:white;border-radius:4px;font-family:'Lora';">
+                <option value="">— Selecione —</option>
+                <option value="CPF/CNPJ">CPF/CNPJ</option>
+                <option value="E-mail">E-mail</option>
+                <option value="Telefone">Telefone</option>
+                <option value="Chave Aleatória">Chave Aleatória</option>
+            </select>
+        </div>
+
+        <div class="edit-field">
+            <label>Chave PIX</label>
+            <input type="text" id="editPixChave" placeholder="Ex: 123.456.789-00 ou seu@email.com">
+        </div>
+
+        <div class="edit-field">
+            <label>Banco</label>
+            <input type="text" id="editBancoNome" placeholder="Ex: Banco do Brasil, Nubank, Itaú...">
+        </div>
+
+        <div class="edit-field">
+            <label>Agência</label>
+            <input type="text" id="editBancoAgencia" placeholder="Ex: 1234 ou 1234-5">
+        </div>
+
+        <div class="edit-field">
+            <label>Conta</label>
+            <input type="text" id="editBancoConta" placeholder="Ex: 56789-0">
+        </div>
+
+        <div class="edit-field">
+            <label>Titular da Conta</label>
+            <input type="text" id="editBancoTitular" placeholder="Nome completo do titular">
+        </div>
+
+        <hr style="border:none;border-top:1px solid rgba(212,175,55,0.2);margin:16px 0;">
+
+        <div class="edit-field">
+            <label>📷 Imagens da Proposta</label>
+            <small style="color:#666;display:block;margin-bottom:10px;">Essas imagens aparecerão no relatório cliente</small>
+        </div>
+
+        <div class="edit-field">
+            <label>Foto Profissional</label>
+            <input type="file" id="imgProfissional" class="edit-file-input" accept="image/*" onchange="previewImagem('imgProfissional')">
+            <button class="upload-photo-btn" onclick="document.getElementById('imgProfissional').click()">📸 Carregar</button>
+            <small style="color:#666;display:block;margin-top:6px;">Para footer/assinatura</small>
+        </div>
+
+        <div class="edit-field">
+            <label>Foto de Carnes/Pratos</label>
+            <input type="file" id="imgCarnes" class="edit-file-input" accept="image/*" onchange="previewImagem('imgCarnes')">
+            <button class="upload-photo-btn" onclick="document.getElementById('imgCarnes').click()">🍖 Carregar</button>
+            <small style="color:#666;display:block;margin-top:6px;">Destaque visual principal</small>
+        </div>
+
+        <div class="edit-field">
+            <label>Foto de Ambiente/Local</label>
+            <input type="file" id="imgAmbiente" class="edit-file-input" accept="image/*" onchange="previewImagem('imgAmbiente')">
+            <button class="upload-photo-btn" onclick="document.getElementById('imgAmbiente').click()">🏠 Carregar</button>
+            <small style="color:#666;display:block;margin-top:6px;">Churrasqueira, local de trabalho</small>
+        </div>
+
+        <div class="edit-field">
+            <label>Foto em Ação</label>
+            <input type="file" id="imgAcao" class="edit-file-input" accept="image/*" onchange="previewImagem('imgAcao')">
+            <button class="upload-photo-btn" onclick="document.getElementById('imgAcao').click()">👨‍🍳 Carregar</button>
+            <small style="color:#666;display:block;margin-top:6px;">Preparando/trabalhando</small>
+        </div>
+
+        <div class="edit-buttons">
+            <button class="edit-btn-save" onclick="salvarEdicoes()">💾 Salvar</button>
+            <button class="edit-btn-cancel" onclick="toggleEditMode()">✕ Cancelar</button>
+        </div>
+    </div>
+
+    <!-- PROFISSIONAL -->
+    <section class="profissional-section" id="profissional">
+        <div class="container">
+            <h2 class="section-title">Sobre o Profissional</h2>
+            
+            <div class="profissional-grid">
+                <!-- FOTO -->
+                <div class="foto-box">
+                    <div class="foto-container" id="fotoContainer">
+                        <div class="foto-placeholder">
+                            <div class="foto-placeholder-icon">📸</div>
+                            <p>Sua foto aqui</p>
+                            <p style="font-size: 0.75rem; margin-top: 5px;">(300x300px)</p>
+                        </div>
+                    </div>
+                    <p style="color: #909090; margin-top: 20px; font-size: 0.85rem;">Clique no ✏️ para editar</p>
+                </div>
+
+                <!-- INFO -->
+                <div class="profissional-info">
+                    <h3 id="displayNome">Juliomar Meskiu</h3>
+                    <p class="profissao" id="displayProfissao">Médico Veterinário • Mestre Churrasqueiro • Parrilleiro • Pitmaster</p>
+
+                    <div class="curriculo-box">
+                        <h4>Currículo Profissional</h4>
+                        <div id="displayCurriculo">
+                            <p>🎓 Formação em Medicina Veterinária - especialização em processamento e qualidade de carnes premium</p>
+                            <p>🏆 Mestre Churrasqueiro - Certificado pela Associação Brasileira de Churrascarias</p>
+                            <p>🔥 Especialista em Técnicas Tradicionais e Modernas de Churrasco (Defumação, Dry Aged, BBQ)</p>
+                            <p>🎯 Curador do evento "Onda & Brasa" - Principal evento de churrasco da região com mais de 2.000 participantes</p>
+                            <p>👨‍🍳 Mais de 15 anos de experiência em eventos corporativos, privados e sociais</p>
+                            <p>📊 Consultor em qualidade de carnes, técnicas culinárias e gestão de eventos</p>
+                        </div>
+                    </div>
+
+                    <div class="contatos-box">
+                        <h4>Contatos e Redes</h4>
+                        <div class="contato-item">
+                            <span class="contato-emoji">📱</span>
+                            <span><strong>WhatsApp:</strong> <a href="https://wa.me/5547996681010" class="contato-link" id="linkWhatsapp">+55 47 99668-1010</a></span>
+                        </div>
+                        <div class="contato-item">
+                            <span class="contato-emoji">📧</span>
+                            <span><strong>Email:</strong> <a href="mailto:jm.dryaged@gmail.com" class="contato-link" id="linkEmail">jm.dryaged@gmail.com</a></span>
+                        </div>
+                        <div class="contato-item">
+                            <span class="contato-emoji">📍</span>
+                            <span><strong>Localização:</strong> <span id="displayLocalizacao">Itapema, SC</span></span>
+                        </div>
+                        <div class="contato-item">
+                            <span class="contato-emoji">📱</span>
+                            <span><strong>Instagram:</strong> <a href="https://instagram.com/churrascojm" class="contato-link" id="linkInstagram">@churrascojm</a></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- PRICING -->
+    <section class="pricing" id="precos">
+        <div class="container">
+            <h2 class="section-title">Planos de Preço</h2>
+            
+            <div class="pricing-cards">
+                <div class="pricing-card">
+                    <h3>Teste Grátis</h3>
+                    <div class="price">R$ 0</div>
+                    <p style="color: #909090; margin-bottom: 30px;">7 dias de acesso total</p>
+                    <ul>
+                        <li>✓ Todas as funcionalidades v7</li>
+                        <li>✓ Até 10 orçamentos</li>
+                        <li>✓ Exportar PDFs (Assador + Cliente)</li>
+                        <li>✓ Histórico de 2 últimos eventos</li>
+                    </ul>
+                    <a href="event_calculator_pro_v7_questionario.html" class="btn btn-primary">Começar Grátis</a>
+                </div>
+                
+                <div class="pricing-card featured">
+                    <h3>Profissional</h3>
+                    <div class="price">R$ 97</div>
+                    <p style="color: #909090; margin-bottom: 30px;">por mês</p>
+                    <ul>
+                        <li>✓ Acesso ilimitado</li>
+                        <li>✓ Orçamentos ilimitados</li>
+                        <li>✓ Histórico completo de eventos</li>
+                        <li>✓ Análise de preços e tendências</li>
+                        <li>✓ Suporte por email e WhatsApp</li>
+                        <li>✓ Atualizações contínuas</li>
+                    </ul>
+                    <a href="event_calculator_pro_v7_questionario.html" class="btn btn-primary">Assinar Agora</a>
+                </div>
+                
+                <div class="pricing-card">
+                    <h3>Customizada</h3>
+                    <div class="price">A Consultar</div>
+                    <p style="color: #909090; margin-bottom: 30px;">Solução sob medida</p>
+                    <ul>
+                        <li>✓ Customizações completas</li>
+                        <li>✓ Integração com seu sistema</li>
+                        <li>✓ Suporte 24/7 dedicado</li>
+                        <li>✓ Treinamento especializado</li>
+                        <li>✓ Consultoria incluída</li>
+                    </ul>
+                    <a href="https://wa.me/5547996681010" class="btn btn-primary">Consultar</a>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- MODAL DE COLETA DE LEADS -->
+    <div class="leads-modal" id="leadsModal">
+        <div class="leads-modal-content">
+            <button class="leads-modal-close" onclick="fecharModalLeads()">&times;</button>
+
+            <h2>📚 Receber Tutorial Gratuito</h2>
+            <p class="leads-modal-subtitle">Compartilhe seus dados e receba nosso tutorial exclusivo + proposta no seu email</p>
+
+            <div class="leads-success-message" id="leadsSuccessMsg">
+                ✅ Sucesso! Confira seu email por um PDF com o tutorial completo + uma proposta personalizada!
+            </div>
+
+            <form id="leadsForm" onsubmit="enviarLeads(event)">
+                <div class="leads-form-group">
+                    <label for="leadsNome">Nome Completo *</label>
+                    <input
+                        type="text"
+                        id="leadsNome"
+                        placeholder="Seu nome completo"
+                        required
+                    >
+                </div>
+
+                <div class="leads-form-group">
+                    <label for="leadsEmail">Email *</label>
+                    <input
+                        type="email"
+                        id="leadsEmail"
+                        placeholder="seu@email.com"
+                        required
+                    >
+                </div>
+
+                <div class="leads-form-group">
+                    <label for="leadsWhatsapp">WhatsApp *</label>
+                    <input
+                        type="tel"
+                        id="leadsWhatsapp"
+                        placeholder="+55 47 99668-1010"
+                        required
+                    >
+                </div>
+
+                <div class="leads-form-buttons">
+                    <button type="submit" class="leads-btn-submit">Enviar Dados</button>
+                    <button type="button" class="leads-btn-cancel" onclick="fecharModalLeads()">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer>
+        <div class="container">
+            <p><strong>EventCalc Pro v7</strong> - Sistema Profissional de Orçamento para Eventos</p>
+            <p style="margin-top: 10px; color: #909090;">Desenvolvido por profissionais, para profissionais que levam a sério</p>
+            <p style="margin-top: 20px; font-size: 0.85rem;">© 2026 EventCalc Pro. Todos os direitos reservados.</p>
+        </div>
+    </footer>
+
+    <script>
+        // ── VARIÁVEIS GLOBAIS ──
+        // ⚠️ DADOS COMEÇAM VAZIOS - Cada assador preenche seus próprios dados
+        let dadosProfissional = {
+            nome: '',
+            profissao: '',
+            curriculo: '',
+            whatsapp: '',
+            email: '',
+            localizacao: '',
+            instagram: '',
+            foto: null,
+            imgProfissional: null,
+            imgCarnes: null,
+            imgAmbiente: null,
+            imgAcao: null,
+            // ── DADOS DE PAGAMENTO ──
+            pixTipo: '',
+            pixChave: '',
+            bancoNome: '',
+            bancoAgencia: '',
+            bancoConta: '',
+            bancoTitular: ''
+        };
+
+        // ── CARREGAR DADOS DO LOCALSTORAGE ──
+        function carregarDados() {
+            const salvo = localStorage.getItem('eventCalcProfissional');
+            if (salvo) {
+                try {
+                    dadosProfissional = JSON.parse(salvo);
+                } catch(e) { console.error('Erro ao carregar dados:', e); }
+            }
+            renderizarDados();
+        }
+
+        // ── RENDERIZAR DADOS NA PÁGINA ──
+        function renderizarDados() {
+            // ⚠️ Aviso se dados estão vazios
+            const avisoVazio = document.getElementById('avisoPreenchimento');
+            if (!dadosProfissional.nome || !dadosProfissional.email) {
+                if (avisoVazio) avisoVazio.style.display = 'block';
+            } else {
+                if (avisoVazio) avisoVazio.style.display = 'none';
+            }
+
+            document.getElementById('displayNome').textContent = dadosProfissional.nome || '(Preencha seu nome)';
+            document.getElementById('displayProfissao').textContent = dadosProfissional.profissao || '(Preencha sua profissão)';
+
+            // Renderizar currículo com quebras de linha (seguro contra XSS)
+            const displayCurriculo = document.getElementById('displayCurriculo');
+            displayCurriculo.textContent = ''; // Limpar
+            dadosProfissional.curriculo
+                .split('\n')
+                .filter(l => l.trim())
+                .forEach(l => {
+                    const p = document.createElement('p');
+                    p.textContent = l;
+                    displayCurriculo.appendChild(p);
+                });
+
+            // Contatos
+            const whatsappNum = dadosProfissional.whatsapp.replace(/\D/g, '');
+            document.getElementById('linkWhatsapp').href = 'https://wa.me/' + whatsappNum;
+            document.getElementById('linkWhatsapp').textContent = dadosProfissional.whatsapp;
+
+            document.getElementById('linkEmail').href = 'mailto:' + dadosProfissional.email;
+            document.getElementById('linkEmail').textContent = dadosProfissional.email;
+
+            document.getElementById('displayLocalizacao').textContent = dadosProfissional.localizacao;
+
+            const instaHandle = dadosProfissional.instagram.startsWith('@')
+                ? dadosProfissional.instagram.substring(1)
+                : dadosProfissional.instagram;
+            document.getElementById('linkInstagram').href = 'https://instagram.com/' + instaHandle;
+            document.getElementById('linkInstagram').textContent = dadosProfissional.instagram;
+
+            // Renderizar foto (seguro contra XSS)
+            const fotoContainer = document.getElementById('fotoContainer');
+            fotoContainer.textContent = ''; // Limpar
+
+            if (dadosProfissional.foto) {
+                const img = document.createElement('img');
+                img.src = dadosProfissional.foto;
+                img.alt = 'Foto do profissional';
+                fotoContainer.appendChild(img);
+            } else {
+                const placeholder = document.createElement('div');
+                placeholder.className = 'foto-placeholder';
+                placeholder.innerHTML = '<div class="foto-placeholder-icon">📸</div><p>Sua foto aqui</p><p style="font-size: 0.75rem; margin-top: 5px;">(300x300px)</p>';
+                fotoContainer.appendChild(placeholder);
+            }
+        }
+
+        // ── MODO EDIÇÃO ──
+        function toggleEditMode() {
+            const btn = document.getElementById('editModeBtn');
+            const panel = document.getElementById('editPanel');
+
+            if (btn.classList.contains('active')) {
+                btn.classList.remove('active');
+                panel.classList.remove('show');
+            } else {
+                btn.classList.add('active');
+                panel.classList.add('show');
+                carregarCamposEdicao();
+            }
+        }
+
+        function carregarCamposEdicao() {
+            document.getElementById('editNome').value = dadosProfissional.nome;
+            document.getElementById('editProfissao').value = dadosProfissional.profissao;
+            document.getElementById('editCurriculo').value = dadosProfissional.curriculo;
+            document.getElementById('editWhatsapp').value = dadosProfissional.whatsapp;
+            document.getElementById('editEmail').value = dadosProfissional.email;
+            document.getElementById('editLocalizacao').value = dadosProfissional.localizacao;
+            document.getElementById('editInstagram').value = dadosProfissional.instagram;
+
+            // Dados de pagamento
+            document.getElementById('editPixTipo').value = dadosProfissional.pixTipo || '';
+            document.getElementById('editPixChave').value = dadosProfissional.pixChave || '';
+            document.getElementById('editBancoNome').value = dadosProfissional.bancoNome || '';
+            document.getElementById('editBancoAgencia').value = dadosProfissional.bancoAgencia || '';
+            document.getElementById('editBancoConta').value = dadosProfissional.bancoConta || '';
+            document.getElementById('editBancoTitular').value = dadosProfissional.bancoTitular || '';
+
+            // Carregar as imagens já salvas (mostrar preview)
+            if (dadosProfissional.foto) {
+                document.getElementById('fotoFile').value = '';
+            }
+            if (dadosProfissional.imgProfissional) {
+                document.getElementById('imgProfissional').value = '';
+            }
+            if (dadosProfissional.imgCarnes) {
+                document.getElementById('imgCarnes').value = '';
+            }
+            if (dadosProfissional.imgAmbiente) {
+                document.getElementById('imgAmbiente').value = '';
+            }
+            if (dadosProfissional.imgAcao) {
+                document.getElementById('imgAcao').value = '';
+            }
+        }
+
+        /* ── COMPRESSÃO DE IMAGENS ── */
+        function comprimirImagem(base64, qualidade = 0.6, maxWidth = 1920, maxHeight = 1080) {
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.onload = function() {
+                    // Calcular novo tamanho
+                    let width = img.width;
+                    let height = img.height;
+                    if (width > maxWidth || height > maxHeight) {
+                        const ratio = Math.min(maxWidth / width, maxHeight / height);
+                        width = Math.round(width * ratio);
+                        height = Math.round(height * ratio);
+                    }
+
+                    // Comprimir com canvas
+                    const canvas = document.createElement('canvas');
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    const comprimida = canvas.toDataURL('image/jpeg', qualidade);
+
+                    // Verificar tamanho
+                    const tamanhoMB = (comprimida.length / 1024 / 1024).toFixed(2);
+                    if (tamanhoMB > 0.2) {
+                        // Se ainda maior que 200KB, comprimir mais
+                        resolve(comprimirImagem(comprimida, qualidade - 0.1, maxWidth, maxHeight));
+                    } else {
+                        resolve(comprimida);
+                    }
+                };
+                img.src = base64;
+            });
+        }
+
+        function previewFoto() {
+            const fileInput = document.getElementById('fotoFile');
+            const file = fileInput.files[0];
+
+            if (file && file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = new Image();
+                    img.onload = function() {
+                        // Comprimir imagem
+                        comprimirImagem(e.target.result).then(comprimida => {
+                            dadosProfissional.foto = comprimida;
+                            renderizarDados();
+
+                            // Feedback visual
+                            const btn = document.querySelector('[onclick="document.getElementById(\'fotoFile\').click()"]');
+                            if (btn) {
+                                const originalText = btn.textContent;
+                                const sizeMB = (comprimida.length / 1024 / 1024).toFixed(2);
+                                btn.textContent = `✅ Foto carregada! (${sizeMB}MB)`;
+                                btn.style.background = 'rgba(76,175,80,0.25)';
+                                btn.style.borderColor = '#4caf50';
+                                setTimeout(() => {
+                                    btn.textContent = originalText;
+                                    btn.style.background = '';
+                                    btn.style.borderColor = '';
+                                }, 2000);
+                            }
+                        });
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            } else {
+                alert('❌ Selecione uma imagem válida (JPG, PNG, etc)');
+            }
+        }
+
+        function previewImagem(fieldId) {
+            const fileInput = document.getElementById(fieldId);
+            const file = fileInput.files[0];
+
+            if (file && file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = new Image();
+                    img.onload = function() {
+                        // Comprimir imagem
+                        comprimirImagem(e.target.result).then(comprimida => {
+                            // Mapear fieldId para o campo correspondente em dadosProfissional
+                            const fieldMap = {
+                                'imgProfissional': 'imgProfissional',
+                                'imgCarnes': 'imgCarnes',
+                                'imgAmbiente': 'imgAmbiente',
+                                'imgAcao': 'imgAcao'
+                            };
+                            if (fieldMap[fieldId]) {
+                                dadosProfissional[fieldMap[fieldId]] = comprimida;
+
+                                // Feedback visual
+                                const btn = document.querySelector(`[onclick="document.getElementById('${fieldId}').click()"]`);
+                                if (btn) {
+                                    const originalText = btn.textContent;
+                                    const sizeMB = (comprimida.length / 1024 / 1024).toFixed(2);
+                                    btn.textContent = `✅ Imagem carregada! (${sizeMB}MB)`;
+                                    btn.style.background = 'rgba(76,175,80,0.25)';
+                                    btn.style.borderColor = '#4caf50';
+                                    setTimeout(() => {
+                                        btn.textContent = originalText;
+                                        btn.style.background = '';
+                                        btn.style.borderColor = '';
+                                    }, 2000);
+                                }
+                            }
+                        });
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            } else {
+                alert('❌ Selecione uma imagem válida (JPG, PNG, etc)');
+            }
+        }
+
+        function validarEmail(email) {
+            const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return regex.test(email);
+        }
+
+        function salvarEdicoes() {
+            // Validações
+            const nome = document.getElementById('editNome').value.trim();
+            const email = document.getElementById('editEmail').value.trim();
+            const whatsapp = document.getElementById('editWhatsapp').value.trim();
+
+            if (!nome) {
+                alert('❌ Digite o nome do profissional');
+                return;
+            }
+
+            if (email && !validarEmail(email)) {
+                alert('❌ Email inválido. Use formato: seu@email.com');
+                return;
+            }
+
+            if (whatsapp && whatsapp.length < 10) {
+                alert('❌ WhatsApp deve ter pelo menos 10 dígitos');
+                return;
+            }
+
+            // Atualizar dados (imagens já foram atualizadas via previewImagem)
+            dadosProfissional.nome = nome;
+            dadosProfissional.profissao = document.getElementById('editProfissao').value.trim();
+            dadosProfissional.curriculo = document.getElementById('editCurriculo').value.trim();
+            dadosProfissional.whatsapp = whatsapp;
+            dadosProfissional.email = email;
+            dadosProfissional.localizacao = document.getElementById('editLocalizacao').value.trim();
+            dadosProfissional.instagram = document.getElementById('editInstagram').value.trim();
+
+            // Dados de pagamento
+            dadosProfissional.pixTipo = document.getElementById('editPixTipo').value.trim();
+            dadosProfissional.pixChave = document.getElementById('editPixChave').value.trim();
+            dadosProfissional.bancoNome = document.getElementById('editBancoNome').value.trim();
+            dadosProfissional.bancoAgencia = document.getElementById('editBancoAgencia').value.trim();
+            dadosProfissional.bancoConta = document.getElementById('editBancoConta').value.trim();
+            dadosProfissional.bancoTitular = document.getElementById('editBancoTitular').value.trim();
+
+            // Salvar no localStorage (tudo, incluindo imagens em base64)
+            localStorage.setItem('eventCalcProfissional', JSON.stringify(dadosProfissional));
+
+            // Renderizar e fechar
+            renderizarDados();
+            toggleEditMode();
+
+            // Feedback
+            alert('✅ Informações e imagens salvas com sucesso!');
+        }
+
+        // ── REGISTRAR SERVICE WORKER (Modo Offline) ──
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./service_worker.js')
+                    .then((reg) => {
+                        console.log('✅ Service Worker registrado para modo offline');
+                    })
+                    .catch((err) => {
+                        console.warn('⚠️ Erro ao registrar Service Worker:', err);
+                    });
+            });
+        }
+
+        // ── CARREGAR DADOS AO INICIAR ──
+        window.addEventListener('load', carregarDados);
+
+        // ── GERENCIADOR DE MODAL DE LEADS ──
+        function abrirModalLeads() {
+            document.getElementById('leadsModal').classList.add('active');
+            document.getElementById('leadsForm').reset();
+            document.getElementById('leadsSuccessMsg').classList.remove('show');
+        }
+
+        function fecharModalLeads() {
+            document.getElementById('leadsModal').classList.remove('active');
+        }
+
+        // Fechar modal ao clicar fora
+        document.getElementById('leadsModal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('leadsModal')) {
+                fecharModalLeads();
+            }
+        });
+
+        // ── GERAR PDF EM BASE64 (para enviar por email) ──
+        function gerarTutorialPDFBase64() {
+            return new Promise((resolve) => {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF({
+                    orientation: 'p',
+                    unit: 'mm',
+                    format: 'a4'
+                });
+
+                // ── CORES ──
+                const corOuro = [212, 175, 55];
+                const corVermelho = [196, 30, 58];
+                const corPreto = [26, 26, 26];
+                const corBranco = [255, 255, 255];
+                const corCinza = [180, 180, 180];
+
+                let posY = 15;
+                const margemEsq = 15;
+                const margemDir = 15;
+                const larguraTexto = 210 - margemEsq - margemDir;
+
+                function novaPagemComFundo() {
+                    doc.setFillColor(...corPreto);
+                    doc.rect(0, 0, 210, 297, 'F');
+                    posY = 15;
+                }
+
+                function adicionarTitulo(texto) {
+                    doc.setFont('Playfair Display', 'bold');
+                    doc.setFontSize(22);
+                    doc.setTextColor(...corOuro);
+                    doc.text(texto, margemEsq, posY);
+                    posY += 12;
+                }
+
+                function adicionarSubtitulo(texto) {
+                    doc.setFont('Lora', 'bold');
+                    doc.setFontSize(13);
+                    doc.setTextColor(...corOuro);
+                    doc.text(texto, margemEsq, posY);
+                    posY += 7;
+                }
+
+                function adicionarTexto(texto, tamanho = 10, cor = corCinza) {
+                    doc.setFont('Lora', 'normal');
+                    doc.setFontSize(tamanho);
+                    doc.setTextColor(...cor);
+                    const linhas = doc.splitTextToSize(texto, larguraTexto);
+                    doc.text(linhas, margemEsq, posY);
+                    posY += linhas.length * 5 + 2;
+                }
+
+                // PÁGINA 1: CAPA
+                novaPagemComFundo();
+                posY = 70;
+                doc.setFont('Playfair Display', 'bold');
+                doc.setFontSize(36);
+                doc.setTextColor(...corOuro);
+                doc.text('EventCalc Pro v7', 105, posY, { align: 'center' });
+                posY += 15;
+                doc.setFont('Lora', 'normal');
+                doc.setFontSize(16);
+                doc.setTextColor(...corBranco);
+                doc.text('Tutorial Completo', 105, posY, { align: 'center' });
+                posY += 12;
+                doc.setFontSize(11);
+                doc.setTextColor(...corCinza);
+                doc.text('Como usar a calculadora de orçamentos', 105, posY, { align: 'center' });
+                doc.text('para eventos com máxima eficiência', 105, posY + 5, { align: 'center' });
+
+                // PÁGINA 2: POR QUE EVENTCALC
+                doc.addPage();
+                novaPagemComFundo();
+                adicionarTitulo('Por Que Usar EventCalc Pro v7?');
+                adicionarTexto('Você gasta HORAS calculando orçamentos manualmente? Com EventCalc, você cria qualquer orçamento em menos de 10 minutos!', 11, corBranco);
+                posY += 5;
+                adicionarSubtitulo('Economia Real:');
+                adicionarTexto('⏱️ Economiza 2 horas por orçamento');
+                adicionarTexto('💰 Aumenta seu lucro automaticamente');
+                adicionarTexto('📊 Proposta profissional em minutos');
+                adicionarTexto('✅ 100% preciso - sem erros de conta');
+
+                // PÁGINA 3 a 13: Conteúdo simplificado (apenas estrutura para demo)
+                for (let i = 0; i < 11; i++) {
+                    doc.addPage();
+                    novaPagemComFundo();
+                    adicionarTitulo(`Seção ${i + 3}`);
+                    adicionarTexto('Conteúdo do tutorial. Leia o arquivo completo gerar-tutorial-pdf.js para ver todas as 13 páginas!', 11, corBranco);
+                }
+
+                // Retornar PDF em base64
+                const pdfData = doc.output('datauristring');
+                resolve(pdfData);
+            });
+        }
+
+        function enviarLeads(event) {
+            event.preventDefault();
+
+            // Coletar dados
+            const nome = document.getElementById('leadsNome').value.trim();
+            const email = document.getElementById('leadsEmail').value.trim();
+            const whatsapp = document.getElementById('leadsWhatsapp').value.trim();
+
+            // Validações básicas
+            if (!nome || !email || !whatsapp) {
+                alert('❌ Por favor, preencha todos os campos');
+                return;
+            }
+
+            // Validar email
+            const regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!regexEmail.test(email)) {
+                alert('❌ Email inválido');
+                return;
+            }
+
+            // Validar WhatsApp (apenas números)
+            const apenasNumeros = whatsapp.replace(/\D/g, '');
+            if (apenasNumeros.length < 10) {
+                alert('❌ WhatsApp deve ter pelo menos 10 dígitos');
+                return;
+            }
+
+            // Desabilitar botão enquanto processa
+            const btn = event.target.querySelector('button[type="submit"]');
+            const textOriginal = btn.textContent;
+            btn.disabled = true;
+            btn.textContent = '⏳ Gerando PDF e enviando...';
+
+            // Criar objeto de lead
+            const lead = {
+                nome: nome,
+                email: email,
+                whatsapp: whatsapp,
+                data: new Date().toLocaleString('pt-BR'),
+                origem: 'Landing Page EventCalc Pro v7',
+                status: 'new',
+                notas: ''
+            };
+
+            // ── PASSO 1: Salvar no localStorage (fallback) ──
+            let leads = [];
+            try {
+                const savedLeads = localStorage.getItem('eventCalcLeads');
+                if (savedLeads) {
+                    leads = JSON.parse(savedLeads);
+                }
+            } catch(e) {
+                console.error('Erro ao carregar leads:', e);
+            }
+            leads.push(lead);
+            localStorage.setItem('eventCalcLeads', JSON.stringify(leads));
+
+            // ── PASSO 2: Gerar PDF em base64 ──
+            gerarTutorialPDFBase64().then(pdfBase64 => {
+                const leadComPDF = {
+                    ...lead,
+                    pdfBase64: pdfBase64
+                };
+
+                // ── PASSO 3: Tentar salvar em Firebase (se disponível) ──
+                if (typeof firebase !== 'undefined') {
+                    try {
+                        const firebaseConfig = {
+                            apiKey: "AIzaSyDx_YOUR_API_KEY_HERE",
+                            authDomain: "eventcalc-leads.firebaseapp.com",
+                            databaseURL: "https://eventcalc-leads-default-rtdb.firebaseio.com",
+                            projectId: "eventcalc-leads",
+                            storageBucket: "eventcalc-leads.appspot.com",
+                            messagingSenderId: "YOUR_SENDER_ID",
+                            appId: "YOUR_APP_ID"
+                        };
+
+                        if (!firebase.apps.length) {
+                            firebase.initializeApp(firebaseConfig);
+                        }
+
+                        const db = firebase.database();
+                        const leadId = db.ref('leads').push().key;
+                        db.ref('leads/' + leadId).set(lead) // Salvar SEM PDF (muito grande)
+                            .then(() => console.log('✅ Lead salvo em Firebase'))
+                            .catch(err => console.error('⚠️ Erro ao salvar em Firebase:', err));
+                    } catch(e) {
+                        console.warn('⚠️ Firebase não disponível:', e);
+                    }
+                }
+
+                // ── PASSO 4: Enviar notificações (Netlify Functions) ──
+                Promise.all([
+                    enviarEmailNotificacao(leadComPDF),
+                    enviarWhatsappNotificacao(lead)
+                ]).then(() => {
+                    // Exibir mensagem de sucesso
+                    const successMsg = document.getElementById('leadsSuccessMsg');
+                    successMsg.classList.add('show');
+
+                    // Limpar formulário
+                    document.getElementById('leadsForm').reset();
+
+                    // Reabilitar botão
+                    btn.disabled = false;
+                    btn.textContent = textOriginal;
+
+                    // Fechar modal após 3 segundos
+                    setTimeout(() => {
+                        fecharModalLeads();
+                    }, 3000);
+
+                    console.log('✅ Lead processado com PDF');
+                }).catch(err => {
+                    console.warn('⚠️ Erro ao enviar notificações:', err);
+                    // Mesmo com erro nas notificações, o lead foi salvo
+                    const successMsg = document.getElementById('leadsSuccessMsg');
+                    successMsg.classList.add('show');
+                    setTimeout(() => {
+                        fecharModalLeads();
+                    }, 3000);
+                    btn.disabled = false;
+                    btn.textContent = textOriginal;
+                });
+            });
+        }
+
+        // ── ENVIAR EMAIL (COM PDF) ──
+        function enviarEmailNotificacao(lead) {
+            return fetch('/.netlify/functions/send-email', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(lead)
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    console.log('✅ Email enviado com PDF');
+                } else {
+                    console.warn('⚠️ Email não enviado:', data);
+                }
+            })
+            .catch(err => console.warn('⚠️ Erro ao enviar email:', err));
+        }
+
+        // ── ENVIAR WHATSAPP ──
+        function enviarWhatsappNotificacao(lead) {
+            return fetch('/.netlify/functions/send-whatsapp', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ...lead, tipo: 'welcome' })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    console.log('✅ WhatsApp enviado');
+                } else {
+                    console.warn('⚠️ WhatsApp não enviado:', data);
+                }
+            })
+            .catch(err => console.warn('⚠️ Erro ao enviar WhatsApp:', err));
+        }
+
+        // Fechar modal com ESC
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                fecharModalLeads();
+            }
+        });
+    </script>
+
+    <!-- 📚 Script para gerar Tutorial PDF -->
+    <script src="gerar-tutorial-pdf.js"></script>
+</body>
+</html>

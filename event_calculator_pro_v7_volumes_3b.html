@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EventCalc Pro v7 - Volumes Especiais</title>
+    <script src="sistema-expiracao.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Lora:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root { --dark-bg: #0a0a0a; --dark-card: #242424; --gold: #d4af37; --red: #c41e3a; --green: #4caf50; --orange: #f59e0b; --white: #ffffff; }
+        body { font-family: 'Lora', serif; background: var(--dark-bg); color: var(--white); }
+        .container { max-width: 1600px; margin: 0 auto; padding: 20px; }
+
+        .header { background: linear-gradient(135deg, #1a1a1a 0%, #242424 100%); padding: 28px 40px; border-radius: 8px; margin-bottom: 16px; border: 1px solid rgba(212,175,55,0.3); text-align: center; }
+        .header h1 { font-family: 'Playfair Display'; font-size: 2rem; color: var(--gold); margin-bottom: 4px; }
+        .header p { color: #909090; font-size: 0.88rem; }
+        .header .cliente-info { color: var(--gold); font-size: 0.82rem; margin-top: 5px; font-style: italic; }
+
+        .prog-bar { display: flex; align-items: center; justify-content: center; padding: 14px 20px; margin-bottom: 16px; background: var(--dark-card); border: 1px solid rgba(212,175,55,0.3); border-radius: 8px; }
+        .prog-step { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        .prog-circle { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.82rem; border: 2px solid rgba(212,175,55,0.2); color: #555; background: transparent; transition: 0.2s; }
+        .prog-circle.done { border-color: var(--gold); color: var(--gold); background: rgba(212,175,55,0.12); cursor: pointer; }
+        .prog-circle.done:hover { background: rgba(212,175,55,0.22); }
+        .prog-circle.active { border-color: var(--gold); color: #0a0a0a; background: var(--gold); }
+        .prog-label { font-size: 0.66rem; color: #555; text-align: center; white-space: nowrap; }
+        .prog-label.done, .prog-label.active { color: var(--gold); }
+        .prog-line { height: 2px; width: 48px; background: rgba(212,175,55,0.15); margin-bottom: 18px; flex-shrink: 0; }
+        .prog-line.done { background: rgba(212,175,55,0.5); }
+        @media (max-width: 500px) { .prog-line { width: 18px; } .prog-label { font-size: 0.58rem; } }
+
+        .progress { background: var(--dark-card); padding: 14px 20px; border-radius: 8px; margin-bottom: 16px; border: 1px solid rgba(212,175,55,0.3); text-align: center; }
+        .progress h3 { color: var(--gold); font-size: 0.93rem; }
+
+        .info-box { background: rgba(212,175,55,0.06); border-left: 4px solid var(--gold); padding: 14px 18px; border-radius: 6px; margin-bottom: 20px; }
+        .info-box h3 { color: var(--gold); margin-bottom: 5px; font-size: 0.93rem; }
+        .info-box p { color: #c0c0c0; font-size: 0.85rem; line-height: 1.5; }
+
+        .two-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px; }
+        @media (max-width: 900px) { .two-columns { grid-template-columns: 1fr; } }
+
+        .section-title { font-family: 'Playfair Display'; font-size: 1.25rem; color: var(--gold); margin-bottom: 16px; padding-bottom: 10px; border-bottom: 2px solid rgba(212,175,55,0.3); }
+
+        .tabela-box { background: var(--dark-card); border: 1px solid rgba(212,175,55,0.3); border-radius: 8px; padding: 14px; overflow-x: auto; }
+        table { width: 100%; font-size: 0.73rem; border-collapse: collapse; }
+        th { background: rgba(212,175,55,0.1); color: var(--gold); padding: 7px 6px; text-align: left; border-bottom: 2px solid rgba(212,175,55,0.3); white-space: nowrap; }
+        td { padding: 6px; border-bottom: 1px solid rgba(212,175,55,0.08); }
+        td input { background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.15); color: white; padding: 4px 5px; border-radius: 3px; width: 100%; font-family: 'Lora'; font-size: 0.72rem; }
+        td input:focus { outline: none; border-color: var(--gold); background: rgba(212,175,55,0.08); }
+        .calc-cell { color: #c0c0c0; font-weight: 600; font-size: 0.72rem; }
+        .total-cell { color: var(--gold); font-weight: 700; }
+
+        .btn-remove-row { background: rgba(196,30,58,0.2); color: var(--red); border: 1px solid rgba(196,30,58,0.35); padding: 3px 7px; border-radius: 3px; cursor: pointer; font-size: 0.68rem; font-weight: 700; width: 100%; transition: 0.2s; }
+        .btn-remove-row:hover { background: var(--red); color: white; border-color: var(--red); }
+
+        .btn-add { background: rgba(76,175,80,0.15); color: var(--green); border: 2px solid var(--green); padding: 7px 14px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.78rem; margin-top: 10px; width: 100%; transition: 0.2s; }
+        .btn-add:hover { background: var(--green); color: white; }
+
+        .totals { background: rgba(212,175,55,0.08); border: 1px solid rgba(212,175,55,0.3); padding: 10px 12px; border-radius: 6px; margin-top: 10px; }
+        .totals-item { display: flex; justify-content: space-between; padding: 5px 0; font-weight: 600; font-size: 0.82rem; border-bottom: 1px solid rgba(212,175,55,0.1); }
+        .totals-item:last-child { border-bottom: none; }
+        .totals-item span:last-child { color: var(--gold); }
+
+        .meta-box { background: var(--dark-card); border: 2px solid var(--gold); border-radius: 8px; padding: 14px; height: fit-content; margin-top: 20px; }
+        .meta-item { padding: 7px 0; border-bottom: 1px solid rgba(212,175,55,0.08); font-size: 0.82rem; }
+        .meta-item:last-child { border-bottom: none; }
+        .meta-label { color: #808080; font-size: 0.72rem; margin-bottom: 2px; }
+        .meta-valor { color: var(--gold); font-weight: bold; font-size: 0.9rem; }
+        .meta-delta { font-size: 0.72rem; margin-top: 2px; font-weight: 600; }
+        .delta-ok { color: var(--green); }
+        .delta-baixo { color: var(--orange); }
+        .delta-neutro { color: #707070; }
+        .meta-header-item { padding: 7px 0; border-bottom: 1px solid rgba(212,175,55,0.08); font-size: 0.82rem; }
+        .meta-header-valor { color: white; font-weight: 600; font-size: 0.88rem; }
+
+        .buttons { display: flex; gap: 12px; margin-top: 20px; }
+        .btn { padding: 12px 22px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-family: 'Lora'; text-transform: uppercase; flex: 1; transition: 0.3s; font-size: 0.88rem; }
+        .btn-primary { background: linear-gradient(135deg, var(--red), #8b1428); color: white; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(196,30,58,0.4); }
+        .btn-secondary { background: transparent; color: var(--gold); border: 2px solid var(--gold); }
+        .btn-secondary:hover { background: rgba(212,175,55,0.1); }
+
+        .percentage-bar-container { display: flex; align-items: center; gap: 12px; margin-top: 10px; }
+        .percentage-bar { flex: 1; height: 8px; background: rgba(212,175,55,0.1); border-radius: 4px; overflow: hidden; border: 1px solid rgba(212,175,55,0.2); }
+        .percentage-bar-fill { height: 100%; background: linear-gradient(90deg, var(--gold), #b8952a); transition: width 0.3s ease; border-radius: 4px; }
+        .percentage-text { color: var(--gold); font-weight: 700; font-size: 0.9rem; min-width: 45px; text-align: right; font-family: 'Playfair Display'; }
+
+        footer { background: var(--dark-card); border-top: 1px solid rgba(212,175,55,0.3); padding: 22px; text-align: center; color: #707070; margin-top: 50px; font-size: 0.83rem; }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <div class="header">
+        <h1>EventCalc Pro v7</h1>
+        <p>Volumes Especiais (Celiaco / Lactose / Vegano / Vegetariano)</p>
+        <div class="cliente-info" id="clienteInfo"></div>
+    </div>
+
+    <div class="prog-bar">
+        <div class="prog-step"><div class="prog-circle done" onclick="window.location.href='event_calculator_pro_v7_questionario.html'">1</div><div class="prog-label done">Questionário</div></div>
+        <div class="prog-line done"></div>
+        <div class="prog-step"><div class="prog-circle done" onclick="window.location.href='event_calculator_pro_v7_cardapio.html'">2</div><div class="prog-label done">Cardápio</div></div>
+        <div class="prog-line done"></div>
+        <div class="prog-step"><div class="prog-circle done" onclick="window.location.href='event_calculator_pro_v7_cardapio_2b.html'">2B</div><div class="prog-label done">Especial</div></div>
+        <div class="prog-line done"></div>
+        <div class="prog-step"><div class="prog-circle active">3B</div><div class="prog-label active">Vol. Esp.</div></div>
+        <div class="prog-line"></div>
+        <div class="prog-step"><div class="prog-circle">3</div><div class="prog-label">Volumes</div></div>
+        <div class="prog-line"></div>
+        <div class="prog-step"><div class="prog-circle">4</div><div class="prog-label">Proposta</div></div>
+    </div>
+
+    <div class="progress">
+        <h3>📊 Etapa 3B de 4: VOLUMES ESPECIAIS</h3>
+        <div class="percentage-bar-container">
+            <div class="percentage-bar"><div class="percentage-bar-fill" id="progressBar" style="width: 0%"></div></div>
+            <div class="percentage-text" id="progressPercentage">0%</div>
+        </div>
+    </div>
+
+    <div class="info-box">
+        <h3>Como funciona</h3>
+        <p>Preencha os volumes especiais (celiaco/lactose) com <strong>kg</strong> e <strong>R$/kg</strong>. Os campos <strong>A Comprar</strong> e <strong>Total R$</strong> calculam automaticamente.</p>
+    </div>
+
+    <div class="two-columns">
+        <div id="secaoCeliaco" style="display: none;">
+            <div class="section-title">🌾 Volumes Celiaco</div>
+            <div class="tabela-box">
+                <table><thead><tr><th>Item</th><th>Kg</th><th>R$/kg</th><th>Perda%</th><th>A Comprar</th><th>Total R$</th><th></th></tr></thead><tbody id="tbodyCeliaco"></tbody></table>
+            </div>
+            <button class="btn-add" onclick="adicionarLinhaCeliaco()">+ Adicionar Item</button>
+            <div class="totals">
+                <div class="totals-item"><span>Total a Servir:</span> <span id="totalServirCeliaco">0,00 kg</span></div>
+                <div class="totals-item"><span>Total a Comprar:</span> <span id="totalComprarCeliaco">0,00 kg</span></div>
+                <div class="totals-item"><span>Total em R$:</span> <span id="totalValorCeliaco">R$ 0,00</span></div>
+            </div>
+            <div class="meta-box">
+                <div class="meta-header-item"><div class="meta-label">Celiaco:</div><div class="meta-header-valor" id="metaPessoasCeliaco">—</div></div>
+                <div class="meta-item"><div class="meta-label">Meta de consumo:</div><div class="meta-valor" id="metaTotalCeliaco">—</div><div class="meta-delta delta-neutro" id="deltaCeliaco"></div></div>
+            </div>
+        </div>
+
+        <div id="secaoLactose" style="display: none;">
+            <div class="section-title">🥛 Intolerante à Lactose</div>
+            <div class="tabela-box">
+                <table><thead><tr><th>Item</th><th>Kg</th><th>R$/kg</th><th>Perda%</th><th>A Comprar</th><th>Total R$</th><th></th></tr></thead><tbody id="tbodyLactose"></tbody></table>
+            </div>
+            <button class="btn-add" onclick="adicionarLinhaLactose()">+ Adicionar Item</button>
+            <div class="totals">
+                <div class="totals-item"><span>Total a Servir:</span> <span id="totalServirLactose">0,00 kg</span></div>
+                <div class="totals-item"><span>Total a Comprar:</span> <span id="totalComprarLactose">0,00 kg</span></div>
+                <div class="totals-item"><span>Total em R$:</span> <span id="totalValorLactose">R$ 0,00</span></div>
+            </div>
+            <div class="meta-box">
+                <div class="meta-header-item"><div class="meta-label">Intolerante à Lactose:</div><div class="meta-header-valor" id="metaPessoasLactose">—</div></div>
+                <div class="meta-item"><div class="meta-label">Meta de consumo:</div><div class="meta-valor" id="metaTotalLactose">—</div><div class="meta-delta delta-neutro" id="deltaLactose"></div></div>
+            </div>
+        </div>
+
+        <div id="secaoVegano" style="display: none;">
+            <div class="section-title">🥬 Volumes Vegano</div>
+            <div class="tabela-box">
+                <table><thead><tr><th>Item</th><th>Kg</th><th>R$/kg</th><th>Perda%</th><th>A Comprar</th><th>Total R$</th><th></th></tr></thead><tbody id="tbodyVegano"></tbody></table>
+            </div>
+            <button class="btn-add" onclick="adicionarLinhaVegano()">+ Adicionar Item</button>
+            <div class="totals">
+                <div class="totals-item"><span>Total a Servir:</span> <span id="totalServirVegano">0,00 kg</span></div>
+                <div class="totals-item"><span>Total a Comprar:</span> <span id="totalComprarVegano">0,00 kg</span></div>
+                <div class="totals-item"><span>Total em R$:</span> <span id="totalValorVegano">R$ 0,00</span></div>
+            </div>
+            <div class="meta-box">
+                <div class="meta-header-item"><div class="meta-label">Vegano:</div><div class="meta-header-valor" id="metaPessoasVegano">—</div></div>
+                <div class="meta-item"><div class="meta-label">Meta de consumo:</div><div class="meta-valor" id="metaTotalVegano">—</div><div class="meta-delta delta-neutro" id="deltaVegano"></div></div>
+            </div>
+        </div>
+
+        <div id="secaoVegetariano" style="display: none;">
+            <div class="section-title">🥦 Volumes Vegetariano</div>
+            <div class="tabela-box">
+                <table><thead><tr><th>Item</th><th>Kg</th><th>R$/kg</th><th>Perda%</th><th>A Comprar</th><th>Total R$</th><th></th></tr></thead><tbody id="tbodyVegetariano"></tbody></table>
+            </div>
+            <button class="btn-add" onclick="adicionarLinhaVegetariano()">+ Adicionar Item</button>
+            <div class="totals">
+                <div class="totals-item"><span>Total a Servir:</span> <span id="totalServirVegetariano">0,00 kg</span></div>
+                <div class="totals-item"><span>Total a Comprar:</span> <span id="totalComprarVegetariano">0,00 kg</span></div>
+                <div class="totals-item"><span>Total em R$:</span> <span id="totalValorVegetariano">R$ 0,00</span></div>
+            </div>
+            <div class="meta-box">
+                <div class="meta-header-item"><div class="meta-label">Vegetariano:</div><div class="meta-header-valor" id="metaPessoasVegetariano">—</div></div>
+                <div class="meta-item"><div class="meta-label">Meta de consumo:</div><div class="meta-valor" id="metaTotalVegetariano">—</div><div class="meta-delta delta-neutro" id="deltaVegetariano"></div></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="buttons">
+        <button type="button" class="btn btn-secondary" onclick="voltar()">← Voltar</button>
+        <button type="button" class="btn btn-primary" onclick="prosseguir()">Prosseguir para Volumes Normais →</button>
+    </div>
+
+</div>
+
+<footer><p>EventCalc Pro v7 — Sistema Profissional de Orçamento para Eventos</p></footer>
+
+<script>
+    let volumesCeliaco = [], volumesLactose = [], volumesVegano = [], volumesVegetariano = [], questionario = {};
+    let metaKgCeliaco = 0, metaKgLactose = 0, metaKgVegano = 0, metaKgVegetariano = 0;
+
+    function atualizarProgressao() {
+        const totalVols = volumesCeliaco.length + volumesLactose.length + volumesVegano.length + volumesVegetariano.length;
+        if (totalVols === 0) {
+            document.getElementById("progressBar").style.width = "0%";
+            document.getElementById("progressPercentage").textContent = "0%";
+            return;
+        }
+        const comKg = volumesCeliaco.filter(v => v.kg > 0).length + volumesLactose.filter(v => v.kg > 0).length + volumesVegano.filter(v => v.kg > 0).length + volumesVegetariano.filter(v => v.kg > 0).length;
+        const pct = Math.round((comKg / totalVols) * 100);
+        document.getElementById("progressBar").style.width = pct + "%";
+        document.getElementById("progressPercentage").textContent = pct + "%";
+    }
+
+    function carregar() {
+        try {
+            const qSalvo = localStorage.getItem("eventocalcData");
+            if (qSalvo) {
+                const dados = JSON.parse(qSalvo);
+                questionario = dados.questionario || {};
+                if (questionario.nomeContratante) {
+                    document.getElementById("clienteInfo").textContent = "Cliente: " + questionario.nomeContratante + (questionario.numeroProposta ? "  |  " + questionario.numeroProposta : "");
+                }
+            }
+        } catch(e) { console.error(e); }
+
+        const qtdCeliaco = questionario.restricoes?.celiaco || 0;
+        if (qtdCeliaco > 0) {
+            document.getElementById("secaoCeliaco").style.display = "block";
+            const gram = questionario.volumes?.proteina || 450;
+            metaKgCeliaco = gram * qtdCeliaco / 1000;
+            document.getElementById("metaPessoasCeliaco").textContent = qtdCeliaco + " pessoa" + (qtdCeliaco !== 1 ? "s" : "");
+            document.getElementById("metaTotalCeliaco").textContent = metaKgCeliaco.toFixed(2) + " kg  (" + gram + "g/pessoa)";
+        }
+
+        const qtdLactose = questionario.restricoes?.lactose || 0;
+        if (qtdLactose > 0) {
+            document.getElementById("secaoLactose").style.display = "block";
+            const gram = questionario.volumes?.proteina || 450;
+            metaKgLactose = gram * qtdLactose / 1000;
+            document.getElementById("metaPessoasLactose").textContent = qtdLactose + " pessoa" + (qtdLactose !== 1 ? "s" : "");
+            document.getElementById("metaTotalLactose").textContent = metaKgLactose.toFixed(2) + " kg  (" + gram + "g/pessoa)";
+        }
+
+        const qtdVegano = questionario.veganos || 0;
+        if (qtdVegano > 0) {
+            document.getElementById("secaoVegano").style.display = "block";
+            const gram = questionario.volumes?.proteina || 450;
+            metaKgVegano = gram * qtdVegano / 1000;
+            document.getElementById("metaPessoasVegano").textContent = qtdVegano + " pessoa" + (qtdVegano !== 1 ? "s" : "");
+            document.getElementById("metaTotalVegano").textContent = metaKgVegano.toFixed(2) + " kg  (" + gram + "g/pessoa)";
+        }
+
+        const qtdVegetariano = questionario.vegetarianos || 0;
+        if (qtdVegetariano > 0) {
+            document.getElementById("secaoVegetariano").style.display = "block";
+            const gram = questionario.volumes?.proteina || 450;
+            metaKgVegetariano = gram * qtdVegetariano / 1000;
+            document.getElementById("metaPessoasVegetariano").textContent = qtdVegetariano + " pessoa" + (qtdVegetariano !== 1 ? "s" : "");
+            document.getElementById("metaTotalVegetariano").textContent = metaKgVegetariano.toFixed(2) + " kg  (" + gram + "g/pessoa)";
+        }
+
+        // Carregar pratos da Tela 2B e garantir estrutura
+        let cardapioEspecial = {};
+        try {
+            const cardEspSalvo = localStorage.getItem("eventocalc_cardapio_especial");
+            if (cardEspSalvo) {
+                cardapioEspecial = JSON.parse(cardEspSalvo);
+            }
+        } catch(e) { }
+
+        // Garantir que todos os tipos existem com estrutura correta (igual Tela 2B)
+        ["celiaco", "lactose", "vegano", "vegetariano"].forEach(tipo => {
+            if (!cardapioEspecial[tipo]) {
+                cardapioEspecial[tipo] = {};
+            }
+            ["aperitivo", "proteina", "carboidrato", "salada", "sobremesa"].forEach(cat => {
+                if (!Array.isArray(cardapioEspecial[tipo][cat])) {
+                    cardapioEspecial[tipo][cat] = [];
+                }
+            });
+        });
+        console.log("📦 CardapioEspecial carregado:", cardapioEspecial);
+
+        // Carregar volumes salvos anteriormente (se houver)
+        let volumesSalvos = {};
+        try {
+            const volEspSalvo = localStorage.getItem("eventocalc_volumes_especiais");
+            if (volEspSalvo) {
+                const volEsp = JSON.parse(volEspSalvo);
+                volEsp.forEach(v => {
+                    volumesSalvos[v.nome.toLowerCase()] = v;
+                });
+            }
+        } catch(e) { }
+
+        // CELIACO: Extrair pratos da Tela 2B
+        if (qtdCeliaco > 0 && cardapioEspecial.celiaco) {
+            volumesCeliaco = [];
+            Object.entries(cardapioEspecial.celiaco).forEach(([cat, pratos]) => {
+                if (Array.isArray(pratos)) {
+                    pratos.forEach(prato => {
+                        if (prato && prato.trim()) {
+                            const nomeLower = prato.toLowerCase();
+                            const saved = volumesSalvos[nomeLower];
+                            volumesCeliaco.push({
+                                nome: prato.trim(),
+                                kg: saved ? saved.kg : 0,
+                                preco: saved ? saved.preco : 0,
+                                perda: saved ? saved.perda : 10,
+                                tipoEspecial: "celiaco"
+                            });
+                        }
+                    });
+                }
+            });
+        }
+
+        // LACTOSE: Extrair pratos da Tela 2B
+        if (qtdLactose > 0 && cardapioEspecial.lactose) {
+            volumesLactose = [];
+            Object.entries(cardapioEspecial.lactose).forEach(([cat, pratos]) => {
+                if (Array.isArray(pratos)) {
+                    pratos.forEach(prato => {
+                        if (prato && prato.trim()) {
+                            const nomeLower = prato.toLowerCase();
+                            const saved = volumesSalvos[nomeLower];
+                            volumesLactose.push({
+                                nome: prato.trim(),
+                                kg: saved ? saved.kg : 0,
+                                preco: saved ? saved.preco : 0,
+                                perda: saved ? saved.perda : 10,
+                                tipoEspecial: "lactose"
+                            });
+                        }
+                    });
+                }
+            });
+        }
+
+        // VEGANO: Extrair pratos da Tela 2B
+        if (qtdVegano > 0 && cardapioEspecial.vegano) {
+            volumesVegano = [];
+            Object.entries(cardapioEspecial.vegano).forEach(([cat, pratos]) => {
+                if (Array.isArray(pratos)) {
+                    pratos.forEach(prato => {
+                        if (prato && prato.trim()) {
+                            const nomeLower = prato.toLowerCase();
+                            const saved = volumesSalvos[nomeLower];
+                            volumesVegano.push({
+                                nome: prato.trim(),
+                                kg: saved ? saved.kg : 0,
+                                preco: saved ? saved.preco : 0,
+                                perda: saved ? saved.perda : 10,
+                                tipoEspecial: "vegano"
+                            });
+                        }
+                    });
+                }
+            });
+        }
+
+        // VEGETARIANO: Extrair pratos da Tela 2B
+        if (qtdVegetariano > 0 && cardapioEspecial.vegetariano) {
+            volumesVegetariano = [];
+            Object.entries(cardapioEspecial.vegetariano).forEach(([cat, pratos]) => {
+                if (Array.isArray(pratos)) {
+                    pratos.forEach(prato => {
+                        if (prato && prato.trim()) {
+                            const nomeLower = prato.toLowerCase();
+                            const saved = volumesSalvos[nomeLower];
+                            volumesVegetariano.push({
+                                nome: prato.trim(),
+                                kg: saved ? saved.kg : 0,
+                                preco: saved ? saved.preco : 0,
+                                perda: saved ? saved.perda : 10,
+                                tipoEspecial: "vegetariano"
+                            });
+                        }
+                    });
+                }
+            });
+        }
+
+        // Se não há pratos, criar linha vazia para adicionar manualmente
+        if (volumesCeliaco.length === 0 && qtdCeliaco > 0) {
+            volumesCeliaco.push({ nome: "", kg: 0, preco: 0, perda: 10, tipoEspecial: "celiaco" });
+        }
+        if (volumesLactose.length === 0 && qtdLactose > 0) {
+            volumesLactose.push({ nome: "", kg: 0, preco: 0, perda: 10, tipoEspecial: "lactose" });
+        }
+        if (volumesVegano.length === 0 && qtdVegano > 0) {
+            volumesVegano.push({ nome: "", kg: 0, preco: 0, perda: 10, tipoEspecial: "vegano" });
+        }
+        if (volumesVegetariano.length === 0 && qtdVegetariano > 0) {
+            volumesVegetariano.push({ nome: "", kg: 0, preco: 0, perda: 10, tipoEspecial: "vegetariano" });
+        }
+
+        renderizar();
+    }
+
+    function validarNum(event) {
+        let val = parseFloat(event.target.value) || 0;
+        if (val < 0) event.target.value = 0;
+    }
+
+    function renderizarCeliaco() {
+        const tbody = document.getElementById("tbodyCeliaco");
+        tbody.innerHTML = "";
+        volumesCeliaco.forEach((v, i) => {
+            const ac = v.kg > 0 ? v.kg / (1 - (v.perda || 0) / 100) : 0;
+            const tr = document.createElement("tr");
+            tr.innerHTML = "<td><input type=\"text\" value=\"" + esc(v.nome) + "\" onchange=\"volumesCeliaco[" + i + "].nome=this.value;save();\" placeholder=\"Item\" /></td><td><input type=\"number\" value=\"" + v.kg + "\" step=\"0.01\" min=\"0\" oninput=\"validarNum(event);volumesCeliaco[" + i + "].kg=parseFloat(this.value)||0;atualizar();\" /></td><td><input type=\"number\" value=\"" + v.preco + "\" step=\"0.01\" min=\"0\" oninput=\"validarNum(event);volumesCeliaco[" + i + "].preco=parseFloat(this.value)||0;atualizar();\" /></td><td><input type=\"number\" value=\"" + v.perda + "\" step=\"1\" min=\"0\" max=\"99\" oninput=\"validarNum(event);volumesCeliaco[" + i + "].perda=parseFloat(this.value)||0;atualizar();\" /></td><td class=\"calc-cell\">" + ac.toFixed(2) + "</td><td class=\"total-cell\">R$ " + (ac * v.preco).toFixed(2) + "</td><td><button type=\"button\" class=\"btn-remove-row\" onclick=\"volumesCeliaco.splice(" + i + ",1);renderizarCeliaco()\">X</button></td>";
+            tbody.appendChild(tr);
+        });
+        atualizar();
+    }
+
+    function renderizarLactose() {
+        const tbody = document.getElementById("tbodyLactose");
+        tbody.innerHTML = "";
+        volumesLactose.forEach((v, i) => {
+            const ac = v.kg > 0 ? v.kg / (1 - (v.perda || 0) / 100) : 0;
+            const tr = document.createElement("tr");
+            tr.innerHTML = "<td><input type=\"text\" value=\"" + esc(v.nome) + "\" onchange=\"volumesLactose[" + i + "].nome=this.value;save();\" placeholder=\"Item\" /></td><td><input type=\"number\" value=\"" + v.kg + "\" step=\"0.01\" min=\"0\" oninput=\"validarNum(event);volumesLactose[" + i + "].kg=parseFloat(this.value)||0;atualizar();\" /></td><td><input type=\"number\" value=\"" + v.preco + "\" step=\"0.01\" min=\"0\" oninput=\"validarNum(event);volumesLactose[" + i + "].preco=parseFloat(this.value)||0;atualizar();\" /></td><td><input type=\"number\" value=\"" + v.perda + "\" step=\"1\" min=\"0\" max=\"99\" oninput=\"validarNum(event);volumesLactose[" + i + "].perda=parseFloat(this.value)||0;atualizar();\" /></td><td class=\"calc-cell\">" + ac.toFixed(2) + "</td><td class=\"total-cell\">R$ " + (ac * v.preco).toFixed(2) + "</td><td><button type=\"button\" class=\"btn-remove-row\" onclick=\"volumesLactose.splice(" + i + ",1);renderizarLactose()\">X</button></td>";
+            tbody.appendChild(tr);
+        });
+        atualizar();
+    }
+
+    function renderizarVegano() {
+        const tbody = document.getElementById("tbodyVegano");
+        tbody.innerHTML = "";
+        volumesVegano.forEach((v, i) => {
+            const ac = v.kg > 0 ? v.kg / (1 - (v.perda || 0) / 100) : 0;
+            const tr = document.createElement("tr");
+            tr.innerHTML = "<td><input type=\"text\" value=\"" + esc(v.nome) + "\" onchange=\"volumesVegano[" + i + "].nome=this.value;save();\" placeholder=\"Item\" /></td><td><input type=\"number\" value=\"" + v.kg + "\" step=\"0.01\" min=\"0\" oninput=\"validarNum(event);volumesVegano[" + i + "].kg=parseFloat(this.value)||0;atualizar();\" /></td><td><input type=\"number\" value=\"" + v.preco + "\" step=\"0.01\" min=\"0\" oninput=\"validarNum(event);volumesVegano[" + i + "].preco=parseFloat(this.value)||0;atualizar();\" /></td><td><input type=\"number\" value=\"" + v.perda + "\" step=\"1\" min=\"0\" max=\"99\" oninput=\"validarNum(event);volumesVegano[" + i + "].perda=parseFloat(this.value)||0;atualizar();\" /></td><td class=\"calc-cell\">" + ac.toFixed(2) + "</td><td class=\"total-cell\">R$ " + (ac * v.preco).toFixed(2) + "</td><td><button type=\"button\" class=\"btn-remove-row\" onclick=\"volumesVegano.splice(" + i + ",1);renderizarVegano()\">X</button></td>";
+            tbody.appendChild(tr);
+        });
+        atualizar();
+    }
+
+    function renderizarVegetariano() {
+        const tbody = document.getElementById("tbodyVegetariano");
+        tbody.innerHTML = "";
+        volumesVegetariano.forEach((v, i) => {
+            const ac = v.kg > 0 ? v.kg / (1 - (v.perda || 0) / 100) : 0;
+            const tr = document.createElement("tr");
+            tr.innerHTML = "<td><input type=\"text\" value=\"" + esc(v.nome) + "\" onchange=\"volumesVegetariano[" + i + "].nome=this.value;save();\" placeholder=\"Item\" /></td><td><input type=\"number\" value=\"" + v.kg + "\" step=\"0.01\" min=\"0\" oninput=\"validarNum(event);volumesVegetariano[" + i + "].kg=parseFloat(this.value)||0;atualizar();\" /></td><td><input type=\"number\" value=\"" + v.preco + "\" step=\"0.01\" min=\"0\" oninput=\"validarNum(event);volumesVegetariano[" + i + "].preco=parseFloat(this.value)||0;atualizar();\" /></td><td><input type=\"number\" value=\"" + v.perda + "\" step=\"1\" min=\"0\" max=\"99\" oninput=\"validarNum(event);volumesVegetariano[" + i + "].perda=parseFloat(this.value)||0;atualizar();\" /></td><td class=\"calc-cell\">" + ac.toFixed(2) + "</td><td class=\"total-cell\">R$ " + (ac * v.preco).toFixed(2) + "</td><td><button type=\"button\" class=\"btn-remove-row\" onclick=\"volumesVegetariano.splice(" + i + ",1);renderizarVegetariano()\">X</button></td>";
+            tbody.appendChild(tr);
+        });
+        atualizar();
+    }
+
+    function renderizar() { renderizarCeliaco(); renderizarLactose(); renderizarVegano(); renderizarVegetariano(); }
+    function adicionarLinhaCeliaco() { volumesCeliaco.push({ nome: "", kg: 0, preco: 0, perda: 10, tipoEspecial: "celiaco" }); renderizarCeliaco(); }
+    function adicionarLinhaLactose() { volumesLactose.push({ nome: "", kg: 0, preco: 0, perda: 10, tipoEspecial: "lactose" }); renderizarLactose(); }
+    function adicionarLinhaVegano() { volumesVegano.push({ nome: "", kg: 0, preco: 0, perda: 10, tipoEspecial: "vegano" }); renderizarVegano(); }
+    function adicionarLinhaVegetariano() { volumesVegetariano.push({ nome: "", kg: 0, preco: 0, perda: 10, tipoEspecial: "vegetariano" }); renderizarVegetariano(); }
+
+    function atualizar() {
+        let tc = 0, tcc = 0, tcv = 0;
+        volumesCeliaco.forEach(v => {
+            if (v.kg > 0) { tc += v.kg; const ac = v.kg / (1 - (v.perda || 0) / 100); tcc += ac; tcv += ac * v.preco; }
+        });
+        document.getElementById("totalServirCeliaco").textContent = tc.toFixed(2) + " kg";
+        document.getElementById("totalComprarCeliaco").textContent = tcc.toFixed(2) + " kg";
+        document.getElementById("totalValorCeliaco").textContent = "R$ " + tcv.toFixed(2);
+
+        const eldc = document.getElementById("deltaCeliaco");
+        if (metaKgCeliaco > 0) {
+            const d = tc - metaKgCeliaco;
+            eldc.textContent = "Compra: " + tc.toFixed(2) + " kg  (" + (d >= 0 ? "+" : "") + d.toFixed(2) + " kg)";
+            eldc.className = "meta-delta " + (d < -0.01 ? "delta-baixo" : "delta-ok");
+        } else {
+            eldc.textContent = ""; eldc.className = "meta-delta delta-neutro";
+        }
+
+        let tl = 0, tcl = 0, tvl = 0;
+        volumesLactose.forEach(v => {
+            if (v.kg > 0) { tl += v.kg; const ac = v.kg / (1 - (v.perda || 0) / 100); tcl += ac; tvl += ac * v.preco; }
+        });
+        document.getElementById("totalServirLactose").textContent = tl.toFixed(2) + " kg";
+        document.getElementById("totalComprarLactose").textContent = tcl.toFixed(2) + " kg";
+        document.getElementById("totalValorLactose").textContent = "R$ " + tvl.toFixed(2);
+
+        const eldl = document.getElementById("deltaLactose");
+        if (metaKgLactose > 0) {
+            const d = tl - metaKgLactose;
+            eldl.textContent = "Compra: " + tl.toFixed(2) + " kg  (" + (d >= 0 ? "+" : "") + d.toFixed(2) + " kg)";
+            eldl.className = "meta-delta " + (d < -0.01 ? "delta-baixo" : "delta-ok");
+        } else {
+            eldl.textContent = ""; eldl.className = "meta-delta delta-neutro";
+        }
+
+        let tv = 0, tcv2 = 0, tvv = 0;
+        volumesVegano.forEach(v => {
+            if (v.kg > 0) { tv += v.kg; const ac = v.kg / (1 - (v.perda || 0) / 100); tcv2 += ac; tvv += ac * v.preco; }
+        });
+        document.getElementById("totalServirVegano").textContent = tv.toFixed(2) + " kg";
+        document.getElementById("totalComprarVegano").textContent = tcv2.toFixed(2) + " kg";
+        document.getElementById("totalValorVegano").textContent = "R$ " + tvv.toFixed(2);
+
+        const eldv = document.getElementById("deltaVegano");
+        if (metaKgVegano > 0) {
+            const d = tv - metaKgVegano;
+            eldv.textContent = "Compra: " + tv.toFixed(2) + " kg  (" + (d >= 0 ? "+" : "") + d.toFixed(2) + " kg)";
+            eldv.className = "meta-delta " + (d < -0.01 ? "delta-baixo" : "delta-ok");
+        } else {
+            eldv.textContent = ""; eldv.className = "meta-delta delta-neutro";
+        }
+
+        let tvt = 0, tcvt = 0, tvvt = 0;
+        volumesVegetariano.forEach(v => {
+            if (v.kg > 0) { tvt += v.kg; const ac = v.kg / (1 - (v.perda || 0) / 100); tcvt += ac; tvvt += ac * v.preco; }
+        });
+        document.getElementById("totalServirVegetariano").textContent = tvt.toFixed(2) + " kg";
+        document.getElementById("totalComprarVegetariano").textContent = tcvt.toFixed(2) + " kg";
+        document.getElementById("totalValorVegetariano").textContent = "R$ " + tvvt.toFixed(2);
+
+        const eldvt = document.getElementById("deltaVegetariano");
+        if (metaKgVegetariano > 0) {
+            const d = tvt - metaKgVegetariano;
+            eldvt.textContent = "Compra: " + tvt.toFixed(2) + " kg  (" + (d >= 0 ? "+" : "") + d.toFixed(2) + " kg)";
+            eldvt.className = "meta-delta " + (d < -0.01 ? "delta-baixo" : "delta-ok");
+        } else {
+            eldvt.textContent = ""; eldvt.className = "meta-delta delta-neutro";
+        }
+
+        atualizarProgressao();
+        save();
+    }
+
+    function save() {
+        const todos = [...volumesCeliaco, ...volumesLactose, ...volumesVegano, ...volumesVegetariano];
+        localStorage.setItem("eventocalc_volumes_especiais", JSON.stringify(todos));
+    }
+
+    function voltar() { window.location.href = "event_calculator_pro_v7_cardapio_2b.html"; }
+    function prosseguir() {
+        if (!volumesCeliaco.some(v => v.kg > 0) && !volumesLactose.some(v => v.kg > 0) && !volumesVegano.some(v => v.kg > 0) && !volumesVegetariano.some(v => v.kg > 0)) {
+            alert("Preencha pelo menos um item com quantidade!");
+            return;
+        }
+        save();
+        setTimeout(() => { window.location.href = "event_calculator_pro_v7_volumes.html"; }, 200);
+    }
+
+    function esc(t) { return (t || "").replace(/"/g, "&quot;"); }
+    window.addEventListener("load", carregar);
+</script>
+</body>
+</html>

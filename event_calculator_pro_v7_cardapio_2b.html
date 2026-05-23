@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EventCalc Pro v7 - Cardápio Especial</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Lora:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --dark-bg: #0a0a0a;
+            --dark-card: #242424;
+            --gold: #d4af37;
+            --red: #c41e3a;
+            --green: #4caf50;
+            --white: #ffffff;
+        }
+        body { font-family: 'Lora', serif; background: var(--dark-bg); color: var(--white); }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+
+        .header {
+            background: linear-gradient(135deg, #1a1a1a 0%, #242424 100%);
+            padding: 28px 40px; border-radius: 8px; margin-bottom: 16px;
+            border: 1px solid rgba(212,175,55,0.3); text-align: center;
+        }
+        .header h1 { font-family: 'Playfair Display'; font-size: 2rem; color: var(--gold); margin-bottom: 4px; }
+        .header p { color: #909090; font-size: 0.88rem; }
+        .header .cliente-info { color: var(--gold); font-size: 0.85rem; margin-top: 6px; font-style: italic; }
+
+        /* ── BARRA DE PROGRESSO ── */
+        .prog-bar {
+            display: flex; align-items: center; justify-content: center;
+            padding: 14px 20px; margin-bottom: 16px;
+            background: var(--dark-card);
+            border: 1px solid rgba(212,175,55,0.3);
+            border-radius: 8px;
+        }
+        .prog-step { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        .prog-circle {
+            width: 32px; height: 32px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: bold; font-size: 0.82rem;
+            border: 2px solid rgba(212,175,55,0.2);
+            color: #555; background: transparent; transition: 0.2s;
+        }
+        .prog-circle.done { border-color: var(--gold); color: var(--gold); background: rgba(212,175,55,0.12); cursor: pointer; }
+        .prog-circle.done:hover { background: rgba(212,175,55,0.22); }
+        .prog-circle.active { border-color: var(--gold); color: #0a0a0a; background: var(--gold); }
+        .prog-label { font-size: 0.66rem; color: #555; text-align: center; white-space: nowrap; }
+        .prog-label.done, .prog-label.active { color: var(--gold); }
+        .prog-line { height: 2px; width: 48px; background: rgba(212,175,55,0.15); margin-bottom: 18px; flex-shrink: 0; }
+        .prog-line.done { background: rgba(212,175,55,0.5); }
+        @media (max-width: 500px) { .prog-line { width: 18px; } .prog-label { font-size: 0.58rem; } }
+
+        .progress {
+            background: var(--dark-card); padding: 14px 20px;
+            border-radius: 8px; margin-bottom: 20px;
+            border: 1px solid rgba(212,175,55,0.3); text-align: center;
+        }
+        .progress h3 { color: var(--gold); font-size: 0.93rem; }
+
+        /* ── CATEGORIAS ── */
+        .categories {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+            gap: 24px;
+            margin-bottom: 30px;
+        }
+
+        .category-card {
+            background: var(--dark-card);
+            border: 2px solid rgba(212,175,55,0.3);
+            border-radius: 8px; padding: 20px; transition: all 0.3s;
+        }
+        .category-card:hover { border-color: var(--gold); box-shadow: 0 0 18px rgba(212,175,55,0.15); }
+
+        .category-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 16px; padding-bottom: 10px;
+            border-bottom: 2px solid rgba(212,175,55,0.2);
+        }
+        .category-title { font-family: 'Playfair Display'; font-size: 1.35rem; color: var(--gold); }
+        .category-count {
+            background: rgba(212,175,55,0.15); color: var(--gold);
+            border-radius: 12px; padding: 2px 10px; font-size: 0.78rem; font-weight: 600;
+        }
+
+        .item-input { display: flex; gap: 8px; margin-bottom: 12px; }
+        .item-input input {
+            flex: 1; background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(212,175,55,0.15);
+            color: white; padding: 9px 10px; border-radius: 4px; font-family: 'Lora'; font-size: 0.88rem;
+        }
+        .item-input input:focus { outline: none; border-color: var(--gold); background: rgba(212,175,55,0.08); }
+        .item-input input::placeholder { color: #555; }
+
+        .btn-add-item {
+            background: rgba(76,175,80,0.2); color: var(--green);
+            border: 2px solid var(--green); padding: 9px 13px;
+            border-radius: 4px; cursor: pointer; font-weight: 600;
+            font-size: 0.82rem; white-space: nowrap; transition: 0.2s;
+        }
+        .btn-add-item:hover { background: var(--green); color: white; }
+
+        .items-list {
+            background: rgba(0,0,0,0.3); border-radius: 6px;
+            padding: 10px; min-height: 52px; max-height: 260px; overflow-y: auto;
+        }
+        .items-list::-webkit-scrollbar { width: 4px; }
+        .items-list::-webkit-scrollbar-thumb { background: rgba(212,175,55,0.3); border-radius: 2px; }
+
+        .item {
+            background: rgba(212,175,55,0.08); border-left: 3px solid var(--gold);
+            padding: 8px 10px; border-radius: 4px; margin-bottom: 6px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .item-name { color: #d0d0d0; font-size: 0.88rem; }
+        .btn-remove {
+            background: rgba(196,30,58,0.2); color: var(--red);
+            border: 1px solid rgba(196,30,58,0.4); padding: 3px 8px;
+            border-radius: 3px; cursor: pointer; font-size: 0.72rem;
+            font-weight: 600; transition: 0.2s; flex-shrink: 0; margin-left: 8px;
+        }
+        .btn-remove:hover { background: var(--red); color: white; border-color: var(--red); }
+
+        .empty-hint { color: #4a4a4a; text-align: center; padding: 16px; font-size: 0.83rem; font-style: italic; }
+
+        .restriction-section {
+            background: rgba(212,175,55,0.08); border: 2px solid var(--gold);
+            border-radius: 8px; padding: 20px; margin-bottom: 24px;
+        }
+        .restriction-section h2 {
+            font-family: 'Playfair Display'; font-size: 1.3rem; color: var(--gold);
+            margin-bottom: 16px; text-align: center;
+        }
+
+        /* ── BOTÕES NAV ── */
+        .buttons { display: flex; gap: 12px; margin-top: 20px; }
+        .btn {
+            padding: 12px 22px; border: none; border-radius: 6px;
+            cursor: pointer; font-weight: 600; font-family: 'Lora';
+            text-transform: uppercase; flex: 1; transition: 0.3s; font-size: 0.88rem;
+        }
+        .btn-primary { background: linear-gradient(135deg, var(--red), #8b1428); color: white; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(196,30,58,0.4); }
+        .btn-secondary { background: transparent; color: var(--gold); border: 2px solid var(--gold); }
+        .btn-secondary:hover { background: rgba(212,175,55,0.1); }
+
+        footer {
+            background: var(--dark-card); border-top: 1px solid rgba(212,175,55,0.3);
+            padding: 22px; text-align: center; color: #707070;
+            margin-top: 50px; font-size: 0.83rem;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <div class="header">
+        <h1>EventCalc Pro v7</h1>
+        <p>Cardápio Especial - Restrições Alimentares</p>
+        <div class="cliente-info" id="clienteInfo"></div>
+    </div>
+
+    <!-- BARRA DE PROGRESSO -->
+    <div class="prog-bar">
+        <div class="prog-step">
+            <div class="prog-circle done" onclick="window.location.href='event_calculator_pro_v7_questionario.html'" title="Questionário">1</div>
+            <div class="prog-label done">Questionário</div>
+        </div>
+        <div class="prog-line done"></div>
+        <div class="prog-step">
+            <div class="prog-circle done" onclick="window.location.href='event_calculator_pro_v7_cardapio.html'" title="Cardápio">2</div>
+            <div class="prog-label done">Cardápio</div>
+        </div>
+        <div class="prog-line done"></div>
+        <div class="prog-step">
+            <div class="prog-circle active">2B</div>
+            <div class="prog-label active">Especial</div>
+        </div>
+        <div class="prog-line"></div>
+        <div class="prog-step" id="progStep3B" style="display: none;">
+            <div class="prog-circle">3B</div>
+            <div class="prog-label">Vol. Especial</div>
+        </div>
+        <div class="prog-line" id="progLine3B" style="display: none;"></div>
+        <div class="prog-step">
+            <div class="prog-circle">3</div>
+            <div class="prog-label">Volumes</div>
+        </div>
+        <div class="prog-line"></div>
+        <div class="prog-step">
+            <div class="prog-circle">4</div>
+            <div class="prog-label">Proposta</div>
+        </div>
+    </div>
+
+    <div class="progress">
+        <h3>🥘 Etapa 2B: CARDÁPIO ESPECIAL</h3>
+        <p style="color: #909090; font-size: 0.82rem; margin-top: 8px;">
+            Prepare um cardápio alternativo para <span id="restricInfo"></span>
+        </p>
+    </div>
+
+    <!-- CELIÁCOS -->
+    <div class="restriction-section" id="secaoCeliaco" style="display: none;">
+        <h2>🌾 Cardápio para Celíacos</h2>
+        <p style="color: #c0c0c0; font-size: 0.85rem; margin-bottom: 16px; text-align: center;">
+            <span id="qtdCeliaco">0</span> pessoa(s) com intolerância ao glúten — organize itens sem glúten
+        </p>
+        <div class="categories" id="catsCeliaco"></div>
+    </div>
+
+    <!-- INTOLERANTES À LACTOSE -->
+    <div class="restriction-section" id="secaoLactose" style="display: none;">
+        <h2>🥛 Cardápio para Intolerantes à Lactose</h2>
+        <p style="color: #c0c0c0; font-size: 0.85rem; margin-bottom: 16px; text-align: center;">
+            <span id="qtdLactose">0</span> pessoa(s) com intolerância à lactose — organize itens sem lactose
+        </p>
+        <div class="categories" id="catsLactose"></div>
+    </div>
+
+    <!-- VEGANOS -->
+    <div class="restriction-section" id="secaoVegano" style="display: none;">
+        <h2>🥬 Cardápio para Veganos</h2>
+        <p style="color: #c0c0c0; font-size: 0.85rem; margin-bottom: 16px; text-align: center;">
+            <span id="qtdVegano">0</span> pessoa(s) vegana(s) — organize itens sem produtos de origem animal
+        </p>
+        <div class="categories" id="catsVegano"></div>
+    </div>
+
+    <!-- VEGETARIANOS -->
+    <div class="restriction-section" id="secaoVegetariano" style="display: none;">
+        <h2>🍃 Cardápio para Vegetarianos</h2>
+        <p style="color: #c0c0c0; font-size: 0.85rem; margin-bottom: 16px; text-align: center;">
+            <span id="qtdVegetariano">0</span> pessoa(s) vegetariana(s) — organize itens sem carne
+        </p>
+        <div class="categories" id="catsVegetariano"></div>
+    </div>
+
+    <div class="buttons">
+        <button type="button" class="btn btn-secondary" onclick="voltar()">← Voltar ao Cardápio</button>
+        <button type="button" class="btn btn-primary" onclick="prosseguir()">Prosseguir para Volumes →</button>
+    </div>
+
+</div>
+
+<footer>
+    <p>EventCalc Pro v7 — Sistema Profissional de Orçamento para Eventos</p>
+</footer>
+
+<script>
+    let cardapioEspecial = {
+        celiaco: { aperitivo: [], proteina: [], carboidrato: [], salada: [], sobremesa: [] },
+        lactose: { aperitivo: [], proteina: [], carboidrato: [], salada: [], sobremesa: [] },
+        vegano: { aperitivo: [], proteina: [], carboidrato: [], salada: [], sobremesa: [] },
+        vegetariano: { aperitivo: [], proteina: [], carboidrato: [], salada: [], sobremesa: [] }
+    };
+
+    let questionario = {};
+
+    /* ── CARREGAR ── */
+    function carregarDados() {
+        try {
+            const qSalvo = localStorage.getItem('eventocalcData');
+            if (qSalvo) {
+                questionario = JSON.parse(qSalvo).questionario || {};
+            }
+
+            const especSalvo = localStorage.getItem('eventocalc_cardapio_especial');
+            if (especSalvo) {
+                try {
+                    const carregado = JSON.parse(especSalvo);
+                    cardapioEspecial = carregado;
+                } catch(e) {}
+            }
+
+            // Garantir que todos os 4 tipos existem com estrutura correta
+            ['celiaco', 'lactose', 'vegano', 'vegetariano'].forEach(tipo => {
+                if (!cardapioEspecial[tipo]) {
+                    cardapioEspecial[tipo] = {};
+                }
+                ['aperitivo', 'proteina', 'carboidrato', 'salada', 'sobremesa'].forEach(cat => {
+                    if (!Array.isArray(cardapioEspecial[tipo][cat])) {
+                        cardapioEspecial[tipo][cat] = [];
+                    }
+                });
+            });
+
+            // Info do cliente
+            if (questionario.nomeContratante) {
+                document.getElementById('clienteInfo').textContent =
+                    'Cliente: ' + questionario.nomeContratante +
+                    (questionario.numeroProposta ? '  |  ' + questionario.numeroProposta : '');
+            }
+
+            const qtdCel = (questionario.restricoes?.celiaco || 0);
+            const qtdLac = (questionario.restricoes?.lactose || 0);
+            const qtdVeg = (questionario.veganos || 0);
+            const qtdVet = (questionario.vegetarianos || 0);
+
+            // Mostrar seções relevantes
+            document.getElementById('secaoCeliaco').style.display = qtdCel > 0 ? 'block' : 'none';
+            document.getElementById('secaoLactose').style.display = qtdLac > 0 ? 'block' : 'none';
+            document.getElementById('secaoVegano').style.display = qtdVeg > 0 ? 'block' : 'none';
+            document.getElementById('secaoVegetariano').style.display = qtdVet > 0 ? 'block' : 'none';
+
+            // Atualizar contadores
+            document.getElementById('qtdCeliaco').textContent = qtdCel;
+            document.getElementById('qtdLactose').textContent = qtdLac;
+            document.getElementById('qtdVegano').textContent = qtdVeg;
+            document.getElementById('qtdVegetariano').textContent = qtdVet;
+
+            // Construir texto de restrições
+            const info = [];
+            if (qtdCel > 0) info.push(qtdCel + ' celíaco(s)');
+            if (qtdLac > 0) info.push(qtdLac + ' intolerante(s) à lactose');
+            if (qtdVeg > 0) info.push(qtdVeg + ' vegano(s)');
+            if (qtdVet > 0) info.push(qtdVet + ' vegetariano(s)');
+            document.getElementById('restricInfo').textContent = info.join(' e ');
+
+            // Debug: verificar dados carregados
+            console.log('═════════════════════════════════════════');
+            console.log('📋 TELA 2B - CARREGANDO DADOS');
+            console.log('Cardápio especial:', cardapioEspecial);
+            console.log('Qtd Celiaco:', qtdCel, 'Qtd Lactose:', qtdLac, 'Qtd Vegano:', qtdVeg, 'Qtd Vegetariano:', qtdVet);
+            console.log('═════════════════════════════════════════');
+
+            if (qtdCel > 0) {
+                console.log('🌾 Renderizando CELIACO...');
+                renderizarCeliaco();
+            }
+            if (qtdLac > 0) {
+                console.log('🥛 Renderizando LACTOSE...');
+                renderizarLactose();
+            }
+            if (qtdVeg > 0) {
+                console.log('🥬 Renderizando VEGANO...');
+                renderizarVegano();
+            }
+            if (qtdVet > 0) {
+                console.log('🍃 Renderizando VEGETARIANO...');
+                renderizarVegetariano();
+            }
+        } catch(e) { console.error('❌ Erro ao carregar:', e); }
+    }
+
+    /* ── RENDERIZAR CATEGORIAS CELÍACO ── */
+    function renderizarCeliaco() {
+        try {
+            const html = gerarHtml('celiaco');
+            const el = document.getElementById('catsCeliaco');
+            if (el) el.innerHTML = html;
+        } catch(e) { console.error('Erro ao renderizar celiaco:', e); }
+    }
+
+    /* ── RENDERIZAR CATEGORIAS LACTOSE ── */
+    function renderizarLactose() {
+        try {
+            const html = gerarHtml('lactose');
+            const el = document.getElementById('catsLactose');
+            if (el) el.innerHTML = html;
+        } catch(e) { console.error('Erro ao renderizar lactose:', e); }
+    }
+
+    /* ── RENDERIZAR CATEGORIAS VEGANO ── */
+    function renderizarVegano() {
+        try {
+            console.log('🥬 Renderizando Vegano...');
+            const html = gerarHtml('vegano');
+            console.log('HTML gerado para Vegano:', html.substring(0, 100) + '...');
+            const el = document.getElementById('catsVegano');
+            console.log('Elemento catsVegano:', el);
+            if (el) {
+                el.innerHTML = html;
+                console.log('✅ Vegano renderizado com sucesso!');
+            } else {
+                console.error('❌ Elemento catsVegano não encontrado no DOM!');
+            }
+        } catch(e) { console.error('❌ Erro ao renderizar vegano:', e); }
+    }
+
+    /* ── RENDERIZAR CATEGORIAS VEGETARIANO ── */
+    function renderizarVegetariano() {
+        try {
+            const html = gerarHtml('vegetariano');
+            const el = document.getElementById('catsVegetariano');
+            if (el) el.innerHTML = html;
+        } catch(e) { console.error('Erro ao renderizar vegetariano:', e); }
+    }
+
+    /* ── GERAR HTML PARA CATEGORIAS ── */
+    function gerarHtml(tipoRestricao) {
+        const categorias = ['aperitivo', 'proteina', 'carboidrato', 'salada', 'sobremesa'];
+        const emojis = {
+            aperitivo: '🥂', proteina: '🍖', carboidrato: '🥔',
+            salada: '🥗', sobremesa: '🍰'
+        };
+        const nomes = {
+            aperitivo: 'Aperitivo', proteina: 'Proteína', carboidrato: 'Carboidrato',
+            salada: 'Salada', sobremesa: 'Sobremesa'
+        };
+
+        let html = '';
+        categorias.forEach(cat => {
+            const itens = cardapioEspecial[tipoRestricao][cat] || [];
+            const qtd = itens.length;
+
+            html += `
+                <div class="category-card">
+                    <div class="category-header">
+                        <div class="category-title">${emojis[cat]} ${nomes[cat]}</div>
+                        <div class="category-count">${qtd} item${qtd !== 1 ? 's' : ''}</div>
+                    </div>
+                    <div class="item-input">
+                        <input type="text" id="input${tipoRestricao}${capitalize(cat)}"
+                            placeholder="Adicione um item..."
+                            onkeydown="if(event.key==='Enter'){event.preventDefault();adicionarItem('${tipoRestricao}','${cat}');}"/>
+                        <button class="btn-add-item" onclick="adicionarItem('${tipoRestricao}','${cat}')">+ Add</button>
+                    </div>
+                    <div class="items-list" id="lista${tipoRestricao}${capitalize(cat)}">
+                        ${itens.length === 0
+                            ? '<div class="empty-hint">Nenhum item ainda — digite e pressione Enter</div>'
+                            : itens.map((item, idx) => `
+                                <div class="item">
+                                    <span class="item-name">${escHtml(item)}</span>
+                                    <button class="btn-remove" onclick="removerItem('${tipoRestricao}','${cat}',${idx})">✕ Remover</button>
+                                </div>
+                            `).join('')
+                        }
+                    </div>
+                </div>
+            `;
+        });
+
+        return html;
+    }
+
+    /* ── ADICIONAR ITEM ── */
+    function adicionarItem(tipoRestricao, categoria) {
+        const inputId = 'input' + tipoRestricao + capitalize(categoria);
+        const input = document.getElementById(inputId);
+        const valor = input.value.trim();
+
+        if (!valor) {
+            input.focus();
+            return;
+        }
+
+        const itens = cardapioEspecial[tipoRestricao][categoria];
+        if (itens.map(i => i.toLowerCase()).includes(valor.toLowerCase())) {
+            alert('⚠️ Este item já existe nesta categoria!');
+            input.select();
+            return;
+        }
+
+        itens.push(valor);
+        input.value = '';
+        input.focus();
+        salvar();
+
+        // Renderizar baseado no tipo de restrição
+        switch(tipoRestricao) {
+            case 'celiaco': renderizarCeliaco(); break;
+            case 'lactose': renderizarLactose(); break;
+            case 'vegano': renderizarVegano(); break;
+            case 'vegetariano': renderizarVegetariano(); break;
+        }
+    }
+
+    /* ── REMOVER ITEM ── */
+    function removerItem(tipoRestricao, categoria, indice) {
+        cardapioEspecial[tipoRestricao][categoria].splice(indice, 1);
+        salvar();
+
+        // Renderizar baseado no tipo de restrição
+        switch(tipoRestricao) {
+            case 'celiaco': renderizarCeliaco(); break;
+            case 'lactose': renderizarLactose(); break;
+            case 'vegano': renderizarVegano(); break;
+            case 'vegetariano': renderizarVegetariano(); break;
+        }
+    }
+
+    /* ── SALVAR ── */
+    function salvar() {
+        localStorage.setItem('eventocalc_cardapio_especial', JSON.stringify(cardapioEspecial));
+    }
+
+    /* ── NAV ── */
+    function voltar() {
+        window.location.href = 'event_calculator_pro_v7_cardapio.html';
+    }
+
+    function prosseguir() {
+        try {
+            salvar();
+
+            // Verificar se há dados no cardápio especial para qualquer tipo de restrição
+            const temCeliaco = Object.values(cardapioEspecial.celiaco || {}).some(arr => Array.isArray(arr) && arr.length > 0);
+            const temLactose = Object.values(cardapioEspecial.lactose || {}).some(arr => Array.isArray(arr) && arr.length > 0);
+            const temVegano = Object.values(cardapioEspecial.vegano || {}).some(arr => Array.isArray(arr) && arr.length > 0);
+            const temVegetariano = Object.values(cardapioEspecial.vegetariano || {}).some(arr => Array.isArray(arr) && arr.length > 0);
+
+            console.log('Verificação prosseguir:', { temCeliaco, temLactose, temVegano, temVegetariano });
+
+            const proximaPagina = (temCeliaco || temLactose || temVegano || temVegetariano)
+                ? 'event_calculator_pro_v7_volumes_3b.html'
+                : 'event_calculator_pro_v7_volumes.html';
+
+            console.log('Navegando para:', proximaPagina);
+            window.location.href = proximaPagina;
+        } catch(e) {
+            console.error('❌ Erro ao prosseguir:', e);
+            alert('⚠️ Erro ao prosseguir. Verifique o console (F12).');
+        }
+    }
+
+    /* ── UTILS ── */
+    function capitalize(str) { return str.charAt(0).toUpperCase() + str.slice(1); }
+    function escHtml(t) { return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+    window.addEventListener('load', carregarDados);
+</script>
+</body>
+</html>

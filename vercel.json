@@ -1,0 +1,14 @@
+{
+  "version": 2,
+  "buildCommand": "echo 'Static files ready'",
+  "public": true,
+  "env": {
+    "NODE_ENV": "production"
+  },
+  "regions": ["sfo1"],
+  "functions": {
+    "api/**/*.js": {
+      "runtime": "nodejs18.x"
+    }
+  }
+}

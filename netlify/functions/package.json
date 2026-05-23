@@ -1,0 +1,10 @@
+{
+  "name": "eventcalc-functions",
+  "version": "1.0.0",
+  "description": "Netlify Functions para EventCalc Pro v7",
+  "main": "index.js",
+  "dependencies": {
+    "@sendgrid/mail": "^7.7.0",
+    "twilio": "^4.0.0"
+  }
+}

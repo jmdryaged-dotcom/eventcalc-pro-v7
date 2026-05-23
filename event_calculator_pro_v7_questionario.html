@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EventCalc Pro v7 - Questionário</title>
+    <!-- 🔐 Sistema de Expiração Automática -->
+    <script src="sistema-expiracao.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Lora:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --dark-bg: #0a0a0a;
+            --dark-card: #242424;
+            --gold: #d4af37;
+            --red: #c41e3a;
+            --white: #ffffff;
+        }
+        body { font-family: 'Lora', serif; background: var(--dark-bg); color: var(--white); }
+        .container { max-width: 900px; margin: 0 auto; padding: 20px; }
+
+        .header {
+            background: linear-gradient(135deg, #1a1a1a 0%, #242424 100%);
+            padding: 28px 40px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            border: 1px solid rgba(212,175,55,0.3);
+            text-align: center;
+        }
+        .header h1 { font-family: 'Playfair Display'; font-size: 2rem; color: var(--gold); margin-bottom: 4px; }
+        .header p { color: #909090; font-size: 0.88rem; }
+
+        /* ── BARRA DE PROGRESSO ── */
+        .prog-bar {
+            display: flex; align-items: center; justify-content: center;
+            padding: 14px 20px; margin-bottom: 16px;
+            background: var(--dark-card);
+            border: 1px solid rgba(212,175,55,0.3);
+            border-radius: 8px;
+        }
+        .prog-step { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        .prog-circle {
+            width: 32px; height: 32px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: bold; font-size: 0.82rem;
+            border: 2px solid rgba(212,175,55,0.2);
+            color: #555; background: transparent; transition: 0.2s;
+        }
+        .prog-circle.done { border-color: var(--gold); color: var(--gold); background: rgba(212,175,55,0.12); cursor: pointer; }
+        .prog-circle.done:hover { background: rgba(212,175,55,0.22); }
+        .prog-circle.active { border-color: var(--gold); color: #0a0a0a; background: var(--gold); }
+        .prog-label { font-size: 0.66rem; color: #555; text-align: center; white-space: nowrap; }
+        .prog-label.done, .prog-label.active { color: var(--gold); }
+        .prog-line { height: 2px; width: 48px; background: rgba(212,175,55,0.15); margin-bottom: 18px; flex-shrink: 0; }
+        .prog-line.done { background: rgba(212,175,55,0.5); }
+        @media (max-width: 500px) { .prog-line { width: 18px; } .prog-label { font-size: 0.58rem; } }
+
+        .progress {
+            background: var(--dark-card); padding: 14px 20px;
+            border-radius: 8px; margin-bottom: 16px;
+            border: 1px solid rgba(212,175,55,0.3); text-align: center;
+        }
+        .progress h3 { color: var(--gold); font-size: 0.93rem; }
+
+        .novo-btn-row { text-align: right; margin-bottom: 12px; }
+        .novo-btn {
+            background: transparent; border: 1px solid rgba(196,30,58,0.35);
+            color: rgba(196,30,58,0.65); padding: 5px 13px; border-radius: 4px;
+            cursor: pointer; font-size: 0.78rem; font-family: 'Lora'; transition: 0.2s;
+        }
+        .novo-btn:hover { border-color: var(--red); color: var(--red); }
+
+        /* ── SEÇÃO HEADER ── */
+        .section-header {
+            color: var(--gold); font-family: 'Playfair Display';
+            font-size: 1.05rem; margin: 24px 0 12px;
+            padding-bottom: 7px; border-bottom: 1px solid rgba(212,175,55,0.2);
+        }
+
+        /* ── FORM ── */
+        .form-group {
+            background: var(--dark-card);
+            border: 1px solid rgba(212,175,55,0.2);
+            padding: 18px 22px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+        }
+        .form-group label {
+            display: block; color: var(--gold); font-weight: 600;
+            margin-bottom: 7px; font-size: 0.93rem;
+        }
+        .form-group input, .form-group select {
+            width: 100%; background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(212,175,55,0.15);
+            color: white; padding: 10px 12px;
+            border-radius: 6px; font-family: 'Lora'; font-size: 0.93rem;
+        }
+        .form-group input:focus, .form-group select:focus {
+            outline: none; border-color: var(--gold);
+            background: rgba(212,175,55,0.08);
+        }
+        .form-group small { color: #6a6a6a; display: block; margin-top: 4px; font-size: 0.8rem; }
+        select option { background: #242424; }
+
+        .dois-colunas { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        @media (max-width: 560px) { .dois-colunas { grid-template-columns: 1fr; } }
+
+        .equipamentos-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+        .checkbox-item {
+            display: flex; align-items: center; gap: 10px; padding: 10px 12px;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(212,175,55,0.15);
+            border-radius: 6px; cursor: pointer; transition: 0.2s;
+        }
+        .checkbox-item:hover { background: rgba(212,175,55,0.08); border-color: var(--gold); }
+        .checkbox-item input[type="checkbox"] { width: 17px; height: 17px; accent-color: var(--gold); cursor: pointer; flex-shrink: 0; }
+        .checkbox-item label { flex: 1; margin: 0; color: #d0d0d0; font-weight: 400; cursor: pointer; font-size: 0.88rem; }
+
+        /* ── VOLUMES ── */
+        .volumes-section {
+            background: rgba(212,175,55,0.06); border-left: 4px solid var(--gold);
+            padding: 18px 20px; border-radius: 6px; margin-top: 16px;
+        }
+        .volumes-section h3 { color: var(--gold); margin-bottom: 5px; font-family: 'Playfair Display'; font-size: 1.15rem; }
+        .volumes-section .vol-hint { color: #909090; margin-bottom: 15px; font-size: 0.85rem; }
+        .volume-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(125px, 1fr)); gap: 10px; }
+        .volume-item { padding: 11px; background: rgba(0,0,0,0.2); border-radius: 6px; }
+        .volume-item label { color: #c0c0c0; font-weight: 500; margin-bottom: 5px; font-size: 0.82rem; display: block; }
+        .volume-item input { margin-bottom: 0 !important; }
+
+        /* ── BOTÕES ── */
+        .buttons { display: flex; gap: 12px; margin-top: 24px; }
+        .btn {
+            padding: 12px 22px; border: none; border-radius: 6px;
+            cursor: pointer; font-weight: 600; font-family: 'Lora';
+            text-transform: uppercase; flex: 1; transition: 0.3s; font-size: 0.88rem;
+        }
+        .btn-primary { background: linear-gradient(135deg, var(--red), #8b1428); color: white; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(196,30,58,0.4); }
+        .btn-secondary { background: transparent; color: var(--gold); border: 2px solid var(--gold); }
+        .btn-secondary:hover { background: rgba(212,175,55,0.1); }
+
+        .required { color: var(--red); }
+
+        /* ── BARRA DE PROGRESSO PERCENTUAL ── */
+        .percentage-bar-container {
+            display: flex; align-items: center; gap: 12px; margin-top: 10px;
+        }
+        .percentage-bar {
+            flex: 1; height: 8px; background: rgba(212,175,55,0.1);
+            border-radius: 4px; overflow: hidden; border: 1px solid rgba(212,175,55,0.2);
+        }
+        .percentage-bar-fill {
+            height: 100%; background: linear-gradient(90deg, var(--gold), #b8952a);
+            transition: width 0.3s ease; border-radius: 4px;
+        }
+        .percentage-text {
+            color: var(--gold); font-weight: 700; font-size: 0.9rem;
+            min-width: 45px; text-align: right; font-family: 'Playfair Display';
+        }
+
+        /* ── MODAL DE GERENCIAMENTO ── */
+        .modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7); z-index: 1000; align-items: center; justify-content: center;
+        }
+        .modal.show { display: flex; }
+        .modal-content {
+            background: var(--dark-card); border: 1px solid rgba(212,175,55,0.3);
+            border-radius: 8px; padding: 28px; max-width: 600px; width: 90%; max-height: 80vh;
+            overflow-y: auto; position: relative;
+        }
+        .modal-close {
+            position: absolute; top: 16px; right: 16px; background: none; border: none;
+            color: var(--gold); font-size: 1.5rem; cursor: pointer;
+        }
+        .modal h2 { font-family: 'Playfair Display'; color: var(--gold); margin-bottom: 16px; }
+        .modal-section { margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid rgba(212,175,55,0.2); }
+        .modal-section:last-child { border-bottom: none; }
+        .modal-buttons { display: flex; gap: 8px; flex-wrap: wrap; }
+        .modal-btn {
+            background: rgba(212,175,55,0.2); color: var(--gold); border: 1px solid rgba(212,175,55,0.4);
+            padding: 8px 14px; border-radius: 4px; cursor: pointer; font-size: 0.78rem;
+            transition: 0.2s;
+        }
+        .modal-btn:hover { background: rgba(212,175,55,0.4); }
+        .historico-item {
+            background: rgba(255,255,255,0.02); border: 1px solid rgba(212,175,55,0.15);
+            padding: 10px 12px; border-radius: 4px; margin-bottom: 8px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .historico-info { flex: 1; }
+        .historico-nome { color: var(--gold); font-weight: 600; font-size: 0.88rem; }
+        .historico-data { color: #808080; font-size: 0.75rem; margin-top: 2px; }
+        .historico-btns { display: flex; gap: 4px; }
+        .btn-hist-carregar, .btn-hist-remover {
+            background: none; border: 1px solid rgba(212,175,55,0.3); color: var(--gold);
+            padding: 4px 8px; border-radius: 3px; cursor: pointer; font-size: 0.7rem;
+            transition: 0.2s;
+        }
+        .btn-hist-carregar:hover { background: rgba(212,175,55,0.2); }
+        .btn-hist-remover:hover { background: rgba(196,30,58,0.3); color: var(--red); border-color: var(--red); }
+        .historico-vazio { color: #808080; text-align: center; padding: 16px; font-size: 0.85rem; }
+
+        footer {
+            background: var(--dark-card); border-top: 1px solid rgba(212,175,55,0.3);
+            padding: 22px; text-align: center; color: #707070;
+            margin-top: 50px; font-size: 0.83rem;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <div class="header">
+        <h1>EventCalc Pro v7</h1>
+        <p>Sistema Profissional de Orçamento para Eventos</p>
+    </div>
+
+    <!-- BARRA DE PROGRESSO -->
+    <div class="prog-bar">
+        <div class="prog-step">
+            <div class="prog-circle active">1</div>
+            <div class="prog-label active">Questionário</div>
+        </div>
+        <div class="prog-line"></div>
+        <div class="prog-step">
+            <div class="prog-circle">2</div>
+            <div class="prog-label">Cardápio</div>
+        </div>
+        <div class="prog-line"></div>
+        <div class="prog-step">
+            <div class="prog-circle">3</div>
+            <div class="prog-label">Volumes</div>
+        </div>
+        <div class="prog-line"></div>
+        <div class="prog-step">
+            <div class="prog-circle">4</div>
+            <div class="prog-label">Proposta</div>
+        </div>
+    </div>
+
+    <div class="progress">
+        <h3>📋 Etapa 1 de 4: QUESTIONÁRIO INICIAL</h3>
+        <div class="percentage-bar-container">
+            <div class="percentage-bar">
+                <div class="percentage-bar-fill" id="progressBar" style="width: 0%"></div>
+            </div>
+            <div class="percentage-text" id="progressPercentage">0%</div>
+        </div>
+    </div>
+
+    <div class="novo-btn-row" style="display: flex; gap: 8px; justify-content: flex-end;">
+        <button class="novo-btn" onclick="abrirGerenciador()">📂 Meus Orçamentos</button>
+        <button class="novo-btn" onclick="novoOrcamento()">🗑️ Limpar e Novo Orçamento</button>
+    </div>
+
+    <form id="questionario">
+
+        <!-- ── DADOS DA PROPOSTA ── -->
+        <div class="section-header">📄 Dados da Proposta</div>
+
+        <div class="form-group">
+            <label>Nome do Contratante / Cliente <span class="required">*</span></label>
+            <input type="text" id="nomeContratante" placeholder="Ex: João Silva | Empresa ABC Ltda" required />
+            <small>Nome para quem será emitida a proposta</small>
+        </div>
+
+        <div class="dois-colunas">
+            <div class="form-group">
+                <label>Nº da Proposta</label>
+                <input type="text" id="numeroProposta" placeholder="Gerado ao prosseguir (ex: ORÇ-2026-001)" />
+                <small>Você pode digitar o seu próprio código</small>
+            </div>
+            <div class="form-group">
+                <label>Validade da Proposta</label>
+                <input type="date" id="validadeProposta" />
+                <small>Padrão: 7 dias a partir de hoje</small>
+            </div>
+        </div>
+
+        <!-- ── DADOS DO EVENTO ── -->
+        <div class="section-header">🎉 Dados do Evento</div>
+
+        <div class="form-group">
+            <label>1. Local do Evento <span class="required">*</span></label>
+            <input type="text" id="local" placeholder="Ex: Itapema/SC" required />
+            <small>Cidade e estado onde o evento ocorrerá</small>
+        </div>
+
+        <div class="form-group">
+            <label>2. Data do Evento <span class="required">*</span></label>
+            <input type="date" id="data" required />
+            <small>Quando será o evento</small>
+        </div>
+
+        <div class="form-group">
+            <label>3. Horário de Início <span class="required">*</span></label>
+            <input type="time" id="horario" required />
+            <small>Que horas começa</small>
+        </div>
+
+        <div class="form-group">
+            <label>4. Hora de Chegada (preparo) <span class="required">*</span></label>
+            <input type="time" id="horarioChegada" required oninput="calcularHorarioSaida()" />
+            <small>Que horas você chegará para iniciar o preparo</small>
+        </div>
+
+        <div class="form-group">
+            <label>5. Duração (horas) <span class="required">*</span></label>
+            <input type="number" id="duracao" min="1" max="24" step="0.5" placeholder="Ex: 4" required oninput="calcularHorarioSaida()" />
+            <small>Quanto tempo vai durar</small>
+        </div>
+
+        <div class="form-group">
+            <label>6. Horário de Saída (auto)</label>
+            <input type="time" id="horarioSaida" readonly />
+            <small>Calculado automaticamente: chegada + duração</small>
+        </div>
+
+        <div class="form-group">
+            <label>7. Tipo de Refeição <span class="required">*</span></label>
+            <select id="refeicao" required onchange="atualizarVolumesProjetados()">
+                <option value="">-- Selecione --</option>
+                <option value="cafe">Café da Manhã</option>
+                <option value="almoco">Almoço</option>
+                <option value="lanche">Lanche / Petisco</option>
+                <option value="jantar">Jantar</option>
+            </select>
+            <small>Qual tipo de refeição será servida</small>
+        </div>
+
+        <div class="form-group">
+            <label>8. Número de Pessoas <span class="required">*</span></label>
+            <div class="dois-colunas">
+                <div>
+                    <label style="color:#c0c0c0;font-size:0.8rem;margin-bottom:4px;">Adultos</label>
+                    <input type="number" id="adultos" min="1" placeholder="20" required />
+                </div>
+                <div>
+                    <label style="color:#c0c0c0;font-size:0.8rem;margin-bottom:4px;">Crianças</label>
+                    <input type="number" id="criancas" min="0" placeholder="0" />
+                </div>
+            </div>
+            <small>Separe adultos e crianças</small>
+        </div>
+
+        <div class="form-group">
+            <label>9. Equipamentos Disponíveis</label>
+            <div class="equipamentos-grid">
+                <div class="checkbox-item">
+                    <input type="checkbox" id="churrasqueira" />
+                    <label for="churrasqueira">🔥 Churrasqueira</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="forno" />
+                    <label for="forno">🔥 Forno</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="parrilla" />
+                    <label for="parrilla">🔥 Parrilla</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="smoker" />
+                    <label for="smoker">🔥 Pit Smoker</label>
+                </div>
+            </div>
+            <small style="margin-top:10px;display:block;">Marque quais equipamentos você tem disponível</small>
+        </div>
+
+        <div class="form-group">
+            <label>10. Tipo de Cardápio Sugerido</label>
+            <select id="tipoCardapio">
+                <option value="">-- Selecione --</option>
+                <option value="dryaged">Dry Aged (Premium)</option>
+                <option value="bbq">American BBQ / Defumada</option>
+                <option value="tradicional">Tradicional / Churrascaria</option>
+            </select>
+            <small>Que estilo de churrasco você oferece</small>
+        </div>
+
+        <div class="form-group">
+            <label>11. Cortes Especiais Disponíveis</label>
+            <input type="text" id="cortes" placeholder="Ex: Picanha, Costela, Contrafilé, Frango, Suíno" />
+            <small>Quais cortes você trabalha (separar por vírgula)</small>
+        </div>
+
+        <div class="form-group">
+            <label>12. Restrições Alimentares</label>
+            <div class="dois-colunas">
+                <div>
+                    <label style="color:#c0c0c0;font-size:0.8rem;margin-bottom:4px;">Veganos</label>
+                    <input type="number" id="veganos" min="0" placeholder="0" oninput="atualizarCardapioEspecial()" />
+                </div>
+                <div>
+                    <label style="color:#c0c0c0;font-size:0.8rem;margin-bottom:4px;">Vegetarianos</label>
+                    <input type="number" id="vegetarianos" min="0" placeholder="0" oninput="atualizarCardapioEspecial()" />
+                </div>
+            </div>
+            <small>Quantidade de pessoas com restrições alimentares</small>
+        </div>
+
+        <div class="form-group">
+            <label>13. Restrições de Saúde (Cardápio Especial)</label>
+            <div class="dois-colunas">
+                <div>
+                    <label style="color:#c0c0c0;font-size:0.8rem;margin-bottom:4px;">Celíacos (quantas pessoas)</label>
+                    <input type="number" id="restricCeliaco" min="0" placeholder="0" />
+                </div>
+                <div>
+                    <label style="color:#c0c0c0;font-size:0.8rem;margin-bottom:4px;">Intolerantes a Lactose (quantas pessoas)</label>
+                    <input type="number" id="restricLactose" min="0" placeholder="0" />
+                </div>
+            </div>
+            <small style="margin-top:10px;display:block;">Informações para preparar cardápio especial</small>
+        </div>
+
+        <!-- ── VOLUMES PROJETADOS ── -->
+        <div class="volumes-section">
+            <h3>📊 Volumes Projetados (g/pessoa)</h3>
+            <p class="vol-hint">Ajusta automaticamente ao escolher o tipo de refeição. Edite conforme sua política:</p>
+            <div class="volume-grid">
+                <div class="volume-item">
+                    <label>Aperitivo (g)</label>
+                    <input type="number" id="volAperitivo" min="0" max="500" step="10" value="120" oninput="calcularTotal()" />
+                </div>
+                <div class="volume-item">
+                    <label>Proteína (g)</label>
+                    <input type="number" id="volProteina" min="0" max="1000" step="10" value="450" oninput="calcularTotal()" />
+                </div>
+                <div class="volume-item">
+                    <label>Carboidrato (g)</label>
+                    <input type="number" id="volCarboidrato" min="0" max="500" step="10" value="200" oninput="calcularTotal()" />
+                </div>
+                <div class="volume-item">
+                    <label>Salada (g)</label>
+                    <input type="number" id="volSalada" min="0" max="400" step="10" value="100" oninput="calcularTotal()" />
+                </div>
+                <div class="volume-item">
+                    <label>Sobremesa (g)</label>
+                    <input type="number" id="volSobremesa" min="0" max="400" step="10" value="100" oninput="calcularTotal()" />
+                </div>
+                <div class="volume-item">
+                    <label style="color:var(--gold);">TOTAL (g)</label>
+                    <input type="number" id="volTotal" disabled
+                        style="background:rgba(212,175,55,0.1);cursor:not-allowed;color:var(--gold);" />
+                </div>
+            </div>
+        </div>
+
+    </form>
+
+    <div class="buttons">
+        <button type="button" class="btn btn-secondary" onclick="window.location.href='index_v7.html'">← Voltar</button>
+        <button type="button" class="btn btn-primary" onclick="prosseguir()">Prosseguir para Cardápio →</button>
+    </div>
+
+</div>
+
+<!-- MODAL DE GERENCIAMENTO -->
+<div class="modal" id="modalGerenciador">
+    <div class="modal-content">
+        <button class="modal-close" onclick="fecharGerenciador()">✕</button>
+        <h2>📂 Gerenciar Orçamentos</h2>
+
+        <div class="modal-section">
+            <h3 style="color: var(--gold); font-size: 0.95rem; margin-bottom: 12px;">💾 Exportar / Importar</h3>
+            <div class="modal-buttons">
+                <button class="modal-btn" onclick="exportarOrcamento()">📥 Exportar Atual</button>
+                <button class="modal-btn" onclick="document.getElementById('inputImportar').click()">📤 Importar</button>
+                <input type="file" id="inputImportar" accept=".json" style="display: none;" onchange="importarOrcamento(event)" />
+            </div>
+        </div>
+
+        <div class="modal-section">
+            <h3 style="color: var(--gold); font-size: 0.95rem; margin-bottom: 12px;">📜 Histórico de Orçamentos</h3>
+            <div id="listaHistorico"></div>
+        </div>
+    </div>
+</div>
+
+<footer>
+    <p>EventCalc Pro v7 — Sistema Profissional de Orçamento para Eventos</p>
+</footer>
+
+<script>
+    const padroes = {
+        cafe:   { aperitivo: 100, proteina: 150, carboidrato: 200, salada:   0, sobremesa:  50 },
+        almoco: { aperitivo: 120, proteina: 450, carboidrato: 200, salada: 100, sobremesa: 100 },
+        lanche: { aperitivo: 200, proteina: 300, carboidrato:   0, salada:   0, sobremesa:  50 },
+        jantar: { aperitivo: 150, proteina: 500, carboidrato: 200, salada: 150, sobremesa: 100 }
+    };
+
+    function atualizarVolumesProjetados() {
+        const refeicao = document.getElementById('refeicao').value;
+        if (refeicao && padroes[refeicao]) {
+            const p = padroes[refeicao];
+            document.getElementById('volAperitivo').value   = p.aperitivo;
+            document.getElementById('volProteina').value    = p.proteina;
+            document.getElementById('volCarboidrato').value = p.carboidrato;
+            document.getElementById('volSalada').value      = p.salada;
+            document.getElementById('volSobremesa').value   = p.sobremesa;
+        }
+        calcularTotal();
+    }
+
+    function atualizarProgressao() {
+        // Calcula percentual de preenchimento da página
+        const campos = [
+            'nomeContratante', 'local', 'data', 'horario', 'horarioChegada', 'duracao',
+            'refeicao', 'adultos', 'criancas', 'veganos', 'vegetarianos', 'restricCeliaco',
+            'restricLactose', 'tipoCardapio'
+        ];
+
+        let preenchidos = 0;
+        campos.forEach(campoId => {
+            const el = document.getElementById(campoId);
+            if (el) {
+                const valor = el.value || '';
+                const preenchido = valor !== '' && valor !== '0';
+                if (preenchido) preenchidos++;
+            }
+        });
+
+        const percentual = Math.round((preenchidos / campos.length) * 100);
+        document.getElementById('progressBar').style.width = percentual + '%';
+        document.getElementById('progressPercentage').textContent = percentual + '%';
+    }
+
+    function calcularHorarioSaida() {
+        const chegada = document.getElementById('horarioChegada').value;
+        const duracao = parseFloat(document.getElementById('duracao').value) || 0;
+
+        if (!chegada) {
+            document.getElementById('horarioSaida').value = '';
+            return;
+        }
+
+        const [horas, minutos] = chegada.split(':').map(Number);
+        const totalMinutos = horas * 60 + minutos + (duracao * 60);
+        const horasSaida = Math.floor(totalMinutos / 60) % 24;
+        const minutosSaida = totalMinutos % 60;
+
+        document.getElementById('horarioSaida').value =
+            String(horasSaida).padStart(2, '0') + ':' + String(minutosSaida).padStart(2, '0');
+    }
+
+    function calcularTotal() {
+        const ap = parseFloat(document.getElementById('volAperitivo').value)   || 0;
+        const pr = parseFloat(document.getElementById('volProteina').value)    || 0;
+        const ca = parseFloat(document.getElementById('volCarboidrato').value) || 0;
+        const sa = parseFloat(document.getElementById('volSalada').value)      || 0;
+        const so = parseFloat(document.getElementById('volSobremesa').value)   || 0;
+        document.getElementById('volTotal').value = ap + pr + ca + sa + so;
+    }
+
+    function getValidadeDefault() {
+        const d = new Date();
+        d.setDate(d.getDate() + 7);
+        return d.toISOString().split('T')[0];
+    }
+
+    function gerarNumeroProposta() {
+        const ano = new Date().getFullYear();
+        let counter = parseInt(localStorage.getItem('eventocalc_proposta_counter') || '0') + 1;
+        localStorage.setItem('eventocalc_proposta_counter', String(counter));
+        return 'ORC-' + ano + '-' + String(counter).padStart(3, '0');
+    }
+
+    function restaurarDados() {
+        calcularTotal();
+        document.getElementById('validadeProposta').value = getValidadeDefault();
+
+        const salvo = localStorage.getItem('eventocalcData');
+        if (!salvo) {
+            document.getElementById('adultos').value = 20;
+            calcularTotal();
+            return;
+        }
+
+        try {
+            const dados = JSON.parse(salvo);
+            const q = dados.questionario || {};
+
+            // Proposta
+            if (q.nomeContratante) document.getElementById('nomeContratante').value  = q.nomeContratante;
+            if (q.numeroProposta)  document.getElementById('numeroProposta').value   = q.numeroProposta;
+            if (q.validadeProposta)document.getElementById('validadeProposta').value = q.validadeProposta;
+
+            // Evento
+            if (q.local)           document.getElementById('local').value           = q.local;
+            if (q.data)            document.getElementById('data').value            = q.data;
+            if (q.horario)         document.getElementById('horario').value         = q.horario;
+            if (q.horarioChegada)  document.getElementById('horarioChegada').value  = q.horarioChegada;
+            if (q.duracao)         document.getElementById('duracao').value         = q.duracao;
+            if (q.refeicao)        document.getElementById('refeicao').value        = q.refeicao;
+
+            calcularHorarioSaida();
+
+            document.getElementById('adultos').value      = q.adultos      || 20;
+            document.getElementById('criancas').value     = q.criancas     || 0;
+            document.getElementById('tipoCardapio').value = q.tipoCardapio || '';
+            if (q.cortes) document.getElementById('cortes').value = q.cortes;
+            document.getElementById('veganos').value      = q.veganos      || 0;
+            document.getElementById('vegetarianos').value = q.vegetarianos || 0;
+
+            // Restrições de saúde
+            if (q.restricoes) {
+                document.getElementById('restricCeliaco').value = q.restricoes.celiaco || 0;
+                document.getElementById('restricLactose').value = q.restricoes.lactose || 0;
+            }
+
+            // Equipamentos
+            if (q.equipamentos) {
+                ['churrasqueira','forno','parrilla','smoker'].forEach(id => {
+                    document.getElementById(id).checked = q.equipamentos[id] || false;
+                });
+            }
+
+            // Volumes
+            if (q.volumes) {
+                document.getElementById('volAperitivo').value   = q.volumes.aperitivo   ?? 120;
+                document.getElementById('volProteina').value    = q.volumes.proteina    ?? 450;
+                document.getElementById('volCarboidrato').value = q.volumes.carboidrato ?? 200;
+                document.getElementById('volSalada').value      = q.volumes.salada      ?? 100;
+                document.getElementById('volSobremesa').value   = q.volumes.sobremesa   ?? 100;
+            }
+
+            calcularTotal();
+        } catch(e) {
+            console.error('Erro ao restaurar:', e);
+            document.getElementById('adultos').value = 20;
+            calcularTotal();
+        }
+        atualizarProgressao();
+    }
+
+    function novoOrcamento() {
+        if (!confirm('Isso apagará todos os dados do orçamento atual.\n\nContinuar?')) return;
+        ['eventocalcData','eventocalc_cardapio','eventocalc_volumes','eventocalc_custos'].forEach(k =>
+            localStorage.removeItem(k)
+        );
+        document.getElementById('questionario').reset();
+        document.getElementById('adultos').value = 20;
+        document.getElementById('validadeProposta').value = getValidadeDefault();
+        calcularTotal();
+    }
+
+    function prosseguir() {
+        const nomeContratante = document.getElementById('nomeContratante').value.trim();
+        const local    = document.getElementById('local').value.trim();
+        const data     = document.getElementById('data').value;
+        const horario  = document.getElementById('horario').value;
+        const horarioChegada = document.getElementById('horarioChegada').value;
+        const duracao  = document.getElementById('duracao').value;
+        const refeicao = document.getElementById('refeicao').value;
+        const adultos  = parseInt(document.getElementById('adultos').value);
+
+        if (!nomeContratante) {
+            alert('❌ Informe o nome do contratante!');
+            document.getElementById('nomeContratante').focus();
+            return;
+        }
+        if (!local || !data || !horario || !horarioChegada || !duracao || !refeicao || !adultos) {
+            alert('❌ Preencha todos os campos obrigatórios (marcados com *)!');
+            return;
+        }
+
+        // Gerar número de proposta se ainda não preenchido
+        let numeroProposta = document.getElementById('numeroProposta').value.trim();
+        if (!numeroProposta) {
+            numeroProposta = gerarNumeroProposta();
+            document.getElementById('numeroProposta').value = numeroProposta;
+        }
+
+        const criancas         = parseInt(document.getElementById('criancas').value)      || 0;
+        const validadeProposta = document.getElementById('validadeProposta').value        || getValidadeDefault();
+
+        const equipamentos = {
+            churrasqueira: document.getElementById('churrasqueira').checked,
+            forno:         document.getElementById('forno').checked,
+            parrilla:      document.getElementById('parrilla').checked,
+            smoker:        document.getElementById('smoker').checked
+        };
+
+        const volumes = {
+            aperitivo:   parseFloat(document.getElementById('volAperitivo').value)   || 0,
+            proteina:    parseFloat(document.getElementById('volProteina').value)    || 0,
+            carboidrato: parseFloat(document.getElementById('volCarboidrato').value) || 0,
+            salada:      parseFloat(document.getElementById('volSalada').value)      || 0,
+            sobremesa:   parseFloat(document.getElementById('volSobremesa').value)   || 0,
+            total:       parseFloat(document.getElementById('volTotal').value)       || 0
+        };
+
+        const restricoes = {
+            celiaco: parseInt(document.getElementById('restricCeliaco').value) || 0,
+            lactose: parseInt(document.getElementById('restricLactose').value) || 0
+        };
+
+        const horarioSaida = document.getElementById('horarioSaida').value;
+
+        const questionario = {
+            nomeContratante, numeroProposta, validadeProposta,
+            local, data, horario, horarioChegada, horarioSaida, duracao, refeicao,
+            adultos, criancas, equipamentos,
+            tipoCardapio: document.getElementById('tipoCardapio').value,
+            cortes:       document.getElementById('cortes').value,
+            veganos:      parseInt(document.getElementById('veganos').value)      || 0,
+            vegetarianos: parseInt(document.getElementById('vegetarianos').value) || 0,
+            restricoes,
+            volumes
+        };
+
+        localStorage.setItem('eventocalcData', JSON.stringify({ questionario }));
+        salvarNoHistorico();
+        setTimeout(() => { window.location.href = 'event_calculator_pro_v7_cardapio.html'; }, 200);
+    }
+
+    /* ── GERENCIADOR DE ORÇAMENTOS ── */
+    function abrirGerenciador() {
+        document.getElementById('modalGerenciador').classList.add('show');
+        atualizarListaHistorico();
+    }
+
+    function fecharGerenciador() {
+        document.getElementById('modalGerenciador').classList.remove('show');
+    }
+
+    function exportarOrcamento() {
+        const nome = (document.getElementById('nomeContratante').value || 'orcamento').replace(/[^a-z0-9]/gi, '_').toLowerCase();
+        const dados = {
+            questionario: JSON.parse(localStorage.getItem('eventocalcData') || '{}').questionario || {},
+            cardapio: JSON.parse(localStorage.getItem('eventocalc_cardapio') || '{}'),
+            cardapioEspecial: JSON.parse(localStorage.getItem('eventocalc_cardapio_especial') || '{}'),
+            volumes: JSON.parse(localStorage.getItem('eventocalc_volumes') || '[]'),
+            custos: JSON.parse(localStorage.getItem('eventocalc_custos') || '{}'),
+            profissional: JSON.parse(localStorage.getItem('eventCalcProfissional') || '{}')
+        };
+
+        const json = JSON.stringify(dados, null, 2);
+        const blob = new Blob([json], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `EventCalc_${nome}_${new Date().toISOString().split('T')[0]}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        alert('✅ Orçamento exportado com sucesso!');
+    }
+
+    function importarOrcamento(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const dados = JSON.parse(e.target.result);
+
+                if (dados.questionario) localStorage.setItem('eventocalcData', JSON.stringify({ questionario: dados.questionario }));
+                if (dados.cardapio) localStorage.setItem('eventocalc_cardapio', JSON.stringify(dados.cardapio));
+                if (dados.cardapioEspecial) localStorage.setItem('eventocalc_cardapio_especial', JSON.stringify(dados.cardapioEspecial));
+                if (dados.volumes) localStorage.setItem('eventocalc_volumes', JSON.stringify(dados.volumes));
+                if (dados.custos) localStorage.setItem('eventocalc_custos', JSON.stringify(dados.custos));
+                if (dados.profissional) localStorage.setItem('eventCalcProfissional', JSON.stringify(dados.profissional));
+
+                alert('✅ Orçamento importado com sucesso!');
+                fecharGerenciador();
+                restaurarDados();
+            } catch(err) {
+                alert('❌ Erro ao importar arquivo. Verifique se é um arquivo válido do EventCalc.');
+                console.error(err);
+            }
+        };
+        reader.readAsText(file);
+        event.target.value = '';
+    }
+
+    // Função para calcular espaço utilizado do localStorage
+    function calcularEspacoLS() {
+        let total = 0;
+        for (let key in localStorage) {
+            if (localStorage.hasOwnProperty(key)) {
+                total += localStorage[key].length + key.length;
+            }
+        }
+        return (total / 1024).toFixed(2); // em KB
+    }
+
+    // Avisar quando localStorage > 80% (estimado 8MB)
+    function avisarEspacoLS() {
+        const espacoKB = parseFloat(calcularEspacoLS());
+        const limiteKB = 8192; // ~8MB
+        const percentual = (espacoKB / limiteKB) * 100;
+
+        if (percentual > 80) {
+            console.warn('⚠️ localStorage está ' + percentual.toFixed(0) + '% cheio. Considere exportar orçamentos antigos.');
+            alert('⚠️ ATENÇÃO: Sua memória de dados está ' + percentual.toFixed(0) + '% cheia!\n\nRecomendamos exportar orçamentos antigos para liberar espaço.\n\nClique em "📂 Meus Orçamentos" → "📥 Exportar"');
+        }
+    }
+
+    function salvarNoHistorico() {
+        const nomeContratante = document.getElementById('nomeContratante').value.trim();
+        const numeroProposta = document.getElementById('numeroProposta').value.trim();
+        const local = document.getElementById('local').value.trim();
+
+        if (!nomeContratante) return; // Só salva se houver nome
+
+        let historico = JSON.parse(localStorage.getItem('eventocalc_historico') || '[]');
+
+        // Limitar a 5 itens (não 20) para economizar storage
+        if (historico.length >= 5) historico.pop();
+
+        historico.unshift({
+            id: Date.now(),
+            nome: nomeContratante,
+            numeroProposta: numeroProposta || 'Sem número',
+            local: local || 'Sem local',
+            timestamp: new Date().toLocaleString('pt-BR'),
+            dados: {
+                questionario: JSON.parse(localStorage.getItem('eventocalcData') || '{}').questionario || {},
+                cardapio: JSON.parse(localStorage.getItem('eventocalc_cardapio') || '{}'),
+                cardapioEspecial: JSON.parse(localStorage.getItem('eventocalc_cardapio_especial') || '{}'),
+                volumes: JSON.parse(localStorage.getItem('eventocalc_volumes') || '[]'),
+                custos: JSON.parse(localStorage.getItem('eventocalc_custos') || '{}')
+            }
+        });
+
+        localStorage.setItem('eventocalc_historico', JSON.stringify(historico));
+
+        // Verificar se localStorage está ficando cheio
+        avisarEspacoLS();
+    }
+
+    function atualizarListaHistorico() {
+        const historico = JSON.parse(localStorage.getItem('eventocalc_historico') || '[]');
+        const listaEl = document.getElementById('listaHistorico');
+
+        if (historico.length === 0) {
+            listaEl.innerHTML = '<div class="historico-vazio">Nenhum orçamento no histórico ainda.</div>';
+            return;
+        }
+
+        listaEl.innerHTML = historico.map(item => `
+            <div class="historico-item">
+                <div class="historico-info">
+                    <div class="historico-nome">${escHtml(item.nome)}</div>
+                    <div class="historico-data">${item.numeroProposta} • ${item.local} • ${item.timestamp}</div>
+                </div>
+                <div class="historico-btns">
+                    <button class="btn-hist-carregar" onclick="carregarDoHistorico(${item.id})">Carregar</button>
+                    <button class="btn-hist-remover" onclick="removerDoHistorico(${item.id})">Remover</button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function carregarDoHistorico(id) {
+        const historico = JSON.parse(localStorage.getItem('eventocalc_historico') || '[]');
+        const item = historico.find(h => h.id === id);
+
+        if (!item) {
+            alert('❌ Orçamento não encontrado.');
+            return;
+        }
+
+        localStorage.setItem('eventocalcData', JSON.stringify({ questionario: item.dados.questionario }));
+        localStorage.setItem('eventocalc_cardapio', JSON.stringify(item.dados.cardapio));
+        localStorage.setItem('eventocalc_cardapio_especial', JSON.stringify(item.dados.cardapioEspecial));
+        localStorage.setItem('eventocalc_volumes', JSON.stringify(item.dados.volumes));
+        localStorage.setItem('eventocalc_custos', JSON.stringify(item.dados.custos));
+
+        alert('✅ Orçamento carregado com sucesso!');
+        fecharGerenciador();
+        restaurarDados();
+    }
+
+    function removerDoHistorico(id) {
+        if (!confirm('Tem certeza? Não será possível recuperar.')) return;
+
+        let historico = JSON.parse(localStorage.getItem('eventocalc_historico') || '[]');
+        historico = historico.filter(h => h.id !== id);
+        localStorage.setItem('eventocalc_historico', JSON.stringify(historico));
+
+        atualizarListaHistorico();
+    }
+
+    function escHtml(t) { return (t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+    window.addEventListener('load', () => {
+        restaurarDados();
+
+        // Adiciona event listeners para atualizar progresso em tempo real
+        const campos = [
+            'nomeContratante', 'local', 'data', 'horario', 'horarioChegada', 'duracao',
+            'refeicao', 'adultos', 'criancas', 'veganos', 'vegetarianos', 'restricCeliaco',
+            'restricLactose', 'tipoCardapio'
+        ];
+
+        campos.forEach(campoId => {
+            const el = document.getElementById(campoId);
+            if (el) {
+                el.addEventListener('input', atualizarProgressao);
+                el.addEventListener('change', atualizarProgressao);
+            }
+        });
+    });
+</script>
+</body>
+</html>
