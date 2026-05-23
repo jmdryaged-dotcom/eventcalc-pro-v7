@@ -1,0 +1,9 @@
+{
+  "name": "eventcalc-pro-v7",
+  "version": "1.0.0",
+  "description": "Calculadora profissional de orçamento para eventos",
+  "dependencies": {
+    "@sendgrid/mail": "^7.7.0",
+    "twilio": "^3.88.0"
+  }
+}
