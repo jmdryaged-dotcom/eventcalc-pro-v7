@@ -1,5 +1,5 @@
 const express = require('express');
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
 const cors = require('cors');
 const { jsPDF } = require('jspdf');
 const { gerarTutorialPDF } = require('./tutorial-pdf');
@@ -14,20 +14,20 @@ app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb' }));
 
 // ════════════════════════════════════════════
-// CONFIGURAR NODEMAILER COM GMAIL
+// CONFIGURAR RESEND (substituiu Gmail SMTP)
+// Render Free bloqueia portas SMTP, então usamos
+// Resend que envia emails via HTTPS API
 // ════════════════════════════════════════════
 
-const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: process.env.GMAIL_USER,
-        pass: process.env.GMAIL_PASSWORD
-    }
-});
+const resend = new Resend(process.env.RESEND_API_KEY);
+
+// Email remetente
+// IMPORTANTE: Por enquanto usar onboarding@resend.dev (padrão do Resend para testes)
+// Quando tiver domínio próprio verificado, mudar para: noreply@seudominio.com
+const FROM_EMAIL = process.env.FROM_EMAIL || 'EventCalc Pro <onboarding@resend.dev>';
 
 // ════════════════════════════════════════════
-// FUNÇÃO: Gerar PDF do Tutorial DETALHADO
-// (Importada de tutorial-pdf.js)
+// ENDPOINT: Enviar Tutorial por Email
 // ════════════════════════════════════════════
 
 app.post('/send-tutorial', async (req, res) => {
@@ -48,49 +48,50 @@ app.post('/send-tutorial', async (req, res) => {
         const pdfBuffer = gerarTutorialPDF();
         console.log(`📄 PDF gerado com sucesso (${pdfBuffer.length} bytes)`);
 
-        // Configurar email
-        const mailOptions = {
-            from: process.env.GMAIL_USER,
+        // ── ENVIAR EMAIL VIA RESEND ──
+        const { data, error } = await resend.emails.send({
+            from: FROM_EMAIL,
             to: email,
             subject: '📚 Tutorial EventCalc Pro v7 - Como Usar',
             html: `
-                <h2>Olá ${nome}! 👋</h2>
-                <p>Obrigado por se interessar no <strong>EventCalc Pro v7</strong>!</p>
-                <p>Em anexo você encontra:</p>
-                <ul>
-                    <li>✅ Guia completo de como usar</li>
-                    <li>✅ Passo a passo das telas</li>
-                    <li>✅ Dicas profissionais</li>
-                    <li>✅ Exemplo de proposta</li>
-                </ul>
-                <p><strong>Contato para dúvidas:</strong></p>
-                <ul>
-                    <li>📧 Email: jm.dryaged@gmail.com</li>
-                    <li>📱 WhatsApp: +55 47 99668-1010</li>
-                </ul>
-                <p><em>Qualquer dúvida, estou à disposição!</em></p>
-                <br>
-                <p>Abraço,<br><strong>Club Carnivorista</strong></p>
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+                    <h2 style="color: #d4af37;">Olá ${nome}! 👋</h2>
+                    <p>Obrigado por se interessar no <strong>EventCalc Pro v7</strong>!</p>
+                    <p>Em anexo você encontra:</p>
+                    <ul>
+                        <li>✅ Guia completo de como usar</li>
+                        <li>✅ Passo a passo das telas</li>
+                        <li>✅ Dicas profissionais</li>
+                        <li>✅ Exemplo de proposta</li>
+                    </ul>
+                    <p style="margin-top: 30px;"><em>Qualquer dúvida, estou à disposição!</em></p>
+                    <p style="margin-top: 20px;">Abraço,<br><strong>Equipe EventCalc Pro v7</strong></p>
+                </div>
             `,
             attachments: [
                 {
                     filename: 'Tutorial_EventCalc_Pro_v7.pdf',
-                    content: pdfBuffer,
-                    contentType: 'application/pdf'
+                    content: pdfBuffer.toString('base64')
                 }
             ]
-        };
+        });
 
-        // Enviar email
-        const info = await transporter.sendMail(mailOptions);
+        if (error) {
+            console.error('❌ Erro do Resend:', error);
+            return res.status(500).json({
+                sucesso: false,
+                mensagem: `❌ Erro ao enviar email: ${error.message || error.name}`,
+                detalhes: error
+            });
+        }
 
-        console.log(`✅ Email enviado com sucesso! ID: ${info.messageId}`);
+        console.log(`✅ Email enviado com sucesso! ID: ${data.id}`);
 
         // Resposta sucesso
         res.json({
             sucesso: true,
-            mensagem: `✅ Tutorial enviado para ${email}! Confira sua caixa de entrada.`,
-            messageId: info.messageId
+            mensagem: `✅ Tutorial enviado para ${email}! Confira sua caixa de entrada (e a pasta de spam).`,
+            messageId: data.id
         });
 
     } catch (erro) {
@@ -109,7 +110,12 @@ app.post('/send-tutorial', async (req, res) => {
 // ════════════════════════════════════════════
 
 app.get('/health', (req, res) => {
-    res.json({ status: 'OK', servidor: 'EventCalc Pro v7 Backend' });
+    res.json({
+        status: 'OK',
+        servidor: 'EventCalc Pro v7 Backend',
+        emailProvider: 'Resend',
+        resendConfigured: !!process.env.RESEND_API_KEY
+    });
 });
 
 // ════════════════════════════════════════════
@@ -124,7 +130,7 @@ app.listen(PORT, () => {
 ╚════════════════════════════════════════╝
     `);
     console.log(`✅ Servidor iniciado`);
-    console.log(`✅ Email configurado: ${process.env.GMAIL_USER}`);
+    console.log(`✅ Resend configurado: ${process.env.RESEND_API_KEY ? 'SIM' : '❌ FALTANDO RESEND_API_KEY'}`);
     console.log(`📧 Endpoint: POST /send-tutorial`);
 });
 
