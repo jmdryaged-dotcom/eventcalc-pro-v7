@@ -613,45 +613,59 @@ function gerarTutorialPDF() {
     // ─── PRODUTOS CLUB CARNIVORISTA (E-books Hotmart) ───
     const produtos = [
         {
-            titulo: 'E-book: Hamburguer Artesanal',
-            desc: 'Aprenda a fazer hamburgueres de verdade — blends, pontos, montagem e atendimento. Tudo o que voce precisa para impressionar clientes e aumentar seu lucro.',
-            link: 'Disponivel no Hotmart - link no rodape ou pelo WhatsApp'
+            titulo: 'A ARTE DO CHURRASCO: Do Fogo ao Primeiro Corte',
+            desc: 'O ponto de partida do verdadeiro churrasqueiro. Dominio da grelha, escolha de utensilios, acendimento do carvao, tipos de cortes, ponto perfeito da carne e os erros que ninguem te conta. Com quizzes interativos ao final de cada capitulo.',
+            link: 'https://go.hotmart.com/D100305376G?dp=1'
         },
         {
-            titulo: 'E-book: Churrasqueiro Basico',
-            desc: 'Do iniciante ao primeiro evento pago. Cortes, tempero, ponto da carne, calculo de quantidade e como precificar seu servico. Material pratico e direto.',
-            link: 'Disponivel no Hotmart - link no rodape ou pelo WhatsApp'
+            titulo: 'ENTRE DOIS PAES: O Guia do Hamburguer Artesanal',
+            desc: 'Nao e so um livro de receitas - e um manifesto. Para quem leva hamburguer a serio: blends, ponto da carne, paes artesanais, cortes premium, molhos que emocionam. Inclui quizzes com humor e super quiz interativo final.',
+            link: 'https://go.hotmart.com/S100382006A'
         }
     ];
 
     produtos.forEach((produto, idx) => {
-        if (y > 240) novaPage();
+        if (y > 220) novaPage();
 
-        // Box sutil ao redor de cada produto
+        // Calcular altura dinâmica do box baseado na descrição
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(9);
+        const linhasDesc = doc.splitTextToSize(produto.desc, 170);
+        const alturaDescricao = linhasDesc.length * 4;
+        const alturaBox = 16 + alturaDescricao + 14; // título(16) + descricao + CTA(14)
+
+        // Box dourado ao redor do produto
         doc.setDrawColor(...ouro);
-        doc.setLineWidth(0.3);
-        doc.roundedRect(13, y - 4, 184, 30, 2, 2);
+        doc.setLineWidth(0.5);
+        doc.roundedRect(13, y - 4, 184, alturaBox, 3, 3);
 
-        // Título do produto (dourado, negrito)
+        // Título do produto (dourado, negrito) - quebra se necessário
         doc.setFont('helvetica', 'bold');
-        doc.setFontSize(12);
+        doc.setFontSize(11);
         doc.setTextColor(...ouro);
-        doc.text(produto.titulo, 18, y + 2);
+        const linhasTitulo = doc.splitTextToSize(produto.titulo, 175);
+        doc.text(linhasTitulo, 18, y + 2);
 
-        // Descrição
+        let yDesc = y + 4 + (linhasTitulo.length * 5);
+
+        // Descrição (cinza, normal)
         doc.setFont('helvetica', 'normal');
         doc.setFontSize(9);
         doc.setTextColor(...cinza);
-        const linhasDesc = doc.splitTextToSize(produto.desc, 175);
-        doc.text(linhasDesc, 18, y + 9);
+        doc.text(linhasDesc, 18, yDesc);
 
-        // Link/CTA
-        doc.setFont('helvetica', 'italic');
-        doc.setFontSize(8);
+        // CTA com link
+        const yCTA = yDesc + alturaDescricao + 4;
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(9);
         doc.setTextColor(...ouro);
-        doc.text('>> ' + produto.link, 18, y + 22);
+        doc.text('>> ADQUIRA AGORA:', 18, yCTA);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8);
+        doc.setTextColor(...branco);
+        doc.text(produto.link, 18, yCTA + 5);
 
-        y += 38;
+        y += alturaBox + 8;
     });
 
     // Mensagem suave de fechamento
@@ -663,7 +677,150 @@ function gerarTutorialPDF() {
     y += 6;
     doc.text('Sem pressa, sem pressao. Quando estiver pronto, estamos aqui!', 105, y, { align: 'center' });
 
-    // ════════ PÁGINA 15: CONTATO ════════
+    // ════════ PÁGINA 15: TEASER - PRÓXIMO LANÇAMENTO ════════
+    novaPage();
+
+    // Background com vibração de "novidade" - mantém o preto mas adiciona detalhes em dourado
+    doc.setDrawColor(...ouro);
+    doc.setLineWidth(0.8);
+    doc.line(15, 22, 195, 22);
+    doc.line(15, 28, 195, 28);
+
+    // Tag "EM BREVE" no topo
+    doc.setFillColor(...ouro);
+    doc.roundedRect(80, 32, 50, 8, 2, 2, 'F');
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(10);
+    doc.setTextColor(...fundoPreto);
+    doc.text('EM BREVE', 105, 38, { align: 'center' });
+
+    y = 55;
+
+    // HEADLINE - O HOOK
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(20);
+    doc.setTextColor(...ouro);
+    doc.text('E se voce respondesse', 105, y, { align: 'center' });
+    y += 9;
+    doc.text('um orcamento as 23h...', 105, y, { align: 'center' });
+    y += 9;
+    doc.setTextColor(...branco);
+    doc.text('em apenas 5 MINUTOS?', 105, y, { align: 'center' });
+
+    y += 18;
+
+    // Linha decorativa
+    doc.setDrawColor(...ouro);
+    doc.setLineWidth(0.3);
+    doc.line(70, y, 140, y);
+    y += 10;
+
+    // BODY - A DOR + CURIOSIDADE
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(11);
+    doc.setTextColor(...cinza);
+
+    const paragrafosTeaser = [
+        '73% dos clientes fecham com QUEM RESPONDE PRIMEIRO.',
+        '',
+        'Enquanto voce calcula no caderno depois do almoco,',
+        'seu concorrente ja respondeu e fechou o evento.',
+        '',
+        'Estamos construindo algo NOVO para o Club Carnivorista:',
+        ''
+    ];
+
+    paragrafosTeaser.forEach(linha => {
+        doc.text(linha, 105, y, { align: 'center' });
+        y += 6;
+    });
+
+    y += 4;
+
+    // BOX DE DESTAQUE - o produto
+    doc.setFillColor(20, 20, 20);
+    doc.setDrawColor(...ouro);
+    doc.setLineWidth(1.5);
+    doc.roundedRect(25, y, 160, 50, 4, 4, 'FD');
+
+    y += 12;
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(16);
+    doc.setTextColor(...ouro);
+    doc.text('ASSADOR 5 MINUTOS', 105, y, { align: 'center' });
+
+    y += 8;
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    doc.setTextColor(...branco);
+    doc.text('Seu WhatsApp virando uma maquina', 105, y, { align: 'center' });
+    y += 5;
+    doc.text('de fechar eventos - automaticamente.', 105, y, { align: 'center' });
+
+    y += 9;
+    doc.setFont('helvetica', 'italic');
+    doc.setFontSize(9);
+    doc.setTextColor(...cinza);
+    doc.text('Cliente manda os dados. Sistema calcula tudo.', 105, y, { align: 'center' });
+    y += 5;
+    doc.text('Voce revisa e envia o orcamento. Em minutos.', 105, y, { align: 'center' });
+
+    y += 18;
+
+    // PROMESSA DE BENEFICIOS
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(10);
+    doc.setTextColor(...ouro);
+    doc.text('O QUE VOCE GANHA:', 105, y, { align: 'center' });
+    y += 8;
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    doc.setTextColor(...cinza);
+    const beneficios = [
+        '+ Orcamento profissional em 5 minutos (sem caderno, sem Excel)',
+        '+ Responde clientes 24h por dia - mesmo dormindo',
+        '+ Fecha mais eventos por ser o PRIMEIRO a responder',
+        '+ Tempo de volta com sua familia (nao mais 2h calculando)'
+    ];
+
+    beneficios.forEach(b => {
+        doc.text(b, 30, y);
+        y += 6;
+    });
+
+    y += 8;
+
+    // ESCASSEZ + CTA
+    doc.setFillColor(...ouro);
+    doc.roundedRect(35, y, 140, 22, 3, 3, 'F');
+
+    y += 9;
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(11);
+    doc.setTextColor(...fundoPreto);
+    doc.text('VAGAS LIMITADAS no BETA', 105, y, { align: 'center' });
+    y += 7;
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    doc.text('Os primeiros 10 testadores garantem condicoes exclusivas vitalicias', 105, y, { align: 'center' });
+
+    y += 16;
+
+    // CTA FINAL
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(11);
+    doc.setTextColor(...ouro);
+    doc.text('>> QUER SER UM DOS PRIMEIROS A TESTAR? <<', 105, y, { align: 'center' });
+    y += 7;
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    doc.setTextColor(...branco);
+    doc.text('Responda este email com a frase "QUERO O BETA"', 105, y, { align: 'center' });
+    y += 5;
+    doc.text('ou chame no WhatsApp - link na proxima pagina.', 105, y, { align: 'center' });
+
+    // ════════ PÁGINA 16: CONTATO ════════
     novaPage();
     titulo('Duvidas? Contato!');
 
