@@ -1,8 +1,35 @@
 // ════════════════════════════════════════════════════════════════════════════
 // GERADOR DE PDF DO TUTORIAL - VERSÃO LIMPA E DETALHADA
+// Logo Club Carnivorista + CTA para infoprodutos
 // ════════════════════════════════════════════════════════════════════════════
 
 const { jsPDF } = require('jspdf');
+const fs = require('fs');
+const path = require('path');
+
+// ── CARREGAR LOGO UMA VEZ (cache) ──
+// Procura logo-club.jpeg na pasta raiz do projeto OU em files/
+let LOGO_BASE64 = null;
+try {
+    const possiveisCaminhos = [
+        path.join(__dirname, 'logo-club.jpeg'),
+        path.join(__dirname, 'files', 'logo-club.jpeg'),
+        path.join(__dirname, 'logo-club.jpg')
+    ];
+    for (const caminho of possiveisCaminhos) {
+        if (fs.existsSync(caminho)) {
+            const buffer = fs.readFileSync(caminho);
+            LOGO_BASE64 = 'data:image/jpeg;base64,' + buffer.toString('base64');
+            console.log('✅ Logo carregada de:', caminho);
+            break;
+        }
+    }
+    if (!LOGO_BASE64) {
+        console.warn('⚠️ logo-club.jpeg não encontrada. PDF será gerado SEM logo.');
+    }
+} catch (err) {
+    console.error('❌ Erro ao carregar logo:', err.message);
+}
 
 function gerarTutorialPDF() {
     const doc = new jsPDF({
@@ -52,34 +79,58 @@ function gerarTutorialPDF() {
     }
 
     function destaque(titulo_txt, descricao) {
+        // Título do destaque (dourado, negrito)
         doc.setTextColor(...ouro);
         doc.setFont('helvetica', 'bold');
+        doc.setFontSize(10);
         doc.text('* ' + titulo_txt, 15, y);
-        y += 4;
+        y += 5;
+
+        // Descrição (cinza, normal) - quebra em múltiplas linhas se necessário
         doc.setTextColor(...cinza);
         doc.setFont('helvetica', 'normal');
+        doc.setFontSize(9);
         const linhas = doc.splitTextToSize(descricao, 170);
         doc.text(linhas, 20, y);
-        y += linhas.length * 3 + 5;
+        y += linhas.length * 4 + 6;
     }
 
     // ════════ PÁGINA 1: CAPA ════════
     doc.setFillColor(...fundoPreto);
     doc.rect(0, 0, 210, 297, 'F');
 
+    // ── LOGO CLUB CARNIVORISTA (centralizada no topo) ──
+    if (LOGO_BASE64) {
+        try {
+            // Logo: 50mm de largura, centralizada horizontalmente (210/2 - 25 = 80)
+            doc.addImage(LOGO_BASE64, 'JPEG', 80, 25, 50, 50);
+        } catch (err) {
+            console.warn('⚠️ Erro ao adicionar logo na capa:', err.message);
+        }
+    }
+
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(40);
+    doc.setFontSize(36);
     doc.setTextColor(...ouro);
-    doc.text('EventCalc Pro v7', 105, 90, { align: 'center' });
+    doc.text('EventCalc Pro v7', 105, 100, { align: 'center' });
 
     doc.setFontSize(16);
     doc.setTextColor(...branco);
-    doc.text('TUTORIAL COMPLETO', 105, 115, { align: 'center' });
+    doc.text('TUTORIAL COMPLETO', 105, 125, { align: 'center' });
 
     doc.setFontSize(11);
     doc.setTextColor(...cinza);
-    doc.text('Aprenda PASSO A PASSO como criar orcamentos profissionais', 105, 135, { align: 'center' });
-    doc.text('em poucos MINUTOS', 105, 145, { align: 'center' });
+    doc.text('Aprenda PASSO A PASSO como criar orcamentos profissionais', 105, 145, { align: 'center' });
+    doc.text('em poucos MINUTOS', 105, 155, { align: 'center' });
+
+    // Linha decorativa dourada
+    doc.setDrawColor(...ouro);
+    doc.setLineWidth(0.5);
+    doc.line(60, 170, 150, 170);
+
+    doc.setFontSize(10);
+    doc.setTextColor(...ouro);
+    doc.text('CLUB CARNIVORISTA', 105, 180, { align: 'center' });
 
     doc.setFontSize(10);
     doc.setTextColor(...cinza);
@@ -535,7 +586,84 @@ function gerarTutorialPDF() {
         destaque(dica.titulo, dica.desc);
     });
 
-    // ════════ PÁGINA 14: CONTATO ════════
+    // ════════ PÁGINA 14: CTA - OUTROS PRODUTOS CLUB CARNIVORISTA ════════
+    novaPage();
+
+    // Logo no topo (pequena)
+    if (LOGO_BASE64) {
+        try {
+            doc.addImage(LOGO_BASE64, 'JPEG', 90, 15, 30, 30);
+            y = 55;
+        } catch (err) {
+            y = 20;
+        }
+    }
+
+    titulo('Quer Aprender Mais?');
+
+    y += 5;
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(11);
+    doc.setTextColor(...cinza);
+    const textoIntro = 'Gostou do EventCalc Pro v7? O Club Carnivorista tem outros produtos que vao levar seu negocio para o proximo nivel.';
+    const linhasIntro = doc.splitTextToSize(textoIntro, 180);
+    doc.text(linhasIntro, 15, y);
+    y += linhasIntro.length * 5 + 10;
+
+    // ─── PRODUTOS CLUB CARNIVORISTA (E-books Hotmart) ───
+    const produtos = [
+        {
+            titulo: 'E-book: Hamburguer Artesanal',
+            desc: 'Aprenda a fazer hamburgueres de verdade — blends, pontos, montagem e atendimento. Tudo o que voce precisa para impressionar clientes e aumentar seu lucro.',
+            link: 'Disponivel no Hotmart - link no rodape ou pelo WhatsApp'
+        },
+        {
+            titulo: 'E-book: Churrasqueiro Basico',
+            desc: 'Do iniciante ao primeiro evento pago. Cortes, tempero, ponto da carne, calculo de quantidade e como precificar seu servico. Material pratico e direto.',
+            link: 'Disponivel no Hotmart - link no rodape ou pelo WhatsApp'
+        }
+    ];
+
+    produtos.forEach((produto, idx) => {
+        if (y > 240) novaPage();
+
+        // Box sutil ao redor de cada produto
+        doc.setDrawColor(...ouro);
+        doc.setLineWidth(0.3);
+        doc.roundedRect(13, y - 4, 184, 30, 2, 2);
+
+        // Título do produto (dourado, negrito)
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(12);
+        doc.setTextColor(...ouro);
+        doc.text(produto.titulo, 18, y + 2);
+
+        // Descrição
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(9);
+        doc.setTextColor(...cinza);
+        const linhasDesc = doc.splitTextToSize(produto.desc, 175);
+        doc.text(linhasDesc, 18, y + 9);
+
+        // Link/CTA
+        doc.setFont('helvetica', 'italic');
+        doc.setFontSize(8);
+        doc.setTextColor(...ouro);
+        doc.text('>> ' + produto.link, 18, y + 22);
+
+        y += 38;
+    });
+
+    // Mensagem suave de fechamento
+    y += 5;
+    doc.setFont('helvetica', 'italic');
+    doc.setFontSize(10);
+    doc.setTextColor(...cinza);
+    doc.text('Cada produto foi pensado para ajudar profissionais como voce a crescer.', 105, y, { align: 'center' });
+    y += 6;
+    doc.text('Sem pressa, sem pressao. Quando estiver pronto, estamos aqui!', 105, y, { align: 'center' });
+
+    // ════════ PÁGINA 15: CONTATO ════════
     novaPage();
     titulo('Duvidas? Contato!');
 
