@@ -777,14 +777,14 @@ function gerarTutorialPDF() {
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(9);
     doc.setTextColor(...cinza);
-    const beneficios = [
+    const beneficiosAssador = [
         '+ Orcamento profissional em 5 minutos (sem caderno, sem Excel)',
         '+ Responde clientes 24h por dia - mesmo dormindo',
         '+ Fecha mais eventos por ser o PRIMEIRO a responder',
         '+ Tempo de volta com sua familia (nao mais 2h calculando)'
     ];
 
-    beneficios.forEach(b => {
+    beneficiosAssador.forEach(b => {
         doc.text(b, 30, y);
         y += 6;
     });
