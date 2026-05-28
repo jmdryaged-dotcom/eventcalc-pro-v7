@@ -112,7 +112,7 @@ function gerarTutorialPDF() {
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(36);
     doc.setTextColor(...ouro);
-    doc.text('EventCalc Pro v7', 105, 100, { align: 'center' });
+    doc.text('EventCalc', 105, 100, { align: 'center' });
 
     doc.setFontSize(16);
     doc.setTextColor(...branco);
@@ -138,9 +138,9 @@ function gerarTutorialPDF() {
 
     // ════════ PÁGINA 2: O QUE É EVENTCALC? ════════
     novaPage();
-    titulo('O Que eh EventCalc Pro v7?');
+    titulo('O Que eh EventCalc?');
 
-    paragrafo('EventCalc Pro v7 é uma calculadora profissional para criar orçamentos de eventos (churrascos, catering, festas). É um programa que funciona no navegador e ajuda você a:');
+    paragrafo('EventCalc é uma calculadora profissional para criar orçamentos de eventos (churrascos, catering, festas). É um programa que funciona no navegador e ajuda você a:');
 
     y += 2;
     doc.setTextColor(...ouro);
@@ -605,7 +605,7 @@ function gerarTutorialPDF() {
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(11);
     doc.setTextColor(...cinza);
-    const textoIntro = 'Gostou do EventCalc Pro v7? O Club Carnivorista tem outros produtos que vao levar seu negocio para o proximo nivel.';
+    const textoIntro = 'Gostou do EventCalc? O Club Carnivorista tem outros produtos que vao levar seu negocio para o proximo nivel.';
     const linhasIntro = doc.splitTextToSize(textoIntro, 180);
     doc.text(linhasIntro, 15, y);
     y += linhasIntro.length * 5 + 10;

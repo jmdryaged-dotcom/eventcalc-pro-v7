@@ -1,6 +1,7 @@
 const express = require('express');
 const { Resend } = require('resend');
 const cors = require('cors');
+const rateLimit = require('express-rate-limit');
 const { jsPDF } = require('jspdf');
 const { gerarTutorialPDF } = require('./tutorial-pdf');
 require('dotenv').config();
@@ -8,10 +9,67 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// Middleware
-app.use(cors());
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ limit: '50mb' }));
+// ════════════════════════════════════════════
+// CORS — apenas origens permitidas
+// (Adicionar mais domínios se for vender com domínio próprio depois)
+// ════════════════════════════════════════════
+const ORIGENS_PERMITIDAS = [
+    'https://cute-parfait-948162.netlify.app',
+    'http://localhost:3000',  // desenvolvimento local
+    'http://localhost:8000',  // desenvolvimento local alternativo
+    'http://127.0.0.1:5500'   // VS Code Live Server
+];
+
+app.use(cors({
+    origin: function(origin, callback) {
+        // Permite requisições sem origin (Postman, curl, server-to-server)
+        if (!origin) return callback(null, true);
+        if (ORIGENS_PERMITIDAS.includes(origin)) {
+            callback(null, true);
+        } else {
+            console.warn(`⚠️ CORS bloqueado para origem: ${origin}`);
+            callback(new Error('Origem não permitida'));
+        }
+    },
+    methods: ['GET', 'POST'],
+    credentials: false
+}));
+
+// Trust proxy do Render (necessário para rate-limit pegar IP real)
+app.set('trust proxy', 1);
+
+app.use(express.json({ limit: '5mb' })); // reduzido de 50mb (era exagero)
+app.use(express.urlencoded({ limit: '5mb', extended: true }));
+
+// ════════════════════════════════════════════
+// RATE LIMITING — protege contra spam/bots
+// ════════════════════════════════════════════
+// Limita a 5 requests por IP a cada 15 min no endpoint de email
+const limitadorEnvioEmail = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutos
+    max: 5, // máximo 5 envios por IP por janela
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: {
+        sucesso: false,
+        mensagem: '⚠️ Muitas tentativas. Aguarde 15 minutos para tentar novamente.'
+    },
+    handler: (req, res, next, options) => {
+        console.warn(`🚫 Rate-limit atingido para IP: ${req.ip}`);
+        res.status(options.statusCode).json(options.message);
+    }
+});
+
+// Limite geral (mais permissivo, para todos os endpoints)
+const limitadorGeral = rateLimit({
+    windowMs: 1 * 60 * 1000, // 1 minuto
+    max: 30, // máximo 30 requests por minuto
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { sucesso: false, mensagem: 'Muitas requisições. Aguarde um momento.' }
+});
+
+app.use(limitadorGeral);
 
 // ════════════════════════════════════════════
 // CONFIGURAR RESEND (substituiu Gmail SMTP)
@@ -41,60 +99,53 @@ async function notificarAdminNovoLead(nome, email, whatsapp) {
         const { data, error } = await resend.emails.send({
             from: FROM_EMAIL,
             to: ADMIN_EMAIL,
-            subject: `🎯 NOVO LEAD: ${nome}`,
+            subject: `Novo lead: ${nome}`,
             html: `
-                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #1a1a1a; color: #d0d0d0;">
-                    <div style="background: linear-gradient(135deg, #d4af37 0%, #b8860b 100%); padding: 20px; border-radius: 8px 8px 0 0; text-align: center;">
-                        <h1 style="margin: 0; color: #0a0a0a; font-size: 1.6rem;">🎯 NOVO LEAD CAPTURADO</h1>
-                        <p style="margin: 5px 0 0 0; color: #0a0a0a;">EventCalc Pro v7 - Club Carnivorista</p>
+                <div style="font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Arial, sans-serif; max-width: 560px; margin: 0 auto; padding: 24px; background: #0a0a0b; color: #f5f5f7;">
+
+                    <div style="text-align: center; margin-bottom: 24px;">
+                        <p style="color: #c9a14b; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.12em; margin: 0;">Novo lead capturado</p>
+                        <p style="color: #f5f5f7; font-size: 26px; font-weight: 700; letter-spacing: -0.025em; margin: 8px 0 0 0;">EventCalc</p>
                     </div>
 
-                    <div style="background: #2a2a2a; padding: 25px; border-radius: 0 0 8px 8px; border: 1px solid #d4af37;">
-                        <h2 style="color: #d4af37; margin-top: 0;">Dados do Interessado</h2>
+                    <div style="background: #131316; border: 1px solid #232328; border-radius: 16px; padding: 28px;">
+                        <p style="color: #6e6e73; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 12px 0;">Dados do interessado</p>
 
-                        <table style="width: 100%; border-collapse: collapse; margin: 15px 0;">
-                            <tr>
-                                <td style="padding: 10px; border-bottom: 1px solid #444; color: #d4af37; font-weight: bold; width: 30%;">Nome:</td>
-                                <td style="padding: 10px; border-bottom: 1px solid #444; color: #fff;">${nome}</td>
-                            </tr>
-                            <tr>
-                                <td style="padding: 10px; border-bottom: 1px solid #444; color: #d4af37; font-weight: bold;">Email:</td>
-                                <td style="padding: 10px; border-bottom: 1px solid #444; color: #fff;">
-                                    <a href="mailto:${email}" style="color: #d4af37;">${email}</a>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td style="padding: 10px; border-bottom: 1px solid #444; color: #d4af37; font-weight: bold;">WhatsApp:</td>
-                                <td style="padding: 10px; border-bottom: 1px solid #444; color: #fff;">${whatsapp || '(não informado)'}</td>
-                            </tr>
-                            <tr>
-                                <td style="padding: 10px; color: #d4af37; font-weight: bold;">Capturado em:</td>
-                                <td style="padding: 10px; color: #fff;">${dataAgora}</td>
-                            </tr>
-                        </table>
+                        <h2 style="color: #f5f5f7; font-size: 22px; font-weight: 700; letter-spacing: -0.02em; margin: 0 0 24px 0;">${nome}</h2>
 
-                        <div style="margin-top: 25px; padding: 15px; background: rgba(212, 175, 55, 0.1); border-left: 4px solid #d4af37; border-radius: 4px;">
-                            <p style="margin: 0; color: #d0d0d0; font-size: 0.95rem;">
-                                <strong style="color: #d4af37;">✅ Tutorial PDF enviado automaticamente</strong> para o email do lead.
-                            </p>
+                        <div style="padding: 14px 0; border-bottom: 1px solid #232328;">
+                            <p style="color: #6e6e73; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 4px 0;">Email</p>
+                            <a href="mailto:${email}" style="color: #c9a14b; font-size: 15px; text-decoration: none; font-weight: 500;">${email}</a>
+                        </div>
+
+                        <div style="padding: 14px 0; border-bottom: 1px solid #232328;">
+                            <p style="color: #6e6e73; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 4px 0;">WhatsApp</p>
+                            <p style="color: #f5f5f7; font-size: 15px; margin: 0; font-weight: 500;">${whatsapp || '—'}</p>
+                        </div>
+
+                        <div style="padding: 14px 0 18px;">
+                            <p style="color: #6e6e73; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 4px 0;">Capturado em</p>
+                            <p style="color: #a1a1a6; font-size: 14px; margin: 0;">${dataAgora}</p>
+                        </div>
+
+                        <div style="background: rgba(201, 161, 75, 0.06); border: 1px solid rgba(201, 161, 75, 0.2); border-radius: 10px; padding: 14px 16px; margin-bottom: 20px;">
+                            <p style="color: #c9a14b; font-size: 13px; margin: 0; font-weight: 500;">✓ Tutorial em PDF enviado automaticamente</p>
                         </div>
 
                         ${whatsappLink ? `
-                            <div style="text-align: center; margin: 25px 0 10px 0;">
-                                <a href="https://wa.me/${whatsappLink}?text=Olá%20${encodeURIComponent(nome.split(' ')[0])}!%20Vi%20que%20você%20se%20interessou%20pelo%20EventCalc%20Pro%20v7."
-                                   style="display: inline-block; padding: 12px 28px; background: #25d366; color: white; text-decoration: none; border-radius: 6px; font-weight: bold;">
-                                    💬 Chamar no WhatsApp agora
-                                </a>
-                            </div>
+                            <a href="https://wa.me/${whatsappLink}?text=${encodeURIComponent('Olá ' + nome.split(' ')[0] + '! Vi que você baixou o tutorial do EventCalc. Posso te ajudar com alguma dúvida?')}"
+                               style="display: block; padding: 14px; background: #c9a14b; color: #0a0a0b; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 14px; text-align: center; letter-spacing: -0.01em;">
+                                Chamar no WhatsApp →
+                            </a>
                         ` : ''}
 
-                        <p style="margin-top: 25px; padding-top: 15px; border-top: 1px solid #444; color: #909090; font-size: 0.85rem; text-align: center;">
-                            💡 <strong>Dica:</strong> Responder em até 5 minutos aumenta a conversão em 9x.
+                        <p style="color: #6e6e73; font-size: 12px; margin: 20px 0 0 0; text-align: center;">
+                            Responder em até 5 minutos aumenta a conversão em 9×.
                         </p>
                     </div>
 
-                    <p style="text-align: center; margin-top: 20px; color: #707070; font-size: 0.8rem;">
-                        EventCalc Pro v7 © 2026 — Sistema de Captura de Leads
+                    <p style="text-align: center; color: #48484c; font-size: 11px; margin: 20px 0 0 0;">
+                        EventCalc · Sistema de captura de leads
                     </p>
                 </div>
             `,
@@ -121,7 +172,7 @@ async function notificarAdminNovoLead(nome, email, whatsapp) {
 // ENDPOINT: Enviar Tutorial por Email
 // ════════════════════════════════════════════
 
-app.post('/send-tutorial', async (req, res) => {
+app.post('/send-tutorial', limitadorEnvioEmail, async (req, res) => {
     try {
         const { nome, email, whatsapp } = req.body;
 
@@ -152,20 +203,37 @@ app.post('/send-tutorial', async (req, res) => {
         const { data, error } = await resend.emails.send({
             from: FROM_EMAIL,
             to: email,
-            subject: '📚 Tutorial EventCalc Pro v7 - Como Usar',
+            subject: 'Seu tutorial do EventCalc chegou',
             html: `
-                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-                    <h2 style="color: #d4af37;">Olá ${nome}! 👋</h2>
-                    <p>Obrigado por se interessar no <strong>EventCalc Pro v7</strong>!</p>
-                    <p>Em anexo você encontra:</p>
-                    <ul>
-                        <li>✅ Guia completo de como usar</li>
-                        <li>✅ Passo a passo das telas</li>
-                        <li>✅ Dicas profissionais</li>
-                        <li>✅ Exemplo de proposta</li>
-                    </ul>
-                    <p style="margin-top: 30px;"><em>Qualquer dúvida, estou à disposição!</em></p>
-                    <p style="margin-top: 20px;">Abraço,<br><strong>Equipe EventCalc Pro v7</strong></p>
+                <div style="font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Arial, sans-serif; max-width: 560px; margin: 0 auto; padding: 32px 24px; background: #0a0a0b; color: #f5f5f7; border-radius: 12px;">
+                    <div style="text-align: center; margin-bottom: 32px;">
+                        <p style="font-size: 24px; font-weight: 700; letter-spacing: -0.025em; color: #f5f5f7; margin: 0 0 8px 0;">EventCalc</p>
+                        <p style="font-size: 13px; color: #6e6e73; margin: 0; letter-spacing: 0.05em; text-transform: uppercase;">Tutorial Gratuito</p>
+                    </div>
+
+                    <h2 style="color: #f5f5f7; font-size: 22px; font-weight: 600; letter-spacing: -0.02em; margin-bottom: 16px;">Olá, ${nome}.</h2>
+
+                    <p style="color: #a1a1a6; font-size: 15px; line-height: 1.6; margin-bottom: 24px;">
+                        Obrigado por baixar o tutorial. Em anexo você encontra um PDF completo com:
+                    </p>
+
+                    <div style="background: #131316; border: 1px solid #232328; border-radius: 12px; padding: 20px; margin-bottom: 24px;">
+                        <p style="color: #f5f5f7; font-size: 14px; line-height: 2; margin: 0;">
+                            • Guia completo de como usar o EventCalc<br>
+                            • Passo a passo das 5 telas<br>
+                            • Dicas profissionais de orçamento<br>
+                            • Exemplo de proposta pronta para o cliente
+                        </p>
+                    </div>
+
+                    <p style="color: #a1a1a6; font-size: 14px; line-height: 1.6; margin-bottom: 32px;">
+                        Qualquer dúvida, é só responder este email — estou à disposição.
+                    </p>
+
+                    <div style="padding-top: 24px; border-top: 1px solid #232328;">
+                        <p style="color: #6e6e73; font-size: 13px; margin: 0;">Equipe EventCalc</p>
+                        <p style="color: #6e6e73; font-size: 12px; margin: 4px 0 0 0;">Club Carnivorista • Itapema, SC</p>
+                    </div>
                 </div>
             `,
             attachments: [
@@ -218,7 +286,7 @@ app.post('/send-tutorial', async (req, res) => {
 app.get('/health', (req, res) => {
     res.json({
         status: 'OK',
-        servidor: 'EventCalc Pro v7 Backend',
+        servidor: 'EventCalc Backend',
         emailProvider: 'Resend',
         resendConfigured: !!process.env.RESEND_API_KEY,
         adminEmail: ADMIN_EMAIL.replace(/(.{2}).+(@.+)/, '$1***$2') // mascarado nos logs
@@ -232,7 +300,7 @@ app.get('/health', (req, res) => {
 app.listen(PORT, () => {
     console.log(`
 ╔════════════════════════════════════════╗
-║   EventCalc Pro v7 - Backend Server    ║
+║   EventCalc - Backend Server    ║
 ║   Rodando em http://localhost:${PORT}    ║
 ╚════════════════════════════════════════╝
     `);
