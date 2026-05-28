@@ -26,6 +26,97 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 // Quando tiver domínio próprio verificado, mudar para: noreply@seudominio.com
 const FROM_EMAIL = process.env.FROM_EMAIL || 'EventCalc Pro <onboarding@resend.dev>';
 
+// Email do ADMIN que recebe notificação de cada lead capturado
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'jm.dryaged@gmail.com';
+
+// ════════════════════════════════════════════
+// FUNÇÃO: Notificar admin sobre novo lead
+// (rodada em paralelo, não bloqueia resposta ao cliente)
+// ════════════════════════════════════════════
+async function notificarAdminNovoLead(nome, email, whatsapp) {
+    try {
+        const dataAgora = new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });
+        const whatsappLink = whatsapp ? whatsapp.replace(/\D/g, '') : '';
+
+        const { data, error } = await resend.emails.send({
+            from: FROM_EMAIL,
+            to: ADMIN_EMAIL,
+            subject: `🎯 NOVO LEAD: ${nome}`,
+            html: `
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #1a1a1a; color: #d0d0d0;">
+                    <div style="background: linear-gradient(135deg, #d4af37 0%, #b8860b 100%); padding: 20px; border-radius: 8px 8px 0 0; text-align: center;">
+                        <h1 style="margin: 0; color: #0a0a0a; font-size: 1.6rem;">🎯 NOVO LEAD CAPTURADO</h1>
+                        <p style="margin: 5px 0 0 0; color: #0a0a0a;">EventCalc Pro v7 - Club Carnivorista</p>
+                    </div>
+
+                    <div style="background: #2a2a2a; padding: 25px; border-radius: 0 0 8px 8px; border: 1px solid #d4af37;">
+                        <h2 style="color: #d4af37; margin-top: 0;">Dados do Interessado</h2>
+
+                        <table style="width: 100%; border-collapse: collapse; margin: 15px 0;">
+                            <tr>
+                                <td style="padding: 10px; border-bottom: 1px solid #444; color: #d4af37; font-weight: bold; width: 30%;">Nome:</td>
+                                <td style="padding: 10px; border-bottom: 1px solid #444; color: #fff;">${nome}</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 10px; border-bottom: 1px solid #444; color: #d4af37; font-weight: bold;">Email:</td>
+                                <td style="padding: 10px; border-bottom: 1px solid #444; color: #fff;">
+                                    <a href="mailto:${email}" style="color: #d4af37;">${email}</a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 10px; border-bottom: 1px solid #444; color: #d4af37; font-weight: bold;">WhatsApp:</td>
+                                <td style="padding: 10px; border-bottom: 1px solid #444; color: #fff;">${whatsapp || '(não informado)'}</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 10px; color: #d4af37; font-weight: bold;">Capturado em:</td>
+                                <td style="padding: 10px; color: #fff;">${dataAgora}</td>
+                            </tr>
+                        </table>
+
+                        <div style="margin-top: 25px; padding: 15px; background: rgba(212, 175, 55, 0.1); border-left: 4px solid #d4af37; border-radius: 4px;">
+                            <p style="margin: 0; color: #d0d0d0; font-size: 0.95rem;">
+                                <strong style="color: #d4af37;">✅ Tutorial PDF enviado automaticamente</strong> para o email do lead.
+                            </p>
+                        </div>
+
+                        ${whatsappLink ? `
+                            <div style="text-align: center; margin: 25px 0 10px 0;">
+                                <a href="https://wa.me/${whatsappLink}?text=Olá%20${encodeURIComponent(nome.split(' ')[0])}!%20Vi%20que%20você%20se%20interessou%20pelo%20EventCalc%20Pro%20v7."
+                                   style="display: inline-block; padding: 12px 28px; background: #25d366; color: white; text-decoration: none; border-radius: 6px; font-weight: bold;">
+                                    💬 Chamar no WhatsApp agora
+                                </a>
+                            </div>
+                        ` : ''}
+
+                        <p style="margin-top: 25px; padding-top: 15px; border-top: 1px solid #444; color: #909090; font-size: 0.85rem; text-align: center;">
+                            💡 <strong>Dica:</strong> Responder em até 5 minutos aumenta a conversão em 9x.
+                        </p>
+                    </div>
+
+                    <p style="text-align: center; margin-top: 20px; color: #707070; font-size: 0.8rem;">
+                        EventCalc Pro v7 © 2026 — Sistema de Captura de Leads
+                    </p>
+                </div>
+            `,
+            // ReplyTo para você responder direto ao cliente
+            reply_to: email
+        });
+
+        if (error) {
+            console.error('⚠️ Falha ao notificar admin (lead salvo, mas você não recebeu email):', error);
+            return false;
+        }
+
+        console.log(`📩 Notificação enviada ao admin (${ADMIN_EMAIL}). ID: ${data.id}`);
+        return true;
+
+    } catch (err) {
+        // Erro aqui NÃO deve quebrar o envio do tutorial pro cliente
+        console.error('⚠️ Erro ao notificar admin:', err.message);
+        return false;
+    }
+}
+
 // ════════════════════════════════════════════
 // ENDPOINT: Enviar Tutorial por Email
 // ════════════════════════════════════════════
@@ -39,6 +130,15 @@ app.post('/send-tutorial', async (req, res) => {
             return res.status(400).json({
                 sucesso: false,
                 mensagem: 'Dados incompletos. Faltam: nome ou email.'
+            });
+        }
+
+        // Validação simples de email
+        const emailValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        if (!emailValido) {
+            return res.status(400).json({
+                sucesso: false,
+                mensagem: 'Email inválido.'
             });
         }
 
@@ -85,9 +185,15 @@ app.post('/send-tutorial', async (req, res) => {
             });
         }
 
-        console.log(`✅ Email enviado com sucesso! ID: ${data.id}`);
+        console.log(`✅ Email enviado com sucesso ao cliente! ID: ${data.id}`);
 
-        // Resposta sucesso
+        // ── NOTIFICAR ADMIN (em paralelo, sem bloquear resposta) ──
+        // Roda assíncrono. Se falhar, não impacta o cliente.
+        notificarAdminNovoLead(nome, email, whatsapp).catch(err => {
+            console.error('⚠️ Falha silenciosa ao notificar admin:', err.message);
+        });
+
+        // Resposta sucesso (já vai antes da notificação ao admin terminar)
         res.json({
             sucesso: true,
             mensagem: `✅ Tutorial enviado para ${email}! Confira sua caixa de entrada (e a pasta de spam).`,
@@ -114,7 +220,8 @@ app.get('/health', (req, res) => {
         status: 'OK',
         servidor: 'EventCalc Pro v7 Backend',
         emailProvider: 'Resend',
-        resendConfigured: !!process.env.RESEND_API_KEY
+        resendConfigured: !!process.env.RESEND_API_KEY,
+        adminEmail: ADMIN_EMAIL.replace(/(.{2}).+(@.+)/, '$1***$2') // mascarado nos logs
     });
 });
 
@@ -132,6 +239,7 @@ app.listen(PORT, () => {
     console.log(`✅ Servidor iniciado`);
     console.log(`✅ Resend configurado: ${process.env.RESEND_API_KEY ? 'SIM' : '❌ FALTANDO RESEND_API_KEY'}`);
     console.log(`📧 Endpoint: POST /send-tutorial`);
+    console.log(`📩 Admin notificado em: ${ADMIN_EMAIL}`);
 });
 
 // ════════════════════════════════════════════
