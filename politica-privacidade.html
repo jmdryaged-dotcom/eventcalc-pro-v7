@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Política de Privacidade - EventCalc Pro v7</title>
+    <title>Política de Privacidade - EventCalc</title>
+    <script src="lgpd-modal.js"></script>
+    <link rel="stylesheet" href="theme-override.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -70,32 +72,35 @@
         <p class="last-update">Última atualização: Maio de 2026</p>
 
         <h2>1. Introdução</h2>
-        <p>A <span class="highlight">EventCalc Pro v7</span> ("nós", "nosso" ou "aplicação") respeita a privacidade dos usuários. Esta Política de Privacidade explica como coletamos, usamos, protegemos e compartilhamos dados.</p>
+        <p>A <span class="highlight">EventCalc</span> ("nós", "nosso" ou "aplicação") respeita a privacidade dos usuários. Esta Política de Privacidade explica como coletamos, usamos, protegemos e compartilhamos dados.</p>
         <p>Estamos em conformidade com a <span class="highlight">Lei Geral de Proteção de Dados (LGPD)</span> - Lei nº 13.709/2018.</p>
 
         <h2>2. Dados Coletados</h2>
         <p>Nossa aplicação coleta os seguintes dados:</p>
         <ul>
-            <li><strong>Dados de Orçamento:</strong> Local, data, horário, duração, tipo de evento, número de pessoas, cardápio, volumes de alimentos, preços</li>
-            <li><strong>Dados de Navegação:</strong> Armazenados LOCALMENTE no seu navegador (localStorage) - não enviados a servidores</li>
-            <li><strong>Dados Técnicos:</strong> Apenas para fins de funcionamento da aplicação</li>
+            <li><strong>Dados de Orçamento:</strong> Local, data, horário, duração, tipo de evento, número de pessoas, cardápio, volumes de alimentos, preços — armazenados <strong>localmente</strong> no seu navegador (localStorage).</li>
+            <li><strong>Dados de Contato (Opcional):</strong> Se você preencher o formulário de tutorial gratuito, coletamos <strong>nome, email e WhatsApp</strong> para enviar o material e fazer contato comercial.</li>
+            <li><strong>Dados de Ativação de Licença (se aplicável):</strong> Quando você ativa uma licença paga, registramos <strong>endereço IP, tipo de navegador e dispositivo</strong> para detectar compartilhamento indevido. Estes dados ficam armazenados no seu próprio navegador.</li>
+            <li><strong>Dados Técnicos:</strong> Apenas para fins de funcionamento da aplicação.</li>
         </ul>
 
         <h2>3. Como Usamos os Dados</h2>
         <p>Os dados são usados exclusivamente para:</p>
         <ul>
             <li>Calcular orçamentos de eventos</li>
-            <li>Gerar propostas profissionais</li>
-            <li>Melhorar a experiência do usuário</li>
-            <li>Armazenar seus orçamentos para futuras consultas</li>
+            <li>Gerar propostas profissionais em PDF</li>
+            <li>Enviar o tutorial gratuito por email (via Resend, provedor de email transacional)</li>
+            <li>Contato comercial (caso você tenha solicitado)</li>
+            <li>Detectar compartilhamento indevido de licenças (quando aplicável)</li>
+            <li>Armazenar seus orçamentos no seu navegador para futuras consultas</li>
         </ul>
 
         <h2>4. Armazenamento de Dados</h2>
         <p><span class="highlight">Importante:</span> Seus dados são armazenados:</p>
         <ul>
-            <li><strong>Primariamente:</strong> No seu navegador (localStorage) - você tem controle total</li>
-            <li><strong>Opcionalmente:</strong> Em banco de dados remoto (Firebase) - apenas se você escolher salvar na nuvem</li>
-            <li><strong>Nunca:</strong> Seus dados não são compartilhados com terceiros sem sua permissão</li>
+            <li><strong>Primariamente:</strong> No seu navegador (localStorage) — você tem controle total e pode apagar a qualquer momento (botão no item 8).</li>
+            <li><strong>Provedor de Email (Resend):</strong> Quando você solicita o tutorial, seu email é enviado para o serviço Resend (resend.com) apenas para entrega do material. O Resend tem sua própria política de privacidade e segue padrões internacionais.</li>
+            <li><strong>Nunca:</strong> Seus dados não são vendidos ou compartilhados com terceiros para fins de marketing.</li>
         </ul>
 
         <h2>5. Seus Direitos (LGPD)</h2>
@@ -108,11 +113,11 @@
             <li><strong>Revogação:</strong> Revogar consentimento a qualquer momento</li>
         </ul>
 
-        <h2>6. Cookies</h2>
-        <p>A aplicação <span class="highlight">NÃO utiliza cookies de rastreamento</span>. Apenas armazena dados essenciais para funcionamento:</p>
+        <h2>6. Cookies e Tecnologias Similares</h2>
+        <p>A aplicação <span class="highlight">NÃO utiliza cookies de rastreamento publicitário</span>. Utilizamos apenas:</p>
         <ul>
-            <li>Dados de orçamento (localStorage)</li>
-            <li>Preferências de usuário</li>
+            <li><strong>localStorage:</strong> Para armazenar seus orçamentos, preferências e consentimento desta política. Fica apenas no seu navegador.</li>
+            <li><strong>Detecção de IP (somente se ativar licença paga):</strong> Para coibir compartilhamento de licenças. Não usamos seu IP para rastrear navegação fora do nosso site.</li>
         </ul>
 
         <h2>7. Segurança</h2>
@@ -123,12 +128,38 @@
             <li>Nenhum compartilhamento com terceiros</li>
         </ul>
 
-        <h2>8. Deletar Seus Dados</h2>
-        <p>Você pode deletar seus dados a qualquer momento:</p>
+        <h2>8. Deletar Seus Dados (Direito ao Esquecimento - LGPD)</h2>
+        <p>Você pode deletar seus dados a qualquer momento das seguintes formas:</p>
         <ul>
-            <li><strong>Dados locais:</strong> Limpar cache do navegador</li>
-            <li><strong>Dados na nuvem:</strong> Contate-nos em <span class="highlight">jm.dryaged@gmail.com</span></li>
+            <li><strong>Botão automático abaixo:</strong> Apaga TUDO que está no seu navegador relacionado ao EventCalc com 1 clique.</li>
+            <li><strong>Manualmente:</strong> Limpar cache/localStorage do navegador.</li>
+            <li><strong>Para dados de contato fornecidos (email/WhatsApp):</strong> Envie um pedido para <span class="highlight">jm.dryaged@gmail.com</span> com o assunto <em>"Solicitação LGPD - Excluir Dados"</em>. Atenderemos em até 15 dias úteis, conforme exige a LGPD.</li>
         </ul>
+        <div style="background: rgba(212, 175, 55, 0.1); border: 2px solid var(--gold); border-radius: 8px; padding: 25px; margin: 25px 0; text-align: center;">
+            <p style="margin-bottom: 15px; color: #d4af37; font-weight: bold; font-size: 1.05rem;">
+                🗑️ Apagar todos os meus dados deste navegador
+            </p>
+            <p style="color: #d0d0d0; font-size: 0.9rem; margin-bottom: 20px;">
+                Esta ação remove permanentemente: orçamentos salvos, dados profissionais, cardápios, consentimentos e licenças. Não há volta.
+            </p>
+            <button onclick="if (window.deletarMeusDados) { window.deletarMeusDados(); } else { alert('Funcao indisponivel. Recarregue a pagina e tente novamente.'); }" style="
+                background: linear-gradient(135deg, #c41e3a 0%, #8b1428 100%);
+                color: white;
+                border: none;
+                padding: 14px 32px;
+                border-radius: 6px;
+                cursor: pointer;
+                font-weight: bold;
+                font-size: 1rem;
+                transition: 0.3s;
+            " onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='none'">
+                🗑️ APAGAR MEUS DADOS AGORA
+            </button>
+        </div>
+
+        <h2>8.1 Tempo de Retenção</h2>
+        <p>Dados de contato coletados (email/WhatsApp) ficam retidos por até <strong>2 anos</strong> após o último contato, salvo solicitação de exclusão antecipada.</p>
+        <p>Dados de licença ficam retidos enquanto a licença estiver ativa + 1 ano para fins de auditoria fiscal.</p>
 
         <h2>9. Contato</h2>
         <p>Para dúvidas sobre privacidade, direitos LGPD ou para exercer seus direitos:</p>
@@ -143,9 +174,12 @@
 
         <a href="index_v7.html" class="back-link">← Voltar à Landing Page</a>
 
-        <p class="last-update" style="margin-top: 50px; border-top: 1px solid #444; padding-top: 20px;">
-            EventCalc Pro v7 © 2026 - Juliomar Meskiu. Todos os direitos reservados.
-        </p>
+        <div class="last-update" style="margin-top: 50px; border-top: 1px solid #444; padding-top: 30px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 15px;">
+            <img src="logo-club.jpeg" alt="Club Carnivorista" style="height: 100px; width: auto; object-fit: contain;">
+            <p style="margin: 0; text-align: center;">EventCalc © 2026 - Club Carnivorista. Todos os direitos reservados.</p>
+        </div>
     </div>
+    <!-- 🎨 Remover fundo branco da logo -->
+    <script src="remover-fundo-logo.js"></script>
 </body>
 </html>

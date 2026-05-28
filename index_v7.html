@@ -3,7 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EventCalc Pro v7 - Sistema Profissional de Orçamento para Eventos</title>
+    <title>EventCalc — Orçamento de eventos profissional em minutos</title>
+    <meta name="description" content="A calculadora profissional para churrasqueiros e empresas de eventos. Crie orçamentos completos em 5 minutos com PDF pronto para o cliente.">
+    <meta property="og:title" content="EventCalc — Orçamento de eventos em minutos">
+    <meta property="og:description" content="Pare de calcular no caderno. EventCalc faz seu orçamento profissional em 5 minutos.">
+    <meta property="og:type" content="website">
+
+    <!-- 🔐 Configuração de Ambiente (Frontend) -->
+    <script>
+        // Detecta se está em produção ou desenvolvimento
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            window.BACKEND_URL = 'http://localhost:3001';
+        } else {
+            // Em produção, substitua pela URL do backend em produção
+            window.BACKEND_URL = 'https://eventcalc-pro-v7.onrender.com';
+        }
+    </script>
+
     <!-- 🔐 Sistema de Expiração Automática -->
     <script src="sistema-expiracao.js"></script>
     <!-- 📄 jsPDF para geração de PDFs -->
@@ -11,7 +27,7 @@
     <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Lora:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="theme.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
@@ -677,6 +693,391 @@
             .edit-panel { min-width: 280px; right: 10px; bottom: 90px; }
             .leads-modal-content { padding: 30px 20px; }
         }
+
+        /* ═══════════════════════════════════════════════════════
+           🎨 OVERRIDE: Dark Premium — aplicado sobre o CSS legacy
+           Suaviza paleta, tipografia e proporções sem reescrever tudo
+           ═══════════════════════════════════════════════════════ */
+
+        :root {
+            --dark-bg: #0a0a0b;
+            --dark-card: #131316;
+            --gold: #c9a14b;
+            --red: #ff453a;
+            --red-dark: #c93030;
+            --text-primary: #f5f5f7;
+            --text-secondary: #a1a1a6;
+        }
+
+        body, html {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+            background: #0a0a0b !important;
+            color: #f5f5f7;
+            font-weight: 400;
+            letter-spacing: -0.01em;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* HEADER — minimal, slim, sticky */
+        header {
+            background: rgba(10, 10, 11, 0.8) !important;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid #232328 !important;
+            padding: 16px 0 !important;
+        }
+        header nav {
+            display: flex; align-items: center; gap: 28px;
+        }
+        header nav a {
+            color: #a1a1a6;
+            font-weight: 500;
+            font-size: 14px;
+            transition: color 150ms ease;
+        }
+        header nav a:hover { color: #f5f5f7; }
+        .logo {
+            font-family: 'Inter', sans-serif !important;
+            font-weight: 700 !important;
+            font-size: 20px !important;
+            letter-spacing: -0.02em !important;
+            color: #f5f5f7 !important;
+            background: none !important;
+            -webkit-background-clip: initial !important;
+            -webkit-text-fill-color: initial !important;
+        }
+
+        /* BOTÕES — finos e elegantes */
+        .btn {
+            font-family: 'Inter', sans-serif !important;
+            font-weight: 600 !important;
+            font-size: 14px !important;
+            padding: 10px 20px !important;
+            border-radius: 8px !important;
+            letter-spacing: -0.01em !important;
+            transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1) !important;
+            box-shadow: none !important;
+            border: 1px solid transparent !important;
+        }
+        .btn-primary {
+            background: #c9a14b !important;
+            color: #0a0a0b !important;
+        }
+        .btn-primary:hover {
+            background: #d4af37 !important;
+            transform: translateY(-1px);
+            box-shadow: 0 8px 24px rgba(201, 161, 75, 0.25) !important;
+        }
+        .btn-secondary {
+            background: #131316 !important;
+            color: #f5f5f7 !important;
+            border-color: #2a2a30 !important;
+        }
+        .btn-secondary:hover {
+            background: #1c1c20 !important;
+            border-color: #3a3a42 !important;
+        }
+
+        /* HERO — slim, refinado */
+        .hero {
+            padding: 120px 0 80px !important;
+            background: radial-gradient(ellipse at top, rgba(201, 161, 75, 0.08) 0%, transparent 70%) !important;
+            text-align: center;
+        }
+        .hero h1 {
+            font-family: 'Inter', sans-serif !important;
+            font-size: 64px !important;
+            font-weight: 800 !important;
+            line-height: 1.05 !important;
+            letter-spacing: -0.04em !important;
+            color: #f5f5f7 !important;
+            margin-bottom: 24px !important;
+            background: linear-gradient(180deg, #f5f5f7 0%, #a1a1a6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .hero .subtitle {
+            font-size: 22px !important;
+            font-weight: 500 !important;
+            color: #c9a14b !important;
+            margin-bottom: 16px !important;
+            letter-spacing: -0.01em;
+        }
+        .hero .description {
+            font-size: 17px !important;
+            color: #a1a1a6 !important;
+            max-width: 600px;
+            margin: 0 auto 40px !important;
+            line-height: 1.6 !important;
+        }
+
+        /* FEATURES — cards limpos */
+        .features {
+            padding: 80px 0 !important;
+        }
+        .section-title {
+            font-family: 'Inter', sans-serif !important;
+            font-size: 40px !important;
+            font-weight: 700 !important;
+            letter-spacing: -0.03em !important;
+            color: #f5f5f7 !important;
+            text-align: center;
+            margin-bottom: 60px !important;
+            background: none !important;
+            -webkit-text-fill-color: initial !important;
+        }
+        .features-grid {
+            gap: 20px !important;
+        }
+        .feature-card {
+            background: #131316 !important;
+            border: 1px solid #232328 !important;
+            border-radius: 16px !important;
+            padding: 32px !important;
+            transition: all 250ms ease !important;
+            box-shadow: none !important;
+        }
+        .feature-card:hover {
+            border-color: #c9a14b !important;
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4) !important;
+        }
+        .feature-icon {
+            font-size: 32px !important;
+            margin-bottom: 16px !important;
+        }
+        .feature-card h3 {
+            font-family: 'Inter', sans-serif !important;
+            font-size: 18px !important;
+            font-weight: 600 !important;
+            letter-spacing: -0.015em !important;
+            color: #f5f5f7 !important;
+            margin-bottom: 8px !important;
+        }
+        .feature-card p {
+            color: #a1a1a6 !important;
+            font-size: 15px !important;
+            line-height: 1.6 !important;
+        }
+
+        /* PROFISSIONAL */
+        .profissional-section {
+            padding: 80px 0 !important;
+            background: #0d0d0f !important;
+        }
+        .profissional-info h3 {
+            font-family: 'Inter', sans-serif !important;
+            font-size: 36px !important;
+            font-weight: 700 !important;
+            letter-spacing: -0.025em !important;
+            color: #f5f5f7 !important;
+            background: none !important;
+            -webkit-text-fill-color: initial !important;
+        }
+        .profissao { color: #c9a14b !important; font-weight: 500 !important; font-size: 16px !important; }
+        .curriculo-box, .contatos-box {
+            background: #131316 !important;
+            border: 1px solid #232328 !important;
+            border-radius: 12px !important;
+            padding: 24px !important;
+        }
+        .curriculo-box h4, .contatos-box h4 {
+            color: #c9a14b !important;
+            font-family: 'Inter', sans-serif !important;
+            font-weight: 600 !important;
+            font-size: 14px !important;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 16px !important;
+        }
+        .contato-link { color: #c9a14b !important; }
+        .contato-link:hover { color: #d4af37 !important; }
+        .foto-container {
+            border: 1px solid #2a2a30 !important;
+            border-radius: 16px !important;
+        }
+        .foto-placeholder { background: #131316 !important; }
+
+        /* PRICING — minimalista premium */
+        .pricing {
+            padding: 100px 0 !important;
+        }
+        .pricing-card {
+            background: #131316 !important;
+            border: 1px solid #232328 !important;
+            border-radius: 20px !important;
+            padding: 40px 32px !important;
+            box-shadow: none !important;
+            transition: all 250ms ease;
+        }
+        .pricing-card:hover {
+            border-color: #2a2a30 !important;
+        }
+        .pricing-card.featured {
+            border-color: #c9a14b !important;
+            background: linear-gradient(180deg, #1c1c20 0%, #131316 100%) !important;
+            position: relative;
+        }
+        .pricing-card h3 {
+            font-family: 'Inter', sans-serif !important;
+            font-size: 24px !important;
+            font-weight: 700 !important;
+            letter-spacing: -0.02em !important;
+            color: #f5f5f7 !important;
+            background: none !important;
+            -webkit-text-fill-color: initial !important;
+        }
+        .pricing-card .price {
+            font-family: 'Inter', sans-serif !important;
+            font-size: 56px !important;
+            font-weight: 800 !important;
+            letter-spacing: -0.04em !important;
+            color: #c9a14b !important;
+        }
+        .pricing-card li {
+            color: #a1a1a6 !important;
+            font-size: 15px !important;
+            padding: 8px 0 !important;
+            border-bottom: 1px solid #232328 !important;
+        }
+        .pricing-card li::before { color: #c9a14b !important; }
+
+        /* MODAL DE LEADS */
+        .leads-modal-content {
+            background: #1c1c20 !important;
+            border: 1px solid #2a2a30 !important;
+            border-radius: 20px !important;
+            box-shadow: 0 24px 64px rgba(0, 0, 0, 0.6) !important;
+        }
+        .leads-modal h2 {
+            font-family: 'Inter', sans-serif !important;
+            font-size: 28px !important;
+            font-weight: 700 !important;
+            letter-spacing: -0.025em !important;
+            color: #f5f5f7 !important;
+            background: none !important;
+            -webkit-text-fill-color: initial !important;
+        }
+        .leads-modal-subtitle { color: #a1a1a6 !important; font-size: 15px !important; }
+        .leads-form-group label {
+            font-family: 'Inter', sans-serif !important;
+            font-weight: 500 !important;
+            font-size: 13px !important;
+            color: #a1a1a6 !important;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+        .leads-form-group input {
+            background: #0a0a0b !important;
+            border: 1px solid #2a2a30 !important;
+            border-radius: 8px !important;
+            color: #f5f5f7 !important;
+            padding: 12px 16px !important;
+            font-family: 'Inter', sans-serif !important;
+            font-size: 15px !important;
+            transition: all 150ms ease !important;
+        }
+        .leads-form-group input:focus {
+            border-color: #c9a14b !important;
+            box-shadow: 0 0 0 3px rgba(201, 161, 75, 0.15) !important;
+            outline: none !important;
+        }
+        .leads-btn-submit {
+            background: #c9a14b !important;
+            color: #0a0a0b !important;
+            border: none !important;
+            font-family: 'Inter', sans-serif !important;
+            font-weight: 600 !important;
+            font-size: 15px !important;
+            padding: 14px 28px !important;
+            border-radius: 8px !important;
+            transition: all 200ms ease !important;
+        }
+        .leads-btn-submit:hover {
+            background: #d4af37 !important;
+            transform: translateY(-1px);
+            box-shadow: 0 8px 20px rgba(201, 161, 75, 0.3) !important;
+        }
+        .leads-btn-cancel {
+            background: transparent !important;
+            color: #a1a1a6 !important;
+            border: 1px solid #2a2a30 !important;
+            font-family: 'Inter', sans-serif !important;
+            font-weight: 500 !important;
+        }
+        .leads-btn-cancel:hover {
+            background: #1c1c20 !important;
+            color: #f5f5f7 !important;
+        }
+
+        /* PAINEL EDIÇÃO */
+        .edit-mode-btn {
+            background: #c9a14b !important;
+            color: #0a0a0b !important;
+            box-shadow: 0 8px 24px rgba(201, 161, 75, 0.3) !important;
+            border: none !important;
+        }
+        .edit-panel {
+            background: #1c1c20 !important;
+            border: 1px solid #2a2a30 !important;
+            border-radius: 16px !important;
+            box-shadow: 0 24px 64px rgba(0, 0, 0, 0.6) !important;
+        }
+        .edit-field label { color: #c9a14b !important; font-weight: 500 !important; font-size: 12px !important; text-transform: uppercase; letter-spacing: 0.05em; }
+        .edit-field input, .edit-field textarea {
+            background: #0a0a0b !important;
+            border: 1px solid #2a2a30 !important;
+            color: #f5f5f7 !important;
+            border-radius: 8px !important;
+            font-family: 'Inter', sans-serif !important;
+        }
+        .edit-field input:focus, .edit-field textarea:focus {
+            border-color: #c9a14b !important;
+            box-shadow: 0 0 0 3px rgba(201, 161, 75, 0.15) !important;
+            outline: none !important;
+        }
+        .edit-btn-save {
+            background: #c9a14b !important;
+            color: #0a0a0b !important;
+            font-weight: 600 !important;
+        }
+        .edit-btn-cancel {
+            background: transparent !important;
+            color: #a1a1a6 !important;
+            border: 1px solid #2a2a30 !important;
+        }
+
+        /* FOOTER */
+        footer {
+            background: #0a0a0b !important;
+            border-top: 1px solid #232328 !important;
+            padding: 48px 0 32px !important;
+        }
+        footer p { color: #6e6e73 !important; font-size: 13px !important; }
+        footer a { color: #a1a1a6 !important; font-size: 13px !important; }
+        footer a:hover { color: #c9a14b !important; }
+
+        /* Container — espaçamento generoso */
+        .container { max-width: 1140px !important; padding: 0 24px !important; }
+
+        /* Selection */
+        ::selection { background: rgba(201, 161, 75, 0.3); color: #f5f5f7; }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #0a0a0b; }
+        ::-webkit-scrollbar-thumb { background: #2a2a30; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #3a3a42; }
+
+        /* Mobile */
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 40px !important; }
+            .hero .description { font-size: 16px !important; }
+            .section-title { font-size: 28px !important; }
+            header nav { gap: 16px; }
+            header nav a:not(.btn) { display: none; }
+        }
     </style>
 </head>
 <body>
@@ -684,7 +1085,7 @@
     <header>
         <div class="container">
             <nav>
-                <div class="logo">EventCalc Pro v7</div>
+                <div class="logo">EventCalc</div>
                 <div style="flex: 1;"></div>
                 <a href="#recursos">Recursos</a>
                 <a href="#profissional">Profissional</a>
@@ -697,21 +1098,26 @@
     <!-- HERO -->
     <section class="hero">
         <div class="container">
-            <h1>EventCalc Pro v7</h1>
-            <p class="subtitle">Sistema Profissional de Orçamento para Eventos</p>
+            <h1>Orçamento de eventos<br>em minutos.</h1>
+            <p class="subtitle">A calculadora que profissionais de churrasco usam todos os dias.</p>
             <p class="description">
-                Crie orçamentos IMPECÁVEIS com volumes customizáveis, cálculos de custos completos,
-                previsão de consumo e propostas que conquistam clientes.
+                Do questionário ao PDF: cardápio, volumes, custos e proposta para o cliente final.
+                Sem planilha, sem caderno, sem perder vendas.
             </p>
-            <div>
-                <a href="event_calculator_pro_v7_questionario.html" class="btn btn-primary">Começar Agora</a>
-                <a href="#precos" class="btn btn-secondary">Ver Planos</a>
+            <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+                <a href="event_calculator_pro_v7_questionario.html" class="btn btn-primary">Começar agora →</a>
+                <a href="#precos" class="btn btn-secondary">Ver planos</a>
             </div>
 
-            <!-- CTA para Receber Tutorial - DESABILITADO (LGPD compliance) -->
-            <!-- <div class="leads-cta" style="margin-top: 25px;">
-                <a href="#" onclick="abrirModalLeads(); return false;">📚 Receber Tutorial Gratuito</a>
-            </div> -->
+            <!-- CTA secundário para lead capture -->
+            <div style="margin-top: 64px; text-align: center; padding: 32px; background: rgba(201, 161, 75, 0.04); border: 1px solid rgba(201, 161, 75, 0.15); border-radius: 16px; max-width: 540px; margin-left: auto; margin-right: auto;">
+                <p style="color: #c9a14b; margin-bottom: 6px; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em;">Tutorial gratuito</p>
+                <h3 style="color: #f5f5f7; margin-bottom: 12px; font-size: 20px; font-weight: 600; letter-spacing: -0.015em;">Receba o guia completo no seu email</h3>
+                <p style="color: #a1a1a6; margin-bottom: 20px; font-size: 14px; line-height: 1.6;">PDF com todas as funcionalidades, um exemplo de proposta e como aumentar sua margem.</p>
+                <button style="padding: 10px 24px; background: transparent; color: #c9a14b; border: 1px solid #c9a14b; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; font-family: 'Inter', sans-serif; transition: all 200ms ease;" onclick="abrirModalLeads()" onmouseover="this.style.background='#c9a14b'; this.style.color='#0a0a0b';" onmouseout="this.style.background='transparent'; this.style.color='#c9a14b';">
+                    Receber Tutorial Gratuito
+                </button>
+            </div>
         </div>
     </section>
     
@@ -913,18 +1319,14 @@
 
                 <!-- INFO -->
                 <div class="profissional-info">
-                    <h3 id="displayNome">Juliomar Meskiu</h3>
-                    <p class="profissao" id="displayProfissao">Médico Veterinário • Mestre Churrasqueiro • Parrilleiro • Pitmaster</p>
+                    <h3 id="displayNome">(Preencha seu nome)</h3>
+                    <p class="profissao" id="displayProfissao">(Preencha sua profissão)</p>
 
                     <div class="curriculo-box">
                         <h4>Currículo Profissional</h4>
                         <div id="displayCurriculo">
-                            <p>🎓 Formação em Medicina Veterinária - especialização em processamento e qualidade de carnes premium</p>
-                            <p>🏆 Mestre Churrasqueiro - Certificado pela Associação Brasileira de Churrascarias</p>
-                            <p>🔥 Especialista em Técnicas Tradicionais e Modernas de Churrasco (Defumação, Dry Aged, BBQ)</p>
-                            <p>🎯 Curador do evento "Onda & Brasa" - Principal evento de churrasco da região com mais de 2.000 participantes</p>
-                            <p>👨‍🍳 Mais de 15 anos de experiência em eventos corporativos, privados e sociais</p>
-                            <p>📊 Consultor em qualidade de carnes, técnicas culinárias e gestão de eventos</p>
+                            <p style="color: #909090; font-style: italic;">Clique no ✏️ para preencher seu currículo profissional</p>
+                            <p style="color: #707070; font-size: 0.85rem; margin-top: 10px;">Exemplo: 🎓 Formação acadêmica • 🏆 Certificações • 🔥 Especialidades • 👨‍🍳 Anos de experiência</p>
                         </div>
                     </div>
 
@@ -932,19 +1334,19 @@
                         <h4>Contatos e Redes</h4>
                         <div class="contato-item">
                             <span class="contato-emoji">📱</span>
-                            <span><strong>WhatsApp:</strong> <a href="https://wa.me/5547996681010" class="contato-link" id="linkWhatsapp">+55 47 99668-1010</a></span>
+                            <span><strong>WhatsApp:</strong> <a href="#" class="contato-link" id="linkWhatsapp">(Preencha)</a></span>
                         </div>
                         <div class="contato-item">
                             <span class="contato-emoji">📧</span>
-                            <span><strong>Email:</strong> <a href="mailto:jm.dryaged@gmail.com" class="contato-link" id="linkEmail">jm.dryaged@gmail.com</a></span>
+                            <span><strong>Email:</strong> <a href="#" class="contato-link" id="linkEmail">(Preencha)</a></span>
                         </div>
                         <div class="contato-item">
                             <span class="contato-emoji">📍</span>
-                            <span><strong>Localização:</strong> <span id="displayLocalizacao">Itapema, SC</span></span>
+                            <span><strong>Localização:</strong> <span id="displayLocalizacao">(Preencha)</span></span>
                         </div>
                         <div class="contato-item">
                             <span class="contato-emoji">📱</span>
-                            <span><strong>Instagram:</strong> <a href="https://instagram.com/churrascojm" class="contato-link" id="linkInstagram">@churrascojm</a></span>
+                            <span><strong>Instagram:</strong> <a href="#" class="contato-link" id="linkInstagram">(Preencha)</a></span>
                         </div>
                     </div>
                 </div>
@@ -959,58 +1361,33 @@
             
             <div class="pricing-cards">
                 <div class="pricing-card">
-                    <h3>📅 Semanal</h3>
-                    <div class="price">R$ 7,90</div>
-                    <p style="color: #909090; margin-bottom: 30px;">por 7 dias</p>
-                    <ul>
-                        <li>✓ Todas as funcionalidades v7</li>
-                        <li>✓ Orçamentos ilimitados</li>
-                        <li>✓ Exportar PDFs (Assador + Cliente)</li>
-                        <li>✓ Teste sem compromisso</li>
-                    </ul>
-                    <a href="acesso-premium.html" class="btn btn-primary">Desbloquear</a>
-                </div>
-
-                <div class="pricing-card featured">
-                    <h3>📅 Mensal</h3>
-                    <div class="price">R$ 24,90</div>
-                    <p style="color: #909090; margin-bottom: 30px;">por mês (recorrente)</p>
+                    <h3>💡 Mensal</h3>
+                    <div class="price">R$ 19,90</div>
+                    <p style="color: #909090; margin-bottom: 30px;">por mês</p>
                     <ul>
                         <li>✓ Acesso completo</li>
                         <li>✓ Orçamentos ilimitados</li>
                         <li>✓ Histórico completo de eventos</li>
                         <li>✓ Suporte por email e WhatsApp</li>
-                        <li>✓ Atualizações contínuas</li>
+                        <li>✓ Teste com baixo risco</li>
                     </ul>
                     <a href="acesso-premium.html" class="btn btn-primary">Desbloquear Agora</a>
                 </div>
 
-                <div class="pricing-card">
-                    <h3>📅 Trimestral</h3>
-                    <div class="price">R$ 59,90</div>
+                <div class="pricing-card featured">
+                    <div style="background: linear-gradient(135deg, #d4af37 0%, #b8860b 100%); color: #0a0a0a; padding: 8px 16px; border-radius: 6px; margin-bottom: 15px; font-weight: bold; text-align: center; display: inline-block; width: 100%;">⭐ MELHOR OFERTA</div>
+                    <h3>🏆 Trimestral</h3>
+                    <div class="price">R$ 49,90</div>
+                    <p style="color: #d4af37; margin-bottom: 15px; font-weight: bold;">Economize 21%!</p>
                     <p style="color: #909090; margin-bottom: 30px;">a cada 3 meses</p>
                     <ul>
                         <li>✓ Acesso completo</li>
                         <li>✓ Orçamentos ilimitados</li>
                         <li>✓ Histórico e análises</li>
-                        <li>✓ Melhor custo-benefício</li>
-                        <li>✓ Sem compromisso longo prazo</li>
+                        <li>✓ Melhor relação custo/benefício</li>
+                        <li>✓ Cancelar quando desejar</li>
                     </ul>
-                    <a href="acesso-premium.html" class="btn btn-primary">Desbloquear</a>
-                </div>
-
-                <div class="pricing-card">
-                    <h3>🏆 Vitalício</h3>
-                    <div class="price">R$ 199</div>
-                    <p style="color: #909090; margin-bottom: 30px;">sem limite de tempo</p>
-                    <ul>
-                        <li>✓ Acesso permanente</li>
-                        <li>✓ Orçamentos ilimitados</li>
-                        <li>✓ Histórico ilimitado</li>
-                        <li>✓ Atualizações gratuitas</li>
-                        <li>✓ Nunca mais pagar</li>
-                    </ul>
-                    <a href="acesso-premium.html" class="btn btn-primary">Desbloquear</a>
+                    <a href="acesso-premium.html" class="btn btn-primary">Desbloquear Agora</a>
                 </div>
             </div>
         </div>
@@ -1067,14 +1444,7 @@
         </div>
     </div>
 
-    <!-- FOOTER -->
-    <footer>
-        <div class="container">
-            <p><strong>EventCalc Pro v7</strong> - Sistema Profissional de Orçamento para Eventos</p>
-            <p style="margin-top: 10px; color: #909090;">Desenvolvido por profissionais, para profissionais que levam a sério</p>
-            <p style="margin-top: 20px; font-size: 0.85rem;">© 2026 EventCalc Pro. Todos os direitos reservados.</p>
-        </div>
-    </footer>
+    <!-- (footer removido — agora usa o footer LGPD/Privacidade abaixo, que é o oficial) -->
 
     <script>
         // ── VARIÁVEIS GLOBAIS ──
@@ -1434,93 +1804,101 @@
                 const doc = new jsPDF({
                     orientation: 'p',
                     unit: 'mm',
-                    format: 'a4'
+                    format: 'a4',
+                    compress: true
                 });
 
                 // ── CORES ──
-                const corOuro = [212, 175, 55];
-                const corVermelho = [196, 30, 58];
-                const corPreto = [26, 26, 26];
-                const corBranco = [255, 255, 255];
-                const corCinza = [180, 180, 180];
+                const corOuro = '#d4af37';
+                const corBranco = '#ffffff';
+                const corCinza = '#d3d3d3';
+                const fundoPreto = '#1a1a1a';
 
-                let posY = 15;
-                const margemEsq = 15;
-                const margemDir = 15;
-                const larguraTexto = 210 - margemEsq - margemDir;
+                // ── PÁGINA 1: CAPA ──
+                doc.setFillColor(26, 26, 26); // Fundo preto
+                doc.rect(0, 0, 210, 297, 'F');
 
-                function novaPagemComFundo() {
-                    doc.setFillColor(...corPreto);
-                    doc.rect(0, 0, 210, 297, 'F');
-                    posY = 15;
-                }
-
-                function adicionarTitulo(texto) {
-                    doc.setFont('Playfair Display', 'bold');
-                    doc.setFontSize(22);
-                    doc.setTextColor(...corOuro);
-                    doc.text(texto, margemEsq, posY);
-                    posY += 12;
-                }
-
-                function adicionarSubtitulo(texto) {
-                    doc.setFont('Lora', 'bold');
-                    doc.setFontSize(13);
-                    doc.setTextColor(...corOuro);
-                    doc.text(texto, margemEsq, posY);
-                    posY += 7;
-                }
-
-                function adicionarTexto(texto, tamanho = 10, cor = corCinza) {
-                    doc.setFont('Lora', 'normal');
-                    doc.setFontSize(tamanho);
-                    doc.setTextColor(...cor);
-                    const linhas = doc.splitTextToSize(texto, larguraTexto);
-                    doc.text(linhas, margemEsq, posY);
-                    posY += linhas.length * 5 + 2;
-                }
-
-                // PÁGINA 1: CAPA
-                novaPagemComFundo();
-                posY = 70;
-                doc.setFont('Playfair Display', 'bold');
+                doc.setFont('helvetica', 'bold');
                 doc.setFontSize(36);
-                doc.setTextColor(...corOuro);
-                doc.text('EventCalc Pro v7', 105, posY, { align: 'center' });
-                posY += 15;
-                doc.setFont('Lora', 'normal');
+                doc.setTextColor(212, 175, 55); // Dourado
+                doc.text('EventCalc', 105, 80, { align: 'center' });
+
                 doc.setFontSize(16);
-                doc.setTextColor(...corBranco);
-                doc.text('Tutorial Completo', 105, posY, { align: 'center' });
-                posY += 12;
+                doc.setTextColor(255, 255, 255); // Branco
+                doc.text('Tutorial Completo', 105, 100, { align: 'center' });
+
                 doc.setFontSize(11);
-                doc.setTextColor(...corCinza);
-                doc.text('Como usar a calculadora de orçamentos', 105, posY, { align: 'center' });
-                doc.text('para eventos com máxima eficiência', 105, posY + 5, { align: 'center' });
+                doc.setTextColor(211, 211, 211); // Cinza
+                doc.text('Como usar a calculadora de orcamentos', 105, 120, { align: 'center' });
+                doc.text('para eventos com maxima eficiencia', 105, 130, { align: 'center' });
 
-                // PÁGINA 2: POR QUE EVENTCALC
+                // ── PÁGINA 2: POR QUE USAR ──
                 doc.addPage();
-                novaPagemComFundo();
-                adicionarTitulo('Por Que Usar EventCalc Pro v7?');
-                adicionarTexto('Você gasta HORAS calculando orçamentos manualmente? Com EventCalc, você cria qualquer orçamento em menos de 10 minutos!', 11, corBranco);
-                posY += 5;
-                adicionarSubtitulo('Economia Real:');
-                adicionarTexto('⏱️ Economiza 2 horas por orçamento');
-                adicionarTexto('💰 Aumenta seu lucro automaticamente');
-                adicionarTexto('📊 Proposta profissional em minutos');
-                adicionarTexto('✅ 100% preciso - sem erros de conta');
+                doc.setFillColor(26, 26, 26);
+                doc.rect(0, 0, 210, 297, 'F');
 
-                // PÁGINA 3 a 13: Conteúdo simplificado (apenas estrutura para demo)
-                for (let i = 0; i < 11; i++) {
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(22);
+                doc.setTextColor(212, 175, 55);
+                doc.text('Por Que Usar EventCalc?', 15, 20);
+
+                doc.setFont('helvetica', 'normal');
+                doc.setFontSize(11);
+                doc.setTextColor(255, 255, 255);
+                let linhas = doc.splitTextToSize('Voce gasta HORAS calculando orcamentos manualmente? Com EventCalc, voce cria qualquer orcamento em menos de 10 minutos!', 180);
+                doc.text(linhas, 15, 35);
+
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(13);
+                doc.setTextColor(212, 175, 55);
+                doc.text('Economia Real:', 15, 60);
+
+                doc.setFont('helvetica', 'normal');
+                doc.setFontSize(10);
+                doc.setTextColor(211, 211, 211);
+                doc.text('* Economiza 2 horas por orcamento', 15, 75);
+                doc.text('* Aumenta seu lucro automaticamente', 15, 85);
+                doc.text('* Proposta profissional em minutos', 15, 95);
+                doc.text('* 100% preciso - sem erros de conta', 15, 105);
+
+                // ── PÁGINAS 3-13: CONTEÚDO ──
+                const conteudos = [
+                    { titulo: 'Como Comeco?', texto: 'Passo 1: Acesse o sistema\nPasso 2: Preencha os dados do evento\nPasso 3: Escolha o cardapio\nPasso 4: Defina volumes\nPasso 5: Gere a proposta' },
+                    { titulo: 'Tela 1: Informacoes', texto: 'Preencha data, local, horario, duracao, tipo de refeicao e numero de pessoas' },
+                    { titulo: 'Tela 2: Cardapio', texto: 'Escolha entre cardapios sugeridos ou crie seu proprio cardapio customizado' },
+                    { titulo: 'Tela 3: Volumes', texto: 'Defina quantidades de cada item e calcule custos automaticamente' },
+                    { titulo: 'Tela 5 - Custos', texto: 'Analise custos detalhados por item e por categoria' },
+                    { titulo: 'Tela 5 - Relatorio', texto: 'Veja relatorio completo para o assador com todas as especificacoes' },
+                    { titulo: 'Tela 5 - Proposta', texto: 'Gere proposta profissional para enviar ao cliente com todos os detalhes' },
+                    { titulo: 'Exportar PDF', texto: 'Exporte proposta em PDF de alta qualidade pronto para enviar' },
+                    { titulo: 'Compartilhar', texto: 'Compartilhe orcamentos por email ou deixe salvo no seu historico' },
+                    { titulo: 'Suporte', texto: 'Duvidas? Entre em contato pelo email ou whatsapp para assistencia' }
+                ];
+
+                conteudos.forEach((item) => {
                     doc.addPage();
-                    novaPagemComFundo();
-                    adicionarTitulo(`Seção ${i + 3}`);
-                    adicionarTexto('Conteúdo do tutorial. Leia o arquivo completo gerar-tutorial-pdf.js para ver todas as 13 páginas!', 11, corBranco);
-                }
+                    doc.setFillColor(26, 26, 26);
+                    doc.rect(0, 0, 210, 297, 'F');
+
+                    doc.setFont('helvetica', 'bold');
+                    doc.setFontSize(20);
+                    doc.setTextColor(212, 175, 55);
+                    doc.text(item.titulo, 15, 20);
+
+                    doc.setFont('helvetica', 'normal');
+                    doc.setFontSize(11);
+                    doc.setTextColor(211, 211, 211);
+                    linhas = doc.splitTextToSize(item.texto, 180);
+                    doc.text(linhas, 15, 40);
+                });
 
                 // Retornar PDF em base64
-                const pdfData = doc.output('datauristring');
-                resolve(pdfData);
+                const pdfBlob = doc.output('blob');
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    resolve(reader.result);
+                };
+                reader.readAsDataURL(pdfBlob);
             });
         }
 
@@ -1564,7 +1942,7 @@
                 email: email,
                 whatsapp: whatsapp,
                 data: new Date().toLocaleString('pt-BR'),
-                origem: 'Landing Page EventCalc Pro v7',
+                origem: 'Landing Page EventCalc',
                 status: 'new',
                 notas: ''
             };
@@ -1582,111 +1960,73 @@
             leads.push(lead);
             localStorage.setItem('eventCalcLeads', JSON.stringify(leads));
 
-            // ── PASSO 2: Gerar PDF em base64 ──
-            gerarTutorialPDFBase64().then(pdfBase64 => {
-                const leadComPDF = {
-                    ...lead,
-                    pdfBase64: pdfBase64
-                };
+            // ── PASSO 2: Enviar para servidor Node.js via /send-tutorial ──
+            // (O servidor vai gerar o PDF)
+            const BACKEND_URL = window.BACKEND_URL || 'http://localhost:3001';
+            fetch(BACKEND_URL + '/send-tutorial', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    nome: nome,
+                    email: email,
+                    whatsapp: whatsapp
+                })
+            })
+            .then(res => {
+                    if (!res.ok) {
+                        throw new Error(`Erro HTTP: ${res.status}`);
+                    }
+                    return res.json();
+                })
+                .then(data => {
+                    if (data.sucesso) {
+                        console.log('✅ Tutorial enviado com sucesso:', data.mensagem);
 
-                // ── PASSO 3: Tentar salvar em Firebase (se disponível) ──
-                if (typeof firebase !== 'undefined') {
-                    try {
-                        const firebaseConfig = {
-                            apiKey: "AIzaSyDx_YOUR_API_KEY_HERE",
-                            authDomain: "eventcalc-leads.firebaseapp.com",
-                            databaseURL: "https://eventcalc-leads-default-rtdb.firebaseio.com",
-                            projectId: "eventcalc-leads",
-                            storageBucket: "eventcalc-leads.appspot.com",
-                            messagingSenderId: "YOUR_SENDER_ID",
-                            appId: "YOUR_APP_ID"
-                        };
-
-                        if (!firebase.apps.length) {
-                            firebase.initializeApp(firebaseConfig);
+                        // 📊 GA: lead capturado com sucesso
+                        if (window.eventoGA) {
+                            window.eventoGA('lead_capturado', {
+                                metodo: 'form_landing',
+                                tem_whatsapp: !!whatsapp
+                            });
                         }
 
-                        const db = firebase.database();
-                        const leadId = db.ref('leads').push().key;
-                        db.ref('leads/' + leadId).set(lead) // Salvar SEM PDF (muito grande)
-                            .then(() => console.log('✅ Lead salvo em Firebase'))
-                            .catch(err => console.error('⚠️ Erro ao salvar em Firebase:', err));
-                    } catch(e) {
-                        console.warn('⚠️ Firebase não disponível:', e);
+                        // Exibir mensagem de sucesso
+                        const successMsg = document.getElementById('leadsSuccessMsg');
+                        successMsg.classList.add('show');
+
+                        // Limpar formulário
+                        document.getElementById('leadsForm').reset();
+
+                        // Reabilitar botão
+                        btn.disabled = false;
+                        btn.textContent = textOriginal;
+
+                        // Fechar modal após 3 segundos
+                        setTimeout(() => {
+                            fecharModalLeads();
+                        }, 3000);
+                    } else {
+                        throw new Error(data.mensagem || 'Erro desconhecido ao enviar email');
                     }
-                }
+                })
+                .catch(err => {
+                    console.error('❌ Erro ao enviar tutorial:', err);
 
-                // ── PASSO 4: Enviar notificações (Netlify Functions) ──
-                Promise.all([
-                    enviarEmailNotificacao(leadComPDF),
-                    enviarWhatsappNotificacao(lead)
-                ]).then(() => {
-                    // Exibir mensagem de sucesso
-                    const successMsg = document.getElementById('leadsSuccessMsg');
-                    successMsg.classList.add('show');
+                    // 📊 GA: erro no envio
+                    if (window.eventoGA) {
+                        window.eventoGA('lead_erro', { mensagem: err.message });
+                    }
 
-                    // Limpar formulário
-                    document.getElementById('leadsForm').reset();
+                    alert(`❌ Erro ao enviar: ${err.message}\n\nPor favor, tente novamente em alguns minutos.`);
 
-                    // Reabilitar botão
-                    btn.disabled = false;
-                    btn.textContent = textOriginal;
-
-                    // Fechar modal após 3 segundos
-                    setTimeout(() => {
-                        fecharModalLeads();
-                    }, 3000);
-
-                    console.log('✅ Lead processado com PDF');
-                }).catch(err => {
-                    console.warn('⚠️ Erro ao enviar notificações:', err);
-                    // Mesmo com erro nas notificações, o lead foi salvo
-                    const successMsg = document.getElementById('leadsSuccessMsg');
-                    successMsg.classList.add('show');
-                    setTimeout(() => {
-                        fecharModalLeads();
-                    }, 3000);
+                    // Reabilitar botão em caso de erro
                     btn.disabled = false;
                     btn.textContent = textOriginal;
                 });
-            });
         }
 
-        // ── ENVIAR EMAIL (COM PDF) ──
-        function enviarEmailNotificacao(lead) {
-            return fetch('/api/send-email', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(lead)
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    console.log('✅ Email enviado com PDF');
-                } else {
-                    console.warn('⚠️ Email não enviado:', data);
-                }
-            })
-            .catch(err => console.warn('⚠️ Erro ao enviar email:', err));
-        }
-
-        // ── ENVIAR WHATSAPP ──
-        function enviarWhatsappNotificacao(lead) {
-            return fetch('/api/send-whatsapp', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ ...lead, tipo: 'welcome' })
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    console.log('✅ WhatsApp enviado');
-                } else {
-                    console.warn('⚠️ WhatsApp não enviado:', data);
-                }
-            })
-            .catch(err => console.warn('⚠️ Erro ao enviar WhatsApp:', err));
-        }
 
         // Fechar modal com ESC
         document.addEventListener('keydown', (e) => {
@@ -1698,64 +2038,50 @@
 
     <!-- 📚 Script para gerar Tutorial PDF -->
     <script src="gerar-tutorial-pdf.js"></script>
+    <!-- 🎨 Remover fundo branco da logo -->
+    <script src="remover-fundo-logo.js"></script>
 
-    <!-- 🔒 FOOTER COM PRIVACIDADE & CONFORMIDADE LGPD -->
-    <footer style="background: #1a1a1a; border-top: 1px solid rgba(212,175,55,0.3); padding: 30px 20px; text-align: center; color: #d0d0d0; margin-top: 60px;">
-        <div style="max-width: 1200px; margin: 0 auto;">
-            <p style="margin-bottom: 15px;">
-                <strong style="color: #d4af37;">EventCalc Pro v7</strong> © 2026 - Juliomar Meskiu
-            </p>
-            <p style="margin-bottom: 15px; font-size: 0.9rem; color: #909090;">
-                ✅ Conformidade LGPD | 🔒 Seus dados são seguros | 📍 Itapema, SC
-            </p>
-            <p style="font-size: 0.9rem;">
-                <a href="politica-privacidade.html" style="color: #d4af37; text-decoration: none; transition: 0.3s;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">
-                    🔐 Política de Privacidade
-                </a>
-                &nbsp;|&nbsp;
-                <a href="mailto:jm.dryaged@gmail.com" style="color: #d4af37; text-decoration: none; transition: 0.3s;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">
-                    📧 Contato
-                </a>
-            </p>
+    <!-- FOOTER -->
+    <footer style="background: #0a0a0b; border-top: 1px solid #232328; padding: 64px 24px 32px; margin-top: 80px;">
+        <div style="max-width: 1140px; margin: 0 auto;">
+            <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 48px; padding-bottom: 48px; border-bottom: 1px solid #232328;">
+                <!-- Marca -->
+                <div>
+                    <p style="font-size: 22px; font-weight: 700; color: #f5f5f7; letter-spacing: -0.025em; margin-bottom: 12px;">EventCalc</p>
+                    <p style="color: #a1a1a6; font-size: 14px; line-height: 1.6; max-width: 320px;">Orçamentos profissionais de eventos em minutos. Feito por profissionais, para profissionais.</p>
+                </div>
+
+                <!-- Links -->
+                <div>
+                    <p style="color: #6e6e73; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 16px;">Recursos</p>
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        <a href="#recursos" style="color: #a1a1a6; font-size: 14px; text-decoration: none;">Funcionalidades</a>
+                        <a href="#precos" style="color: #a1a1a6; font-size: 14px; text-decoration: none;">Planos</a>
+                        <a href="event_calculator_pro_v7_questionario.html" style="color: #a1a1a6; font-size: 14px; text-decoration: none;">Começar grátis</a>
+                    </div>
+                </div>
+
+                <!-- Legal -->
+                <div>
+                    <p style="color: #6e6e73; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 16px;">Legal</p>
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        <a href="politica-privacidade.html" style="color: #a1a1a6; font-size: 14px; text-decoration: none;">Privacidade</a>
+                        <a href="termos-de-uso.html" style="color: #a1a1a6; font-size: 14px; text-decoration: none;">Termos de Uso</a>
+                        <a href="mailto:jm.dryaged@gmail.com" style="color: #a1a1a6; font-size: 14px; text-decoration: none;">Contato</a>
+                    </div>
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 32px; flex-wrap: wrap; gap: 16px;">
+                <p style="color: #6e6e73; font-size: 13px; margin: 0;">© 2026 EventCalc — Club Carnivorista. Itapema, SC.</p>
+                <p style="color: #6e6e73; font-size: 12px; margin: 0;">Conformidade LGPD • Pagamentos por PIX</p>
+            </div>
         </div>
     </footer>
 
-    <!-- 🔔 AVISO DE CONSENTIMENTO (localStorage) -->
-    <script>
-        // Avisar sobre coleta de dados (localStorage)
-        window.addEventListener('load', () => {
-            // Verificar se usuário já viu o aviso
-            if (!localStorage.getItem('eventcalc_privacy_consent')) {
-                const aviso = document.createElement('div');
-                aviso.style.cssText = `
-                    position: fixed;
-                    bottom: 0;
-                    left: 0;
-                    right: 0;
-                    background: rgba(26, 26, 26, 0.95);
-                    border-top: 2px solid #d4af37;
-                    padding: 20px;
-                    text-align: center;
-                    color: #d0d0d0;
-                    font-size: 0.9rem;
-                    z-index: 9999;
-                    max-width: 100%;
-                `;
-                aviso.innerHTML = `
-                    <div style="max-width: 900px; margin: 0 auto;">
-                        <p style="margin-bottom: 15px;">
-                            <strong style="color: #d4af37;">🔒 Privacidade:</strong> Esta aplicação armazena seus dados de orçamento localmente no seu navegador (localStorage). Você tem controle total sobre seus dados.
-                            <a href="politica-privacidade.html" style="color: #d4af37; text-decoration: underline; margin-left: 10px;">Leia nossa Política de Privacidade</a>
-                        </p>
-                        <button onclick="document.querySelector('[data-privacy-consent]').style.display='none'; localStorage.setItem('eventcalc_privacy_consent', 'true');" style="background: #c41e3a; color: white; border: none; padding: 10px 30px; border-radius: 5px; cursor: pointer; font-weight: bold; transition: 0.3s;" onmouseover="this.style.background='#8b1428'" onmouseout="this.style.background='#c41e3a'">
-                            ✓ Entendi e Aceito
-                        </button>
-                    </div>
-                `;
-                aviso.setAttribute('data-privacy-consent', 'true');
-                document.body.appendChild(aviso);
-            }
-        });
-    </script>
+    <!-- 🔔 MODAL DE CONSENTIMENTO LGPD (universal — funciona em todas as páginas) -->
+    <script src="lgpd-modal.js"></script>
+    <!-- 📊 Google Analytics 4 (só roda após consentimento LGPD) -->
+    <script src="analytics.js"></script>
 </body>
 </html>

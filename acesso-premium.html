@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Desbloquear Acesso Permanente - EventCalc Pro v7</title>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Lora:wght@400;500;600&display=swap" rel="stylesheet">
+    <title>Desbloquear Acesso - EventCalc</title>
+    <link rel="stylesheet" href="theme-override.css">
     <script src="rastreamento-seguranca.js"></script>
+    <script src="licenca-checksum.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -291,7 +292,7 @@
 <body>
     <header>
         <div class="container">
-            <div class="logo">💎 EventCalc Pro v7</div>
+            <div class="logo">💎 EventCalc</div>
         </div>
     </header>
 
@@ -303,73 +304,39 @@
             <!-- PLANOS -->
             <div class="planos">
                 <div class="plano">
-                    <h2>Semanal</h2>
+                    <h2>💡 Mensal</h2>
                     <div class="preco">
-                        R$ 7,90
-                        <small>por 7 dias</small>
+                        R$ 19,90
+                        <small>por mês</small>
                     </div>
                     <ul class="beneficios">
                         <li>Acesso completo à calculadora</li>
                         <li>Histórico ilimitado de orçamentos</li>
                         <li>Exportação em PDF</li>
-                        <li>Teste sem compromisso</li>
-                        <li>Cancelamento a qualquer hora</li>
-                    </ul>
-                    <button class="btn-plano" onclick="abrirCheckout('semanal', 7.90)">
-                        Desbloquear Agora
-                    </button>
-                </div>
-
-                <div class="plano">
-                    <h2>Mensal</h2>
-                    <div class="preco">
-                        R$ 24,90
-                        <small>por mês (recorrente)</small>
-                    </div>
-                    <ul class="beneficios">
-                        <li>Acesso completo à calculadora</li>
-                        <li>Histórico ilimitado de orçamentos</li>
-                        <li>Exportação em PDF</li>
-                        <li>Renovação automática</li>
+                        <li>Teste com baixo risco</li>
                         <li>Cancelamento quando quiser</li>
                     </ul>
-                    <button class="btn-plano" onclick="abrirCheckout('mensal', 24.90)">
+                    <button class="btn-plano" onclick="abrirCheckout('mensal', 19.90)">
                         Desbloquear Agora
                     </button>
                 </div>
 
-                <div class="plano">
-                    <h2>Trimestral</h2>
+                <div class="plano" style="border: 3px solid var(--gold-light); background: rgba(212,175,55,0.15);">
+                    <div style="background: linear-gradient(135deg, #d4af37 0%, #b8860b 100%); color: #0a0a0a; padding: 8px 16px; border-radius: 6px; margin-bottom: 15px; font-weight: bold; display: inline-block;">⭐ MELHOR OFERTA</div>
+                    <h2>🏆 Trimestral</h2>
                     <div class="preco">
-                        R$ 59,90
+                        R$ 49,90
                         <small>a cada 3 meses</small>
                     </div>
+                    <p style="color: var(--gold-light); font-weight: bold; margin: 15px 0;">Economize 21% comparado ao mensal!</p>
                     <ul class="beneficios">
                         <li>Acesso completo à calculadora</li>
                         <li>Histórico ilimitado de orçamentos</li>
                         <li>Exportação em PDF</li>
-                        <li>Melhor custo-benefício</li>
-                        <li>Sem compromisso longo prazo</li>
+                        <li>Melhor relação custo/benefício</li>
+                        <li>Cancelar quando desejar</li>
                     </ul>
-                    <button class="btn-plano" onclick="abrirCheckout('trimestral', 59.90)">
-                        Desbloquear Agora
-                    </button>
-                </div>
-
-                <div class="plano">
-                    <h2>🏆 Vitalício</h2>
-                    <div class="preco">
-                        R$ 199,00
-                        <small>sem limite de tempo</small>
-                    </div>
-                    <ul class="beneficios">
-                        <li>Acesso permanente</li>
-                        <li>Histórico ilimitado</li>
-                        <li>Exportação em PDF</li>
-                        <li>Atualizações gratuitas</li>
-                        <li>Nunca mais pagar</li>
-                    </ul>
-                    <button class="btn-plano" onclick="abrirCheckout('vitalicio', 199)">
+                    <button class="btn-plano" onclick="abrirCheckout('trimestral', 49.90)">
                         Desbloquear Agora
                     </button>
                 </div>
@@ -392,15 +359,57 @@
 
                 <div id="mensagem" class="mensagem"></div>
 
-                <div class="info-caixa">
-                    <h4>📧 Método de Pagamento Direto</h4>
-                    <p>
-                        <strong>Para clientes que preferem PIX ou transferência bancária:</strong><br><br>
-                        Envie um email para <strong>jm.dryaged@gmail.com</strong> informando:<br>
-                        - Qual plano deseja (Pessoal/Profissional/Vitalício)<br>
-                        - Seus dados (nome + email)<br><br>
-                        Você receberá os dados de pagamento (PIX/TED) e o código de licença após confirmação do pagamento.
-                    </p>
+                <!-- FORMULÁRIO PIX -->
+                <div class="info-caixa" style="background: rgba(212,175,55,0.1); border-left-color: #d4af37; margin-top: 30px;">
+                    <h3 style="color: #d4af37; margin-bottom: 20px;">💰 Contratar via PIX (Rápido & Seguro)</h3>
+
+                    <div style="background: rgba(0,0,0,0.3); padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                        <h4 style="margin-bottom: 15px;">1️⃣ Preencha seus dados:</h4>
+                        <form id="formularioPix" onsubmit="return salvarSolicitacaoPix(event)">
+                            <div style="margin-bottom: 15px;">
+                                <label style="display: block; margin-bottom: 5px; color: #d4af37;">Seu Nome:</label>
+                                <input type="text" id="nomeCliente" placeholder="João da Silva" required style="width: 100%; padding: 10px; background: #1a1a1a; border: 1px solid #d4af37; color: white; border-radius: 6px;">
+                            </div>
+
+                            <div style="margin-bottom: 15px;">
+                                <label style="display: block; margin-bottom: 5px; color: #d4af37;">Seu Email:</label>
+                                <input type="email" id="emailCliente" placeholder="seu@email.com" required style="width: 100%; padding: 10px; background: #1a1a1a; border: 1px solid #d4af37; color: white; border-radius: 6px;">
+                            </div>
+
+                            <div style="margin-bottom: 15px;">
+                                <label style="display: block; margin-bottom: 5px; color: #d4af37;">Qual plano deseja?</label>
+                                <select id="planoCliente" required style="width: 100%; padding: 10px; background: #1a1a1a; border: 1px solid #d4af37; color: white; border-radius: 6px;">
+                                    <option value="">Selecione um plano</option>
+                                    <option value="mensal">Mensal - R$ 19,90/mês</option>
+                                    <option value="trimestral">⭐ Trimestral - R$ 49,90/3 meses (MELHOR OFERTA)</option>
+                                </select>
+                            </div>
+
+                            <button type="submit" class="btn-plano" style="width: 100%; margin-top: 10px;">✓ Solicitar Código</button>
+                        </form>
+                        <div id="mensagemPix" style="margin-top: 15px; padding: 10px; border-radius: 6px; display: none;"></div>
+                    </div>
+
+                    <div style="background: rgba(0,0,0,0.3); padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                        <h4 style="margin-bottom: 15px;">2️⃣ Dados para pagamento:</h4>
+                        <div style="background: #1a1a1a; padding: 15px; border-radius: 6px; border: 2px solid #d4af37;">
+                            <p style="margin: 0; font-size: 0.9rem; color: #909090;">Chave PIX (CPF):</p>
+                            <p style="margin: 5px 0 15px 0; font-family: 'Courier New', monospace; font-size: 1.1rem; color: #d4af37; word-break: break-all;"><strong>03362258905</strong></p>
+
+                            <p style="margin: 0; font-size: 0.9rem; color: #909090;">Titular:</p>
+                            <p style="margin: 5px 0 15px 0; font-family: 'Courier New', monospace; font-size: 1rem; color: #ffffff;"><strong>Juliomar Meskiu</strong></p>
+
+                            <div id="valorDiv" style="display: none;">
+                                <p style="margin: 0; font-size: 0.9rem; color: #909090;">Valor a pagar:</p>
+                                <p style="margin: 5px 0; font-family: 'Courier New', monospace; font-size: 1.2rem; color: #d4af37;"><strong id="valorPagar">-</strong></p>
+                            </div>
+                        </div>
+                        <p style="margin-top: 15px; font-size: 0.9rem; color: #d0d0d0;">
+                            ✓ Faça a transferência PIX com o valor acima<br>
+                            ✓ Envie comprovante + seu email para: <strong>jm.dryaged@gmail.com</strong><br>
+                            ✓ Você receberá o código em até <strong>15 minutos</strong> ⚡
+                        </p>
+                    </div>
                 </div>
             </div>
 
@@ -408,10 +417,8 @@
             <div class="info-caixa" style="margin-top: 30px; background: rgba(76,175,80,0.1); border-left-color: #4caf50;">
                 <h4 style="color: #4caf50;">🧪 Códigos de Teste (para você testar agora)</h4>
                 <p>
-                    <strong>EVENTCALC-SEMANAL-2026-TEST001</strong> (7 dias)<br>
-                    <strong>EVENTCALC-MENSAL-2026-TEST002</strong> (30 dias)<br>
-                    <strong>EVENTCALC-TRIMESTRAL-2026-TEST003</strong> (90 dias)<br>
-                    <strong>EVENTCALC-VITALICIO-2026-TEST004</strong> (sem expiração)
+                    <strong>EVENTCALC-MENSAL-2026-TEST001</strong> (30 dias de teste)<br>
+                    <strong>EVENTCALC-TRIMESTRAL-2026-TEST002</strong> (90 dias de teste)
                 </p>
             </div>
 
@@ -429,7 +436,10 @@
 
     <footer>
         <div class="container">
-            <p style="margin-bottom: 10px;">EventCalc Pro v7 © 2026 - Juliomar Meskiu</p>
+            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 15px; margin-bottom: 15px;">
+                <img src="logo-club.jpeg" alt="Club Carnivorista" style="height: 100px; width: auto; object-fit: contain;">
+                <p style="margin: 0; text-align: center;">EventCalc © 2026 - Club Carnivorista</p>
+            </div>
             <p>
                 <a href="politica-privacidade.html">Política de Privacidade</a> •
                 <a href="index_v7.html">Voltar à Calculadora</a>
@@ -442,46 +452,116 @@
          * Sistema de Ativação por Código de Licença
          */
 
-        // Códigos válidos (você gerará esses após pagamento)
+        // ═════════════════════════════════════════════════════════════════
+        // ⚠️ LIMITAÇÃO CONHECIDA DO PAYWALL ATUAL (MVP)
+        // ═════════════════════════════════════════════════════════════════
+        // A validação dos códigos roda no NAVEGADOR do cliente (client-side).
+        // Um usuário técnico pode burlar abrindo DevTools e setando o
+        // localStorage manualmente. Esta é uma limitação aceita do MVP.
+        //
+        // Próxima evolução (Assador 5 Minutos): validar códigos no backend.
+        //
+        // Códigos de teste (TEST001/TEST002) só funcionam em ambiente local.
+        // ═════════════════════════════════════════════════════════════════
+
+        const _ehLocal = (() => {
+            const h = window.location.hostname;
+            return h === 'localhost' || h === '127.0.0.1' || h === '';
+        })();
+
+        // Códigos válidos (gerados após pagamento)
         // Formato: "EVENTCALC-TIPO-DATA-HASH"
         const CODIGOS_VALIDOS = {
-            // === CÓDIGOS DE TESTE (para você testar o sistema) ===
-            'EVENTCALC-SEMANAL-2026-TEST001': {
-                tipo: 'semanal',
-                duracao_dias: 7,
-                descricao: 'Semanal (7 dias)'
-            },
-            'EVENTCALC-MENSAL-2026-TEST002': {
-                tipo: 'mensal',
-                duracao_dias: 30,
-                descricao: 'Mensal (30 dias)'
-            },
-            'EVENTCALC-TRIMESTRAL-2026-TEST003': {
-                tipo: 'trimestral',
-                duracao_dias: 90,
-                descricao: 'Trimestral (90 dias)'
-            },
-            'EVENTCALC-VITALICIO-2026-TEST004': {
-                tipo: 'vitalicio',
-                duracao_dias: 99999, // 273 anos = essencialmente infinito
-                descricao: 'Vitalício (sem expiração)'
-            },
-            // === CÓDIGOS DE CLIENTES (SUBSTITUA CONFORME VENDAS) ===
-            // Adicionar novos códigos aqui após cada venda
+            // === CÓDIGOS DE CLIENTES REAIS (adicionar conforme vendas) ===
             // Exemplo: 'EVENTCALC-MENSAL-20260523-CLIENTE001': { tipo: 'mensal', duracao_dias: 30, descricao: '...' }
         };
+
+        // Códigos de teste apenas em ambiente LOCAL (não funcionam em produção)
+        if (_ehLocal) {
+            CODIGOS_VALIDOS['EVENTCALC-MENSAL-2026-TEST001'] = {
+                tipo: 'mensal',
+                duracao_dias: 30,
+                descricao: 'Mensal (30 dias) - TESTE LOCAL'
+            };
+            CODIGOS_VALIDOS['EVENTCALC-TRIMESTRAL-2026-TEST002'] = {
+                tipo: 'trimestral',
+                duracao_dias: 90,
+                descricao: 'Trimestral (90 dias) - TESTE LOCAL'
+            };
+        }
 
         async function ativarCodigo() {
             const codigo = document.getElementById('codigoInput').value.trim().toUpperCase();
             const mensagem = document.getElementById('mensagem');
 
-            // Validar se código existe
-            if (!CODIGOS_VALIDOS[codigo]) {
-                mostrarMensagem('Código inválido ou já utilizado.', 'erro');
+            if (!codigo) {
+                mostrarMensagem('Digite o código de licença.', 'erro');
                 return;
             }
 
-            const plano = CODIGOS_VALIDOS[codigo];
+            // ═══════════════════════════════════════════════════════════
+            // 🔐 PRIMEIRA VALIDAÇÃO: Checksum
+            // Rejeita códigos forjados antes de qualquer outra checagem
+            // ═══════════════════════════════════════════════════════════
+            const ehLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+            const ehCodigoTeste = codigo === 'EVENTCALC-MENSAL-2026-TEST001' || codigo === 'EVENTCALC-TRIMESTRAL-2026-TEST002';
+
+            // Códigos de teste só pulam o checksum em ambiente local
+            if (!(ehLocal && ehCodigoTeste)) {
+                if (!window.LicencaChecksum) {
+                    mostrarMensagem('Sistema de validação não carregou. Recarregue a página.', 'erro');
+                    return;
+                }
+                const checksumOk = await window.LicencaChecksum.validar(codigo);
+                if (!checksumOk) {
+                    // Atraso anti-brute-force
+                    setTimeout(() => {
+                        mostrarMensagem('Código inválido ou adulterado. Verifique se digitou corretamente.', 'erro');
+                    }, 1500);
+                    return;
+                }
+            }
+
+            // PRIMEIRO: Verificar em CODIGOS_VALIDOS (teste)
+            let plano = CODIGOS_VALIDOS[codigo];
+
+            // SEGUNDO: Se não encontrou, verificar em codigos gerados (PIX)
+            if (!plano) {
+                const codigosGerados = JSON.parse(localStorage.getItem('eventcalc_codigos_gerados') || '[]');
+                const codigoGerado = codigosGerados.find(c => c.codigo === codigo);
+                if (codigoGerado) {
+                    plano = {
+                        tipo: codigoGerado.tipo,
+                        duracao_dias: PRECOS_PLANOS[codigoGerado.tipo]?.dias || 30,
+                        descricao: PRECOS_PLANOS[codigoGerado.tipo]?.nome || codigoGerado.tipo
+                    };
+                }
+            }
+
+            // TERCEIRO: Se passou no checksum mas não está nos registros locais,
+            // ainda assim aceita (checksum válido = código foi emitido por nós).
+            // Isso permite que clientes ativem códigos em qualquer dispositivo.
+            if (!plano) {
+                const info = window.LicencaChecksum.extrair(codigo);
+                if (info) {
+                    // Mapeia tipo do código para plano
+                    const tipoNormalizado = info.tipo.toLowerCase();
+                    const dadosPlano = PRECOS_PLANOS[tipoNormalizado];
+                    if (dadosPlano) {
+                        plano = {
+                            tipo: tipoNormalizado,
+                            duracao_dias: dadosPlano.dias || 30,
+                            descricao: dadosPlano.nome || tipoNormalizado
+                        };
+                    }
+                }
+            }
+
+            // Se ainda não encontrou: código inválido
+            if (!plano) {
+                mostrarMensagem('Código inválido ou já utilizado.', 'erro');
+                return;
+            }
 
             // 🔐 REGISTRAR ATIVAÇÃO PARA RASTREAMENTO DE SEGURANÇA
             const resultadoRastreamento = await RastreamentoSeguranca.registrarAtivacao(codigo, 'cliente@email.com');
@@ -523,28 +603,107 @@
         }
 
         function abrirCheckout(tipo, valor) {
-            // Aqui você poderia integrar com Stripe/MercadoPago/etc
-            // Por enquanto, mostrar instruções para pagamento direto
-            alert(`Plano ${tipo.toUpperCase()} - R$ ${valor},00\n\nEntre em contato:\njm.dryaged@gmail.com`);
+            // Redirecionar para acesso-premium com plano pré-selecionado
+            window.location.href = `acesso-premium.html?plano=${tipo}`;
         }
 
-        // Verificar se já tem licença ativa ao carregar página
-        window.addEventListener('load', () => {
-            const temLicenca = localStorage.getItem('eventcalc_licenca_ativa') === 'true';
-            if (temLicenca) {
-                const expiracao = localStorage.getItem('eventcalc_licenca_expiracao');
-                const hoje = new Date().toISOString().split('T')[0];
-                if (expiracao > hoje) {
-                    mostrarMensagem(
-                        '✅ Você já tem uma licença ativa! Redirecionando em 2 segundos...',
-                        'sucesso'
-                    );
-                    setTimeout(() => {
-                        window.location.href = 'index_v7.html';
-                    }, 2000);
-                }
+        // Mapa de preços
+        const PRECOS_PLANOS = {
+            'mensal': { valor: 19.90, dias: 30, nome: 'Mensal' },
+            'trimestral': { valor: 49.90, dias: 90, nome: 'Trimestral' }
+        };
+
+        // Processar parâmetro de URL ao carregar página
+        window.addEventListener('load', function() {
+            const params = new URLSearchParams(window.location.search);
+            const planoUrl = params.get('plano');
+
+            if (planoUrl && PRECOS_PLANOS[planoUrl]) {
+                const selectPlano = document.getElementById('planoCliente');
+                selectPlano.value = planoUrl;
+                selectPlano.dispatchEvent(new Event('change'));
+
+                // Rolar até o formulário
+                setTimeout(() => {
+                    document.querySelector('#formularioPix').scrollIntoView({ behavior: 'smooth' });
+                    document.getElementById('nomeCliente').focus();
+                }, 300);
+
+                // Limpar URL
+                window.history.replaceState({}, document.title, window.location.pathname);
             }
         });
+
+        // Atualizar valor quando seleciona plano
+        document.getElementById('planoCliente').addEventListener('change', function() {
+            const plano = this.value;
+            const valorDiv = document.getElementById('valorDiv');
+            const valorPagar = document.getElementById('valorPagar');
+
+            if (plano && PRECOS_PLANOS[plano]) {
+                valorDiv.style.display = 'block';
+                valorPagar.textContent = `R$ ${PRECOS_PLANOS[plano].valor.toFixed(2)}`;
+            } else {
+                valorDiv.style.display = 'none';
+            }
+        });
+
+        // Salvar solicitação PIX
+        function salvarSolicitacaoPix(event) {
+            event.preventDefault();
+
+            const nome = document.getElementById('nomeCliente').value.trim();
+            const email = document.getElementById('emailCliente').value.trim();
+            const plano = document.getElementById('planoCliente').value;
+            const mensagemDiv = document.getElementById('mensagemPix');
+
+            if (!nome || !email || !plano) {
+                mensagemDiv.innerHTML = '⚠️ Preencha todos os campos';
+                mensagemDiv.style.background = '#c41e3a';
+                mensagemDiv.style.display = 'block';
+                return false;
+            }
+
+            // Criar solicitação
+            const solicitacao = {
+                id: Date.now(),
+                nome: nome,
+                email: email,
+                plano: plano,
+                valor: PRECOS_PLANOS[plano].valor,
+                data: new Date().toLocaleString('pt-BR'),
+                status: 'pendente',
+                codigo: null
+            };
+
+            // Salvar em localStorage
+            let solicitacoes = JSON.parse(localStorage.getItem('eventcalc_solicitacoes_pix') || '[]');
+            solicitacoes.push(solicitacao);
+            localStorage.setItem('eventcalc_solicitacoes_pix', JSON.stringify(solicitacoes));
+
+            // Mostrar mensagem de sucesso
+            mensagemDiv.innerHTML = `
+                ✅ <strong>Solicitação Recebida!</strong><br>
+                <small>ID: #${solicitacao.id}</small><br><br>
+                Agora faça a transferência PIX para a chave acima com o valor <strong>R$ ${solicitacao.valor.toFixed(2)}</strong>.<br>
+                Envie o comprovante para <strong>jm.dryaged@gmail.com</strong> junto com este ID.<br><br>
+                Você receberá o código em até 15 minutos! ⚡
+            `;
+            mensagemDiv.style.background = 'rgba(76,175,80,0.2)';
+            mensagemDiv.style.borderLeft = '4px solid #4caf50';
+            mensagemDiv.style.display = 'block';
+
+            // Limpar formulário
+            document.getElementById('formularioPix').reset();
+            document.getElementById('valorDiv').style.display = 'none';
+
+            return false;
+        }
+
+        // 🔓 REMOVIDO: acesso-premium.html sempre acessível para pagamento/renovação
+        // Não redirecionar mesmo com licença ativa - cliente pode renovar/upgrade quando quiser
     </script>
+    <!-- 🎨 Remover fundo branco da logo -->
+    <script src="remover-fundo-logo.js"></script>
 </body>
 </html>

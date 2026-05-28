@@ -3,9 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EventCalc Pro v7 - Proposta Final</title>
+    <title>EventCalc - Proposta Final</title>
     <!-- 🔐 Sistema de Expiração Automática -->
     <script src="sistema-expiracao.js"></script>
+    <!-- 🔒 Modal LGPD Universal -->
+    <script src="lgpd-modal.js"></script>
+    <!-- 📊 Google Analytics 4 -->
+    <script src="analytics.js"></script>
+    <!-- 🎨 Tema Dark Premium -->
+    <link rel="stylesheet" href="theme-override.css">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Lora:wght@400;500;600&display=swap" rel="stylesheet">
     <!-- HTML2PDF Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -358,7 +364,7 @@
 <div class="container">
 
     <div class="header">
-        <h1>EventCalc Pro v7</h1>
+        <h1>EventCalc</h1>
         <p>Proposta Final</p>
         <div class="cliente-info" id="clienteInfo"></div>
     </div>
@@ -609,26 +615,6 @@
                 </div>
             </div>
 
-            <!-- CONDIÇÕES -->
-            <div class="dc-section dc-pgto">
-                <h2>Condições de Pagamento</h2>
-                <h3>Forma de pagamento</h3>
-                <p>50% no fechamento do contrato (sinal)<br>50% no dia do evento, até o horário combinado de chegada</p>
-                <p class="nota">* O segundo pagamento é condição imprescindível para o início da prestação do serviço. Qualquer atraso poderá resultar em suspensão da execução do evento.</p>
-
-                <h3 style="margin-top:16px;">Alterações de convidados</h3>
-                <p id="p3ValorPersona">Qualquer variação no número de convidados confirmados resultará em ajuste de preço proporcional. Cada pessoa adicional será cobrada conforme o valor por pessoa desta proposta.</p>
-
-                <h3 style="margin-top:16px;">Cancelamento e remarcação</h3>
-                <p>• Com 30 dias ou mais de antecedência: reembolso integral do sinal (50%).<br>
-                • Entre 10 e 29 dias: perda de 50% do sinal; 50% creditado como crédito para nova data.<br>
-                • Menos de 15 dias: perda integral do sinal (50%), sem reembolso ou crédito.</p>
-
-                <div id="c3AvisoHoraExcedente" style="display:none;"></div>
-
-                <p style="color:#aaa;font-size:0.8rem;margin-top:16px;" id="c3Validade"></p>
-            </div>
-
             <!-- INCLUSO / NÃO INCLUSO -->
             <div class="dc-section">
                 <h2>Detalhes do Serviço</h2>
@@ -663,9 +649,12 @@
                         <li>50% no fechamento do contrato (sinal)</li>
                         <li>50% no dia do evento, até o horário combinado de chegada</li>
                     </ul>
-                    <p style="color: #ff9999; font-size: 0.9rem; border-left: 3px solid #c41e3a; padding-left: 12px;">
+                    <p style="color: #d4af37; font-size: 0.9rem; border-left: 3px solid #d4af37; padding-left: 12px;">
                         * O segundo pagamento é condição imprescindível para o início da prestação do serviço. Qualquer atraso poderá resultar em suspensão da execução do evento.
                     </p>
+
+                    <!-- Dados PIX/Banco (preenchido dinamicamente pelo JS) -->
+                    <div id="c3DadosPagto" style="margin-top: 18px;"></div>
                 </div>
             </div>
 
@@ -698,6 +687,8 @@
                     <p>
                         O valor contratado refere-se à duração de <span id="c3DuracaoHoras">5</span> hora(s). Caso o evento exceda esse tempo, será cobrado R$ 200,00 por hora adicional, ajustada proporcionalmente.
                     </p>
+                    <div id="c3AvisoHoraExcedente" style="display:none; color: #ff9999; border-left: 3px solid #c41e3a; padding-left: 12px; margin-top: 12px; font-size: 0.9rem;"></div>
+                    <p style="color:#aaa; font-size:0.8rem; margin-top: 16px;" id="c3Validade"></p>
                 </div>
             </div>
 
@@ -721,7 +712,7 @@
 </div>
 
 <footer>
-    <p>EventCalc Pro v7 — Sistema Profissional de Orçamento para Eventos</p>
+    <p>EventCalc — Sistema Profissional de Orçamento para Eventos</p>
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -1043,12 +1034,34 @@
     }
 
     /* ───────────────────────────────────────────
+       FORMATAR EQUIPAMENTOS (Tela 1 → texto legível)
+    ─────────────────────────────────────────── */
+    function formatarEquipamentos(equip) {
+        if (!equip || typeof equip !== 'object') return '—';
+        const rotulos = {
+            churrasqueira: 'Churrasqueira',
+            forno:         'Forno',
+            parrilla:      'Parrilla',
+            smoker:        'Pit Smoker',
+            varal:         'Varal de Defumação',
+            fogoChao:      'Fogo de Chão'
+        };
+        const ativos = Object.keys(rotulos)
+            .filter(k => equip[k] === true)
+            .map(k => rotulos[k]);
+        return ativos.length > 0 ? ativos.join(', ') : '—';
+    }
+
+    /* ───────────────────────────────────────────
        ABA 2 — RENDERIZAR RELATÓRIO ASSADOR
     ─────────────────────────────────────────── */
     function renderAssador() {
         const dataFmt = questionario.data
             ? new Date(questionario.data + 'T00:00:00').toLocaleDateString('pt-BR')
             : '—';
+
+        // Equipamentos selecionados — texto legível
+        const equipamentosTexto = formatarEquipamentos(questionario.equipamentos);
 
         // Info Grid
         document.getElementById('a2InfoGrid').innerHTML =
@@ -1066,7 +1079,8 @@
             (questionario.restricoes && (questionario.restricoes.celiaco > 0 || questionario.restricoes.lactose > 0) ?
                 docInfoItem('Celíacos',   (questionario.restricoes.celiaco || 0) + ' pessoa(s)') +
                 docInfoItem('Lactose',    (questionario.restricoes.lactose || 0) + ' pessoa(s)') : '') +
-            docInfoItem('Cardápio',     questionario.tipoCardapio || '—');
+            docInfoItem('Cardápio',     questionario.tipoCardapio || '—') +
+            docInfoItem('Equipamentos', equipamentosTexto);
 
         // Cardápio
         let cHtml = '';
@@ -1224,6 +1238,9 @@
             (questionario.numeroProposta ? questionario.numeroProposta + '  ·  ' : '') +
             'Emitido em ' + new Date().toLocaleDateString('pt-BR');
 
+        // Equipamentos selecionados — texto legível
+        const equipamentosTextoCliente = formatarEquipamentos(questionario.equipamentos);
+
         // Info bar
         document.getElementById('c3InfoBar').innerHTML =
             dcInfoItem('Para',     questionario.nomeContratante || '—') +
@@ -1237,7 +1254,8 @@
             (questionario.veganos > 0 ? dcInfoItem('Veganos', questionario.veganos + ' pessoa(s)') : '') +
             (questionario.vegetarianos > 0 ? dcInfoItem('Vegetarianos', questionario.vegetarianos + ' pessoa(s)') : '') +
             (questionario.restricoes && questionario.restricoes.celiaco > 0 ? dcInfoItem('Celíacos', questionario.restricoes.celiaco + ' pessoa(s)') : '') +
-            (questionario.restricoes && questionario.restricoes.lactose > 0 ? dcInfoItem('Lactose', questionario.restricoes.lactose + ' pessoa(s)') : '');
+            (questionario.restricoes && questionario.restricoes.lactose > 0 ? dcInfoItem('Lactose', questionario.restricoes.lactose + ' pessoa(s)') : '') +
+            dcInfoItem('Equipamentos', equipamentosTextoCliente);
 
         // Nota sobre número de pessoas para o cardápio
         const notaEl = document.getElementById('c3NotaPessoas');
@@ -1310,6 +1328,35 @@
         }
 
         document.getElementById('c3Cardapio').innerHTML = cHtml || '<p style="color:#aaa;font-size:0.85rem;">Nenhum item cadastrado.</p>';
+
+        // ─── Dados para pagamento (PIX/Banco do profissional) ───
+        const dadosPagtoEl = document.getElementById('c3DadosPagto');
+        if (dadosPagtoEl) {
+            let prof = {};
+            try { prof = JSON.parse(localStorage.getItem('eventCalcProfissional') || '{}'); } catch(e) {}
+            let pagHtml = '';
+            if (prof.pixChave || prof.bancoNome) {
+                pagHtml += '<p style="margin-bottom: 10px;"><strong style="color: var(--gold);">Dados para pagamento:</strong></p>';
+                pagHtml += '<ul style="margin-left: 20px; line-height: 1.8;">';
+                if (prof.pixChave) {
+                    const tipoPix = prof.pixTipo || 'Chave';
+                    pagHtml += '<li><strong>PIX (' + esc(tipoPix) + '):</strong> ' + esc(prof.pixChave) + '</li>';
+                }
+                if (prof.bancoNome) {
+                    let linhaBanco = '<strong>Banco:</strong> ' + esc(prof.bancoNome);
+                    if (prof.bancoAgencia) linhaBanco += ' &nbsp;|&nbsp; <strong>Ag:</strong> ' + esc(prof.bancoAgencia);
+                    if (prof.bancoConta) linhaBanco += ' &nbsp;|&nbsp; <strong>Conta:</strong> ' + esc(prof.bancoConta);
+                    pagHtml += '<li>' + linhaBanco + '</li>';
+                    if (prof.bancoTitular) {
+                        pagHtml += '<li style="font-size: 0.9rem; color: #aaa;">Titular: ' + esc(prof.bancoTitular) + '</li>';
+                    }
+                }
+                pagHtml += '</ul>';
+            } else {
+                pagHtml = '<p style="color: #aaa; font-size: 0.85rem; font-style: italic;">⚠️ Preencha seus dados de pagamento (PIX/Banco) na página inicial para que apareçam aqui automaticamente.</p>';
+            }
+            dadosPagtoEl.innerHTML = pagHtml;
+        }
 
         // Consumo
         const vols1 = questionario.volumes || {};
@@ -1530,6 +1577,21 @@
                 doc.setLineWidth(0.5);
                 doc.line(mg, y, pw - mg, y); y += 8;
 
+                // Equipamentos selecionados (texto legível)
+                const equipsLabel = (function() {
+                    const e = questionario.equipamentos || {};
+                    const labels = {
+                        churrasqueira: 'Churrasqueira',
+                        forno: 'Forno',
+                        parrilla: 'Parrilla',
+                        smoker: 'Pit Smoker',
+                        varal: 'Varal de Defumação',
+                        fogoChao: 'Fogo de Chão'
+                    };
+                    const ativos = Object.keys(labels).filter(k => e[k] === true).map(k => labels[k]);
+                    return ativos.length > 0 ? ativos.join(', ') : '-';
+                })();
+
                 // Info do evento
                 doc.setFontSize(9); doc.setTextColor(...DARK);
                 const infoText = [
@@ -1544,7 +1606,8 @@
                         (questionario.vegetarianos > 0 ? questionario.vegetarianos + ' vegetariano(s) ' : '') +
                         (questionario.restricoes?.celiaco > 0 ? questionario.restricoes.celiaco + ' celiáco(s) ' : '') +
                         (questionario.restricoes?.lactose > 0 ? questionario.restricoes.lactose + ' intolerante(s) lactose' : '')
-                        : '')
+                        : ''),
+                    'Equipamentos: ' + equipsLabel
                 ];
                 infoText.forEach(ln => { checkY(5); doc.text(ln, mg + 2, y); y += 5; });
                 y += 6;
@@ -1666,67 +1729,19 @@
                 doc.text('Por pessoa: ' + brl(valPessoa), pw / 2, y + 10, { align: 'center' });
                 y += 20;
 
-                // Condições de pagamento
-                y += 6; // Espaço antes da seção
-                doc.setFontSize(11); doc.setTextColor(...GOLD);
-                checkY(8); doc.text('CONDIÇÕES DE PAGAMENTO', mg, y); y += 8;
+                // ═══════════════════════════════════════════════════════
+                // SEÇÃO: DETALHES DO SERVIÇO (incluso / não incluso)
+                // ═══════════════════════════════════════════════════════
+                y += 6;
+                checkY(8);
+                doc.setFontSize(11); doc.setFont('helvetica', 'bold'); doc.setTextColor(...GOLD);
+                doc.text('DETALHES DO SERVIÇO', mg, y); y += 3;
 
-                doc.setFontSize(8); doc.setTextColor(...DARK);
-                checkY(5); doc.text('• 50% no fechamento do contrato (sinal)', mg + 2, y); y += 5;
-                checkY(5); doc.text('• 50% no dia do evento, até o horário combinado', mg + 2, y); y += 5;
-                checkY(5); doc.text('• Alterações: cobrar o valor por pessoa desta proposta', mg + 2, y); y += 5;
-                checkY(5); doc.text('• Cancelamento: 30+ dias = 100% reembolso | 10-29 dias = 50% crédito', mg + 2, y); y += 5;
-                checkY(5); doc.text('  Menos de 15 dias = perda do sinal (50%), sem reembolso', mg + 2, y); y += 10;
+                // Linha decorativa (abaixo do título, antes do conteúdo)
+                doc.setDrawColor(...GOLD);
+                doc.setLineWidth(0.3);
+                doc.line(mg, y, pw - mg, y); y += 6;
 
-                // ── Carregar custos para Hora Excedente e Limpeza ──
-                let custosPDF = {};
-                try { custosPDF = JSON.parse(localStorage.getItem('eventocalc_custos') || '{}'); } catch(e) {}
-                const horaExcPDF = parseFloat(custosPDF.horaExcedente) || 0;
-                const limpezaPDF = parseFloat(custosPDF.limpeza) || 0;
-
-                // Aviso de Hora Excedente
-                if (horaExcPDF > 0) {
-                    const duracaoPDF = questionario.duracao || '-';
-                    doc.setFontSize(9); doc.setTextColor(...GOLD);
-                    checkY(6); doc.text('HORAS ADICIONAIS', mg, y); y += 5;
-                    doc.setFontSize(8); doc.setTextColor(...DARK);
-                    checkY(5); doc.text('O valor contratado refere-se a ' + duracaoPDF + ' hora(s) de evento.', mg + 2, y); y += 4;
-                    checkY(5); doc.text('Horas adicionais: ' + brl(horaExcPDF) + ' por hora, ajustada proporcionalmente.', mg + 2, y); y += 8;
-                }
-
-                // ── DADOS DE PAGAMENTO (PIX e Banco) ──
-                const temPix = dadosProfissional.pixChave && dadosProfissional.pixChave.trim();
-                const temBanco = dadosProfissional.bancoNome && dadosProfissional.bancoNome.trim();
-                if (temPix || temBanco) {
-                    doc.setFontSize(10); doc.setTextColor(...GOLD);
-                    checkY(8); doc.text('DADOS PARA PAGAMENTO', mg, y); y += 6;
-                    doc.setFontSize(8); doc.setTextColor(...DARK);
-                    if (temPix) {
-                        const tipoPix = dadosProfissional.pixTipo ? '(' + dadosProfissional.pixTipo + ')' : '';
-                        checkY(5); doc.text('PIX ' + tipoPix + ': ' + dadosProfissional.pixChave, mg + 2, y); y += 5;
-                    }
-                    if (temBanco) {
-                        let bancoLinha = dadosProfissional.bancoNome;
-                        if (dadosProfissional.bancoAgencia) bancoLinha += ' • Ag ' + dadosProfissional.bancoAgencia;
-                        if (dadosProfissional.bancoConta) bancoLinha += ' • CC ' + dadosProfissional.bancoConta;
-                        checkY(5); doc.text(bancoLinha, mg + 2, y); y += 5;
-                        if (dadosProfissional.bancoTitular) {
-                            checkY(5); doc.text('Titular: ' + dadosProfissional.bancoTitular, mg + 2, y); y += 5;
-                        }
-                    }
-                    y += 5;
-                }
-
-                // Validade
-                doc.setFontSize(8); doc.setTextColor(...GREY);
-                const valFmt = questionario.validadeProposta ? new Date(questionario.validadeProposta + 'T00:00:00').toLocaleDateString('pt-BR') : '-';
-                checkY(6); doc.text('Proposta válida até: ' + valFmt, mg, y); y += 10;
-
-                // Seção de O que está incluso / não está
-                y += 8; // Espaço antes da seção
-                doc.setFontSize(10); doc.setTextColor(...GOLD);
-                checkY(8); doc.text('O QUE ESTÁ INCLUSO', mg, y); y += 6;
-                doc.setFontSize(7); doc.setTextColor(...DARK);
                 const inclusos = [
                     'Cardápio completo conforme combinado',
                     'Carvão de qualidade e temperos especiais',
@@ -1735,36 +1750,180 @@
                     'Utensílios e material descartável',
                     'Logística e transporte'
                 ];
-                if (limpezaPDF > 0) inclusos.push('Limpeza pós-evento');
-                inclusos.forEach(item => {
-                    checkY(4); doc.text('✓ ' + item, mg + 2, y); y += 4;
-                });
 
-                y += 6; // Espaço entre seções
-                doc.setFontSize(10); doc.setTextColor(...GOLD);
-                checkY(8); doc.text('O QUE NÃO ESTÁ INCLUSO', mg, y); y += 6;
-                doc.setFontSize(7); doc.setTextColor(...DARK);
                 const naoInclusos = [
                     'Bebidas (a combinar)',
                     'Serviço de garçons / garçonetes',
                     'Mobiliário, decoração ou estrutura',
                     'Transporte de convidados'
                 ];
-                if (limpezaPDF <= 0) naoInclusos.splice(1, 0, 'Limpeza pós-evento');
-                naoInclusos.forEach(item => {
-                    checkY(4); doc.text('✗ ' + item, mg + 2, y); y += 4;
+
+                // Layout em 2 colunas
+                const yInicioDetalhes = y;
+                const colLargura = (pw - 2*mg - 6) / 2;
+
+                // Coluna 1: Está incluso
+                doc.setFontSize(9); doc.setFont('helvetica', 'bold'); doc.setTextColor(...GOLD);
+                doc.text('[INCLUSO]', mg, y); y += 5;
+
+                doc.setFontSize(8); doc.setFont('helvetica', 'normal'); doc.setTextColor(...DARK);
+                inclusos.forEach(item => {
+                    checkY(4);
+                    const linhas = doc.splitTextToSize('• ' + item, colLargura);
+                    doc.text(linhas, mg, y);
+                    y += linhas.length * 3.5 + 1;
                 });
+
+                const yFimColuna1 = y;
+
+                // Coluna 2: Não incluso (mesma altura inicial)
+                let yColuna2 = yInicioDetalhes;
+                doc.setFontSize(9); doc.setFont('helvetica', 'bold'); doc.setTextColor(...GREY);
+                doc.text('[NAO INCLUSO]', mg + colLargura + 6, yColuna2); yColuna2 += 5;
+
+                doc.setFontSize(8); doc.setFont('helvetica', 'normal'); doc.setTextColor(...DARK);
+                naoInclusos.forEach(item => {
+                    const linhas = doc.splitTextToSize('• ' + item, colLargura);
+                    doc.text(linhas, mg + colLargura + 6, yColuna2);
+                    yColuna2 += linhas.length * 3.5 + 1;
+                });
+
+                // Pegar a maior altura das 2 colunas
+                y = Math.max(yFimColuna1, yColuna2) + 6;
+
+                // ═══════════════════════════════════════════════════════
+                // SEÇÃO: CONDIÇÕES DE PAGAMENTO
+                // ═══════════════════════════════════════════════════════
+                checkY(30);
+                doc.setFontSize(11); doc.setFont('helvetica', 'bold'); doc.setTextColor(...GOLD);
+                doc.text('CONDIÇÕES DE PAGAMENTO', mg, y); y += 3;
+
+                doc.setDrawColor(...GOLD);
+                doc.line(mg, y, pw - mg, y); y += 6;
+
+                doc.setFontSize(9); doc.setFont('helvetica', 'bold'); doc.setTextColor(...DARK);
+                doc.text('Forma de pagamento:', mg, y); y += 5;
+
+                doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5);
+                doc.text('• 50% no fechamento do contrato (sinal)', mg + 2, y); y += 4;
+                doc.text('• 50% no dia do evento, até o horário combinado de chegada', mg + 2, y); y += 6;
+
+                doc.setFont('helvetica', 'italic'); doc.setFontSize(8); doc.setTextColor(...GREY);
+                const textoPagto = '* O segundo pagamento é condição imprescindível para o início da prestação do serviço. Qualquer atraso poderá resultar em suspensão da execução do evento.';
+                const linhasPagto = doc.splitTextToSize(textoPagto, pw - 2*mg);
+                doc.text(linhasPagto, mg, y);
+                y += linhasPagto.length * 3.5 + 6;
+
+                // ─── DADOS PARA PAGAMENTO (PIX/Banco do profissional) ───
+                if (dadosProfissional && (dadosProfissional.pixChave || dadosProfissional.bancoNome)) {
+                    checkY(20);
+                    doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor(...GOLD);
+                    doc.text('Dados para pagamento:', mg, y); y += 5;
+
+                    if (dadosProfissional.pixChave) {
+                        doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5); doc.setTextColor(...DARK);
+                        const tipoPix = dadosProfissional.pixTipo || 'Chave';
+                        doc.text('• PIX (' + tipoPix + '): ' + dadosProfissional.pixChave, mg + 2, y); y += 4;
+                    }
+
+                    if (dadosProfissional.bancoNome) {
+                        doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5); doc.setTextColor(...DARK);
+                        let linhaBanco = '• Banco: ' + dadosProfissional.bancoNome;
+                        if (dadosProfissional.bancoAgencia) linhaBanco += '  |  Ag: ' + dadosProfissional.bancoAgencia;
+                        if (dadosProfissional.bancoConta) linhaBanco += '  |  Conta: ' + dadosProfissional.bancoConta;
+                        doc.text(linhaBanco, mg + 2, y); y += 4;
+                        if (dadosProfissional.bancoTitular) {
+                            doc.text('   Titular: ' + dadosProfissional.bancoTitular, mg + 2, y); y += 4;
+                        }
+                    }
+                    y += 3;
+                }
+
+                // ═══════════════════════════════════════════════════════
+                // SEÇÃO: ALTERAÇÕES DE CONVIDADOS
+                // ═══════════════════════════════════════════════════════
+                checkY(20);
+                doc.setFontSize(11); doc.setFont('helvetica', 'bold'); doc.setTextColor(...GOLD);
+                doc.text('ALTERAÇÕES DE CONVIDADOS', mg, y); y += 3;
+
+                doc.setDrawColor(...GOLD);
+                doc.line(mg, y, pw - mg, y); y += 6;
+
+                doc.setFontSize(8.5); doc.setFont('helvetica', 'normal'); doc.setTextColor(...DARK);
+                const textoConv = 'Qualquer variação no número de convidados confirmados resultará em ajuste de preço proporcional. Cada pessoa adicional será cobrada conforme o valor por pessoa desta proposta.';
+                const linhasConv = doc.splitTextToSize(textoConv, pw - 2*mg);
+                doc.text(linhasConv, mg, y);
+                y += linhasConv.length * 4 + 6;
+
+                // ═══════════════════════════════════════════════════════
+                // SEÇÃO: CANCELAMENTO E REMARCAÇÃO
+                // ═══════════════════════════════════════════════════════
+                checkY(28);
+                doc.setFontSize(11); doc.setFont('helvetica', 'bold'); doc.setTextColor(...GOLD);
+                doc.text('CANCELAMENTO E REMARCAÇÃO', mg, y); y += 3;
+
+                doc.setDrawColor(...GOLD);
+                doc.line(mg, y, pw - mg, y); y += 6;
+
+                const regrasCancel = [
+                    { titulo: 'Com 30 dias ou mais de antecedência:', texto: 'reembolso integral do sinal (50%).' },
+                    { titulo: 'Entre 10 e 29 dias:', texto: 'perda de 50% do sinal; 50% creditado como crédito para nova data.' },
+                    { titulo: 'Menos de 15 dias:', texto: 'perda integral do sinal (50%), sem reembolso ou crédito.' }
+                ];
+
+                regrasCancel.forEach(regra => {
+                    checkY(8);
+                    doc.setFont('helvetica', 'bold'); doc.setFontSize(8.5); doc.setTextColor(...GOLD);
+                    doc.text('• ' + regra.titulo, mg + 2, y);
+                    const larguraTitulo = doc.getTextWidth('• ' + regra.titulo + ' ');
+                    doc.setFont('helvetica', 'normal'); doc.setTextColor(...DARK);
+                    const restoTexto = doc.splitTextToSize(regra.texto, pw - 2*mg - larguraTitulo - 4);
+                    doc.text(restoTexto[0], mg + 2 + larguraTitulo, y);
+                    y += 4;
+                    if (restoTexto.length > 1) {
+                        for (let i = 1; i < restoTexto.length; i++) {
+                            doc.text(restoTexto[i], mg + 4, y);
+                            y += 4;
+                        }
+                    }
+                    y += 2;
+                });
+                y += 4;
+
+                // ═══════════════════════════════════════════════════════
+                // SEÇÃO: HORAS ADICIONAIS
+                // ═══════════════════════════════════════════════════════
+                checkY(18);
+                doc.setFontSize(11); doc.setFont('helvetica', 'bold'); doc.setTextColor(...GOLD);
+                doc.text('HORAS ADICIONAIS', mg, y); y += 3;
+
+                doc.setDrawColor(...GOLD);
+                doc.line(mg, y, pw - mg, y); y += 6;
+
+                // Pega duração do localStorage (default 5h)
+                let duracaoEvento = 5;
+                try {
+                    const dadosEvento = JSON.parse(localStorage.getItem('eventocalcData') || '{}');
+                    duracaoEvento = parseInt(dadosEvento.questionario?.duracao) || 5;
+                } catch(e) {}
+
+                doc.setFontSize(8.5); doc.setFont('helvetica', 'normal'); doc.setTextColor(...DARK);
+                const textoHoras = `O valor contratado refere-se à duração de ${duracaoEvento} hora(s). Caso o evento exceda esse tempo, será cobrado R$ 200,00 por hora adicional, ajustada proporcionalmente.`;
+                const linhasHoras = doc.splitTextToSize(textoHoras, pw - 2*mg);
+                doc.text(linhasHoras, mg, y);
+                y += linhasHoras.length * 4 + 6;
 
                 // Assinatura (com dados do localStorage)
                 y += 8; // Espaço antes da assinatura
+                checkY(20);
                 doc.setLineWidth(0.3);
                 doc.line(mg + 10, y, pw - mg - 10, y); y += 6;
 
                 doc.setFontSize(10); doc.setTextColor(...GOLD);
-                checkY(5); doc.text((dadosProfissional.nome || 'Juliomar Meskiu').toUpperCase(), pw / 2, y, { align: 'center' }); y += 4;
+                checkY(5); doc.text((dadosProfissional.nome || 'SEU NOME AQUI').toUpperCase(), pw / 2, y, { align: 'center' }); y += 4;
                 doc.setFontSize(7); doc.setTextColor(...GREY);
-                checkY(4); doc.text(dadosProfissional.profissao || 'Médico Veterinário • Mestre Churrasqueiro', pw / 2, y, { align: 'center' }); y += 3;
-                const contatosPDF = (dadosProfissional.whatsapp || '+55 47 99668-1010') + ' | ' + (dadosProfissional.email || 'jm.dryaged@gmail.com') + ' | ' + (dadosProfissional.localizacao || 'Itapema, SC');
+                checkY(4); doc.text(dadosProfissional.profissao || 'Sua Profissão / Especialidade', pw / 2, y, { align: 'center' }); y += 3;
+                const contatosPDF = (dadosProfissional.whatsapp || 'Seu WhatsApp') + ' | ' + (dadosProfissional.email || 'seu@email.com') + ' | ' + (dadosProfissional.localizacao || 'Sua Cidade, UF');
                 checkY(4); doc.text(contatosPDF, pw / 2, y, { align: 'center' });
 
                 doc.save(nomeArq);
@@ -1820,6 +1979,22 @@
             if (questionario.restricoes && (questionario.restricoes.celiaco > 0 || questionario.restricoes.lactose > 0)) {
                 infoLines.push('Celiaco: ' + (questionario.restricoes.celiaco || 0) + '  |  Lactose: ' + (questionario.restricoes.lactose || 0));
             }
+            // Equipamentos selecionados
+            const equipAssPDF = (function() {
+                const e = questionario.equipamentos || {};
+                const labels = {
+                    churrasqueira: 'Churrasqueira',
+                    forno: 'Forno',
+                    parrilla: 'Parrilla',
+                    smoker: 'Pit Smoker',
+                    varal: 'Varal de Defumacao',
+                    fogoChao: 'Fogo de Chao'
+                };
+                const ativos = Object.keys(labels).filter(k => e[k] === true).map(k => labels[k]);
+                return ativos.length > 0 ? ativos.join(', ') : '-';
+            })();
+            infoLines.push('Equipamentos: ' + equipAssPDF);
+
             infoLines.forEach(ln => { checkY(5); doc.text(ln, mg, y); y += 5; });
             y += 4;
 
@@ -2020,18 +2195,37 @@
             y += 3; // espaço antes da caixa
             doc.setDrawColor(212, 175, 55);
             doc.setLineWidth(0.5);
-            doc.rect(mg - 2, y, pw - 2*mg + 4, 35); // altura corrigida para 35
+            // Equipamentos selecionados (para PDF — sem acentos)
+            const equipPDF = (function() {
+                const e = questionario.equipamentos || {};
+                const labels = {
+                    churrasqueira: 'Churrasqueira',
+                    forno: 'Forno',
+                    parrilla: 'Parrilla',
+                    smoker: 'Pit Smoker',
+                    varal: 'Varal de Defumacao',
+                    fogoChao: 'Fogo de Chao'
+                };
+                const ativos = Object.keys(labels).filter(k => e[k] === true).map(k => labels[k]);
+                return ativos.length > 0 ? ativos.join(', ') : '-';
+            })();
 
-            doc.setFontSize(9); doc.setTextColor(...DARK);
-            y += 3; // espaço interno da caixa
             const cli = [
                 'Para: '      + (questionario.nomeContratante || '-'),
                 'Local: '     + (questionario.local            || '-'),
                 'Data: '      + dataFmt,
                 'Refeicao: '  + (nomesRefeicaoSafe[questionario.refeicao] || questionario.refeicao || '-'),
                 'Pessoas: '   + totalPessoas + '  |  Horario: ' + (questionario.horario || '-') + (questionario.duracao ? ' (' + questionario.duracao + 'h)' : '') +
-                    '  |  Chegada: ' + (questionario.horarioChegada || '-') + '  |  Saida: ' + (questionario.horarioSaida || '-')
+                    '  |  Chegada: ' + (questionario.horarioChegada || '-') + '  |  Saida: ' + (questionario.horarioSaida || '-'),
+                'Equipamentos: ' + equipPDF
             ];
+
+            // Calcular altura dinâmica da caixa baseado no número de linhas
+            const alturaCaixaCli = cli.length * 5 + 8;
+            doc.rect(mg - 2, y, pw - 2*mg + 4, alturaCaixaCli);
+
+            doc.setFontSize(9); doc.setTextColor(...DARK);
+            y += 3; // espaço interno da caixa
             cli.forEach(ln => { checkY(5); doc.text(ln, mg + 2, y); y += 5; });
             y += 5; // espaço após conteúdo da caixa
 
@@ -2169,6 +2363,38 @@
             // Valor por pessoa
             doc.setFontSize(9); doc.setTextColor(...GOLD);
             checkY(5); doc.text('Valor por pessoa: ' + brl(valPessoa), pw / 2, y, { align: 'center' }); y += 12;
+
+            // DETALHES DO SERVIÇO
+            y += 6;
+            doc.setFontSize(11); doc.setTextColor(...GOLD);
+            checkY(8); doc.text('DETALHES DO SERVIÇO', mg, y); y += 8;
+
+            // O que está incluso
+            doc.setFontSize(9); doc.setTextColor(...DARK);
+            checkY(6); doc.text('Está Incluído:', mg + 2, y); y += 5;
+            doc.setFontSize(8); doc.setTextColor(...DARK);
+            const incluso = [
+                '• Cardápio completo conforme combinado',
+                '• Carvão de qualidade e temperos especiais',
+                '• Fogo de chão e varal de defumação',
+                '• Equipamentos necessários',
+                '• Mão de obra especializada (chef e auxiliares)',
+                '• Utensílios e material descartável',
+                '• Logística e transporte'
+            ];
+            incluso.forEach(item => { checkY(4); doc.text(item, mg + 5, y); y += 4; });
+
+            y += 3;
+            doc.setFontSize(9); doc.setTextColor(...DARK);
+            checkY(6); doc.text('Não Está Incluído:', mg + 2, y); y += 5;
+            doc.setFontSize(8); doc.setTextColor(...DARK);
+            const naoIncluso = [
+                '• Bebidas (a combinar)',
+                '• Serviço de garçons / garçonetes',
+                '• Mobiliário, decoração ou estrutura',
+                '• Transporte de convidados'
+            ];
+            naoIncluso.forEach(item => { checkY(4); doc.text(item, mg + 5, y); y += 4; });
 
             // Condições com destaque
             y += 4; // espaço antes da caixa de condições

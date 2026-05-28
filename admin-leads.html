@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel de Leads - EventCalc Pro v7</title>
+    <title>Painel de Leads - EventCalc</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Lora:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -515,7 +515,7 @@
     <!-- LOGIN SCREEN -->
     <div id="loginScreen" class="login-container">
         <div class="login-box">
-            <h1>EventCalc Pro v7</h1>
+            <h1>EventCalc</h1>
             <p>Painel de Administração de Leads</p>
 
             <input type="password" id="adminPassword" placeholder="Senha de Acesso" onkeypress="if(event.key==='Enter') loginAdmin()">
@@ -530,7 +530,7 @@
     <!-- ADMIN PANEL -->
     <div id="adminPanel" style="display: none;">
         <div class="header">
-            <div class="logo">EventCalc Pro v7 - Leads</div>
+            <div class="logo">EventCalc - Leads</div>
             <div class="user-info">
                 <span class="user-email" id="userEmail">admin</span>
                 <button class="logout-btn" onclick="logoutAdmin()">Sair</button>
@@ -682,8 +682,46 @@
         let currentFilter = 'all';
         let currentLeadId = null;
 
-        // ── SENHA DE ADMIN (segura - LGPD compliance) ──
-        const ADMIN_PASSWORD = "Ev3ntC@lc!Adm2026"; // ⚠️ Mude em produção final!
+        // ═══════════════════════════════════════════════════════════════
+        // 🔒 AUTENTICAÇÃO SEGURA (SHA-256)
+        //
+        // A SENHA REAL nunca aparece no código. Aqui só temos o HASH dela.
+        // Para gerar um novo hash, abra o console (F12) e cole:
+        //
+        //   (async () => {
+        //     const senha = 'sua_nova_senha_aqui';
+        //     const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(senha));
+        //     const hex = Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+        //     console.log('Hash:', hex);
+        //   })();
+        //
+        // E substitua o valor de ADMIN_HASH abaixo.
+        // ═══════════════════════════════════════════════════════════════
+
+        // 🔐 Hash SHA-256 da senha admin do Juliomar.
+        // A senha real nunca é armazenada — só este hash.
+        // Para trocar a senha: gere novo hash em admin-setup.html (local) e substitua aqui.
+        const ADMIN_HASH = 'fae4fa2a0e7fd69b38f460492bdb40568f40365d4a4ddddfff17af9d70f3088b';
+
+        /**
+         * Compara senha digitada com o hash armazenado.
+         * Senha real nunca trafega nem é armazenada.
+         */
+        async function senhaCorreta(senhaDigitada) {
+            try {
+                const buf = await crypto.subtle.digest(
+                    'SHA-256',
+                    new TextEncoder().encode(senhaDigitada)
+                );
+                const hex = Array.from(new Uint8Array(buf))
+                    .map(b => b.toString(16).padStart(2, '0'))
+                    .join('');
+                return hex === ADMIN_HASH;
+            } catch (e) {
+                console.error('Erro ao verificar senha:', e);
+                return false;
+            }
+        }
 
         try {
             firebase.initializeApp(firebaseConfig);
@@ -695,8 +733,8 @@
             // Usar localStorage como fallback
         }
 
-        // ── AUTENTICAÇÃO ──
-        function loginAdmin() {
+        // ── AUTENTICAÇÃO COM HASH SHA-256 ──
+        async function loginAdmin() {
             const password = document.getElementById('adminPassword').value;
 
             if (!password) {
@@ -704,17 +742,48 @@
                 return;
             }
 
-            if (password === ADMIN_PASSWORD) {
+            // Verifica via hash (senha nunca é armazenada em texto)
+            const ok = await senhaCorreta(password);
+
+            if (ok) {
                 isLoggedIn = true;
+                // Token de sessão temporário (expira em 4 horas)
+                const sessaoExpira = new Date().getTime() + (4 * 60 * 60 * 1000);
                 localStorage.setItem('adminLoggedIn', 'true');
+                localStorage.setItem('adminSessaoExpira', sessaoExpira.toString());
                 document.getElementById('loginScreen').style.display = 'none';
                 document.getElementById('adminPanel').style.display = 'block';
+                document.getElementById('adminPassword').value = ''; // Limpa imediatamente
                 loadLeads();
-                showToast('Login realizado com sucesso!', 'success');
+                showToast('✅ Login realizado!', 'success');
             } else {
-                showToast('Senha incorreta', 'error');
+                // Atraso anti-bruteforce
+                setTimeout(() => {
+                    showToast('Senha incorreta', 'error');
+                    document.getElementById('adminPassword').value = '';
+                }, 1500);
             }
         }
+
+        // Verificar sessão ao carregar
+        (function checarSessao() {
+            const logado = localStorage.getItem('adminLoggedIn') === 'true';
+            const expira = parseInt(localStorage.getItem('adminSessaoExpira') || '0');
+            if (logado && new Date().getTime() < expira) {
+                // Sessão ainda válida — entra direto
+                window.addEventListener('DOMContentLoaded', () => {
+                    isLoggedIn = true;
+                    const loginScreen = document.getElementById('loginScreen');
+                    const adminPanel = document.getElementById('adminPanel');
+                    if (loginScreen) loginScreen.style.display = 'none';
+                    if (adminPanel) adminPanel.style.display = 'block';
+                });
+            } else {
+                // Sessão expirou ou nunca logou
+                localStorage.removeItem('adminLoggedIn');
+                localStorage.removeItem('adminSessaoExpira');
+            }
+        })();
 
         function logoutAdmin() {
             isLoggedIn = false;
@@ -898,7 +967,7 @@
         // ── CONTATAR VIA WHATSAPP ──
         function contactViaWhatsapp(whatsapp) {
             const number = whatsapp.replace(/\D/g, '');
-            const message = encodeURIComponent('Olá! Vimos seu interesse no EventCalc Pro v7. Como posso ajudá-lo?');
+            const message = encodeURIComponent('Olá! Vimos seu interesse no EventCalc. Como posso ajudá-lo?');
             window.open(`https://wa.me/${number}?text=${message}`, '_blank');
         }
 

@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gerenciador de Licenças - EventCalc Pro v7</title>
+    <script src="licenca-checksum.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Lora:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -370,6 +371,20 @@
     </div>
 
     <script>
+        // ═══════════════════════════════════════════════════════════
+        // 🔒 PROTEÇÃO: Esta página só pode ser usada LOCALMENTE.
+        // Se alguém acessar pela URL pública, redireciona para 404.
+        // Defesa em camadas (Netlify já bloqueia via netlify.toml).
+        // ═══════════════════════════════════════════════════════════
+        (function bloquearProducao() {
+            const host = window.location.hostname;
+            const ehLocal = host === 'localhost' || host === '127.0.0.1' || host === '';
+            if (!ehLocal) {
+                document.body.innerHTML = '';
+                window.location.replace('/404.html');
+            }
+        })();
+
         /**
          * Gerenciador de Licenças - EventCalc Pro v7
          */
@@ -379,8 +394,8 @@
             return Math.random().toString(36).substring(2, 8).toUpperCase();
         }
 
-        // Função para gerar código de licença
-        function gerarCodigo() {
+        // Função para gerar código de licença (com checksum)
+        async function gerarCodigo() {
             const nome = document.getElementById('nomeCliente').value.trim();
             const email = document.getElementById('emailCliente').value.trim();
             const tipo = document.getElementById('tipoPlano').value;
@@ -392,10 +407,15 @@
                 return;
             }
 
-            // Gerar código
+            if (!window.LicencaChecksum) {
+                mostrarMensagem('Biblioteca de checksum não carregou. Recarregue a página.', 'erro');
+                return;
+            }
+
+            // Gerar código com checksum (formato: EVENTCALC-TIPO-DATA-HASH-CHECKSUM)
             const data = new Date().toISOString().split('T')[0].replace(/-/g, '').substring(0, 8);
             const hash = gerarHash();
-            const codigo = `EVENTCALC-${tipo.toUpperCase()}-${data}-${hash}`;
+            const codigo = await window.LicencaChecksum.gerar(tipo, data, hash);
 
             // Calcular data de expiração
             const expiracao = new Date();

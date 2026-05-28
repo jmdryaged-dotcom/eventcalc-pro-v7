@@ -1,5 +1,5 @@
 /**
- * 🔐 SISTEMA AUTOMÁTICO DE EXPIRAÇÃO - EventCalc Pro v7
+ * 🔐 SISTEMA AUTOMÁTICO DE EXPIRAÇÃO - EventCalc
  *
  * Este script automaticamente:
  * 1. Verifica se a versão de teste expirou
@@ -10,24 +10,60 @@
  */
 
 (function() {
+    console.log('🚀 SISTEMA-EXPIRACAO.JS CARREGADO');
+
     // ═══════════════════════════════════════════════════════════════════
     // ⚙️ CONFIGURAÇÃO - ALTERE APENAS AQUI
     // ═══════════════════════════════════════════════════════════════════
 
-    // Data de expiração da versão de teste (YYYY-MM-DD)
-    const DATA_EXPIRACAO = '2026-06-01';
+    // Quantos dias cada usuário tem de teste, contado a partir da PRIMEIRA
+    // entrada no site (não uma data global).
+    const DIAS_TESTE = 7;
 
     // URL para redirecionamento após expiração
     const URL_PAGAMENTO = 'acesso-premium.html';
 
     // Número de dias antes de expiração para mostrar aviso
-    const DIAS_AVISO = 7;
+    const DIAS_AVISO = 3;
+
+    // Chave do localStorage que guarda a primeira entrada do usuário
+    const CHAVE_PRIMEIRA_ENTRADA = 'eventcalc_primeira_entrada';
+
+    // ═══════════════════════════════════════════════════════════════════
+    // 🔧 Calcular data de expiração baseada na primeira entrada do usuário
+    // ═══════════════════════════════════════════════════════════════════
+    function obterDataExpiracaoUsuario() {
+        let dataPrimeiraEntrada = localStorage.getItem(CHAVE_PRIMEIRA_ENTRADA);
+
+        if (!dataPrimeiraEntrada) {
+            // Primeira visita: registra agora
+            dataPrimeiraEntrada = new Date().toISOString();
+            localStorage.setItem(CHAVE_PRIMEIRA_ENTRADA, dataPrimeiraEntrada);
+            console.log('🆕 Primeira entrada do usuário registrada:', dataPrimeiraEntrada);
+        }
+
+        const entrada = new Date(dataPrimeiraEntrada);
+        const expiracao = new Date(entrada.getTime() + (DIAS_TESTE * 24 * 60 * 60 * 1000));
+        return expiracao;
+    }
 
     // ═══════════════════════════════════════════════════════════════════
     // 🔧 LÓGICA (Não altere daqui para baixo)
     // ═══════════════════════════════════════════════════════════════════
 
     function verificarExpiracao() {
+        // 🚫 EXCEÇÕES: Não bloquear em páginas de pagamento/admin
+        const href = window.location.href;
+        const paginasExcluidas = ['acesso-premium.html', 'gerenciador-codigos-pix.html', 'politica-privacidade.html'];
+        const estaEmPaginaExcluida = paginasExcluidas.some(p => href.includes(p));
+
+        console.log(`📄 URL: ${href} | Excluída: ${estaEmPaginaExcluida}`);
+
+        if (estaEmPaginaExcluida) {
+            console.log('✅✅✅ Página EXCLUÍDA - SEM NENHUM BLOQUEIO');
+            return true;
+        }
+
         // PRIORIDADE 1: Verificar se tem licença ativa
         const temLicenca = localStorage.getItem('eventcalc_licenca_ativa') === 'true';
         if (temLicenca) {
@@ -41,12 +77,13 @@
                     const tipoLicenca = localStorage.getItem('eventcalc_licenca_tipo') || 'desconhecido';
                     const diasRestantes = Math.ceil((expiracao - hoje) / (1000 * 60 * 60 * 24));
 
-                    // Se falta pouco: mostrar aviso de renovação
-                    if (diasRestantes <= 30) {
+                    // Se falta pouco: mostrar aviso de renovação (APENAS NAS PÁGINAS NÃO EXCLUÍDAS)
+                    if (diasRestantes <= 30 && !estaEmPaginaExcluida) {
                         mostrarAvisoRenovacao(diasRestantes, tipoLicenca);
                     }
 
-                    console.log(`✅ EventCalc Pro v7 - Licença ${tipoLicenca} ativa até ${dataExpiracaoLicenca}`);
+                    console.log(`✅ EventCalc - Licença ${tipoLicenca} ativa até ${dataExpiracaoLicenca} (Página excluída: ${estaEmPaginaExcluida})`);
+                    // ✅ SEMPRE retorna true se licença válida - deixa acessar tudo
                     return true;
                 } else {
                     // Licença expirou: limpar e bloquear
@@ -57,11 +94,12 @@
             }
         }
 
-        // PRIORIDADE 2: Verificar data de expiração de teste
+        // PRIORIDADE 2: Verificar trial individual do usuário
+        // Cada usuário tem DIAS_TESTE dias contados a partir da primeira entrada
         const hoje = new Date();
-        const expiracao = new Date(DATA_EXPIRACAO);
+        const expiracao = obterDataExpiracaoUsuario();
 
-        // Se hoje > data de expiração: BLOQUEADO
+        // Se trial expirou: BLOQUEADO (mostra tela de pagamento)
         if (hoje > expiracao) {
             mostrarTelaExpirada();
             return false;
@@ -73,6 +111,7 @@
             mostrarAvisoExpiracao(diasRestantes);
         }
 
+        console.log(`✅ EventCalc - Trial ativo. Expira em ${diasRestantes} dia(s).`);
         return true;
     }
 
@@ -105,7 +144,7 @@
                         margin: 20px 0;
                         font-family: 'Lora', serif;
                     ">
-                        A versão de teste da EventCalc Pro v7 expirou em ${DATA_EXPIRACAO}.
+                        Seu período de ${DIAS_TESTE} dias de teste gratuito terminou.
                     </p>
 
                     <p style="
@@ -170,7 +209,7 @@
                 z-index: 9999;
             ">
                 <strong>📅 AVISO DE RENOVAÇÃO</strong> -
-                Sua licença (${tipoLicanca}) expira em <strong>${diasRestantes} dia${diasRestantes !== 1 ? 's' : ''}</strong>.
+                Sua licença (${tipoLicenca}) expira em <strong>${diasRestantes} dia${diasRestantes !== 1 ? 's' : ''}</strong>.
                 <a href="${URL_PAGAMENTO}" style="
                     color: #8b1428;
                     text-decoration: underline;
@@ -203,9 +242,8 @@
                 top: 0;
                 z-index: 9999;
             ">
-                <strong>⚠️ VERSÃO DE TESTE</strong> -
-                Expira em <strong>${diasRestantes} dia${diasRestantes !== 1 ? 's' : ''}</strong>
-                (${DATA_EXPIRACAO}).
+                <strong>⚠️ TESTE GRATUITO</strong> -
+                Seu teste expira em <strong>${diasRestantes} dia${diasRestantes !== 1 ? 's' : ''}</strong>.
                 <a href="${URL_PAGAMENTO}" style="
                     color: #d4af37;
                     text-decoration: underline;
@@ -220,7 +258,7 @@
         document.body.insertBefore(banner, document.body.firstChild);
 
         // Log para debug
-        console.log(`📅 EventCalc Pro v7 expira em: ${DATA_EXPIRACAO} (${diasRestantes} dias)`);
+        console.log(`📅 EventCalc - Trial individual. Restam ${diasRestantes} dia(s).`);
     }
 
     // Executar verificação quando página carrega

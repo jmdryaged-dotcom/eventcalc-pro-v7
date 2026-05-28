@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Setup Admin - EventCalc</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Lora:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Lora', serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            padding: 30px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            max-width: 700px;
+            background: #1a1a1a;
+            border: 2px solid #d4af37;
+            border-radius: 12px;
+            padding: 40px;
+        }
+        h1 {
+            font-family: 'Playfair Display', serif;
+            color: #d4af37;
+            font-size: 2rem;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .step {
+            background: rgba(212, 175, 55, 0.05);
+            border-left: 4px solid #d4af37;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        .step h3 { color: #d4af37; margin-bottom: 12px; }
+        input[type="password"] {
+            width: 100%;
+            padding: 14px;
+            border-radius: 6px;
+            border: 2px solid #444;
+            background: #0a0a0a;
+            color: #fff;
+            font-size: 1.1rem;
+            margin: 10px 0;
+        }
+        input:focus { outline: none; border-color: #d4af37; }
+        button {
+            background: linear-gradient(135deg, #d4af37 0%, #b8860b 100%);
+            color: #0a0a0a;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1rem;
+            margin: 10px 0;
+        }
+        button:hover { transform: translateY(-2px); }
+        .resultado {
+            background: #0a0a0a;
+            border: 2px solid #d4af37;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            word-break: break-all;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            display: none;
+        }
+        .resultado.show { display: block; }
+        .copiar {
+            background: #4caf50;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            margin-top: 10px;
+        }
+        .aviso {
+            background: rgba(196, 30, 58, 0.1);
+            border: 2px solid #c41e3a;
+            padding: 15px;
+            border-radius: 8px;
+            color: #ff9a9a;
+            margin: 20px 0;
+        }
+        code {
+            background: #0a0a0a;
+            padding: 2px 6px;
+            border-radius: 3px;
+            color: #d4af37;
+        }
+        a { color: #d4af37; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 Setup de Senha Admin</h1>
+
+        <div class="aviso">
+            <strong>⚠️ Use esta página APENAS uma vez</strong> para gerar o hash da sua senha master.
+            Depois de configurar, ela pode ser apagada do servidor.
+        </div>
+
+        <div class="step">
+            <h3>Passo 1 — Digite sua senha forte</h3>
+            <p style="color: #d0d0d0; margin-bottom: 10px;">
+                Use uma senha com pelo menos 12 caracteres, misturando letras, números e símbolos.
+                Exemplo: <code>ClubCarniv0r!sta@2026</code>
+            </p>
+            <input type="password" id="senha" placeholder="Digite sua senha master..." />
+            <input type="password" id="senha2" placeholder="Confirme a senha..." />
+            <button onclick="gerarHash()">🔑 Gerar Hash</button>
+        </div>
+
+        <div class="resultado" id="resultado">
+            <h3 style="color: #4caf50; margin-bottom: 10px;">✅ Hash gerado com sucesso!</h3>
+            <p style="margin-bottom: 10px;">Copie este hash:</p>
+            <div id="hashTexto" style="background: #1a1a1a; padding: 12px; border-radius: 4px; color: #d4af37;"></div>
+            <button class="copiar" onclick="copiar()">📋 Copiar Hash</button>
+
+            <div style="margin-top: 25px; padding-top: 20px; border-top: 1px solid #444;">
+                <h3 style="color: #d4af37;">Passo 2 — Cole no admin-leads.html</h3>
+                <p style="color: #d0d0d0; margin: 10px 0;">
+                    1. Abra <code>admin-leads.html</code><br>
+                    2. Procure por <code>ADMIN_HASH</code><br>
+                    3. Substitua o valor pelo hash acima<br>
+                    4. Faça upload no Netlify
+                </p>
+                <p style="color: #d0d0d0;">
+                    A senha em si <strong>nunca</strong> aparece no código.
+                    Só o hash dela. Mesmo se alguém ver o código, não consegue descobrir sua senha.
+                </p>
+            </div>
+
+            <div style="margin-top: 20px; padding: 15px; background: rgba(76, 175, 80, 0.1); border: 1px solid #4caf50; border-radius: 6px;">
+                <strong style="color: #4caf50;">💡 Para acessar do celular:</strong>
+                <p style="color: #d0d0d0; margin-top: 8px;">
+                    Depois de configurar o hash, basta acessar
+                    <code>seu-site.netlify.app/admin-leads.html</code>
+                    do celular e digitar sua senha master.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function gerarHash() {
+            const senha = document.getElementById('senha').value;
+            const senha2 = document.getElementById('senha2').value;
+
+            if (!senha) {
+                alert('Digite uma senha');
+                return;
+            }
+            if (senha.length < 8) {
+                alert('Senha muito curta. Use pelo menos 8 caracteres.');
+                return;
+            }
+            if (senha !== senha2) {
+                alert('Senhas não conferem. Digite a mesma senha nos 2 campos.');
+                return;
+            }
+
+            try {
+                const buf = await crypto.subtle.digest(
+                    'SHA-256',
+                    new TextEncoder().encode(senha)
+                );
+                const hex = Array.from(new Uint8Array(buf))
+                    .map(b => b.toString(16).padStart(2, '0'))
+                    .join('');
+
+                document.getElementById('hashTexto').textContent = hex;
+                document.getElementById('resultado').classList.add('show');
+
+                // Limpar campos por segurança
+                document.getElementById('senha').value = '';
+                document.getElementById('senha2').value = '';
+            } catch (e) {
+                alert('Erro ao gerar hash: ' + e.message);
+            }
+        }
+
+        function copiar() {
+            const texto = document.getElementById('hashTexto').textContent;
+            navigator.clipboard.writeText(texto).then(() => {
+                alert('✅ Hash copiado!');
+            });
+        }
+    </script>
+</body>
+</html>

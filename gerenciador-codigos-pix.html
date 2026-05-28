@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciador de Códigos PIX - EventCalc Pro v7</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Lora:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --dark-bg: #0a0a0a;
+            --dark-surface: #1a1a1a;
+            --dark-card: #242424;
+            --gold-light: #d4af37;
+            --red-primary: #c41e3a;
+            --red-dark: #8b1428;
+            --text-primary: #ffffff;
+            --text-secondary: #d0d0d0;
+        }
+
+        body {
+            font-family: 'Lora', serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+            color: var(--text-primary);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            color: var(--gold-light);
+            margin-bottom: 10px;
+        }
+
+        .info-texto {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            margin-bottom: 20px;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 900px) {
+            .grid-2 { grid-template-columns: 1fr; }
+        }
+
+        .secao {
+            background: rgba(36,36,36,0.6);
+            border: 1px solid rgba(212,175,55,0.3);
+            border-radius: 12px;
+            padding: 25px;
+        }
+
+        .secao h2 {
+            font-family: 'Playfair Display', serif;
+            color: var(--gold-light);
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            border-bottom: 2px solid rgba(212,175,55,0.3);
+            padding-bottom: 10px;
+        }
+
+        .lista-item {
+            background: rgba(0,0,0,0.3);
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            border-left: 4px solid var(--gold-light);
+        }
+
+        .lista-item p {
+            margin: 5px 0;
+            font-size: 0.95rem;
+        }
+
+        .label {
+            color: var(--gold-light);
+            font-weight: bold;
+        }
+
+        .valor {
+            color: var(--gold-light);
+            font-family: 'Courier New', monospace;
+            font-size: 0.95rem;
+        }
+
+        .status-pendente {
+            color: #ff9800;
+            font-weight: bold;
+        }
+
+        .status-concluido {
+            color: #4caf50;
+            font-weight: bold;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, var(--gold-light), #b8860b);
+            color: #0a0a0a;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.9rem;
+            transition: transform 0.2s;
+            margin-right: 5px;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            transform: scale(1.05);
+        }
+
+        .btn-copiar {
+            background: var(--gold-light);
+            color: #0a0a0a;
+            padding: 8px 15px;
+            font-size: 0.85rem;
+        }
+
+        .btn-gerar {
+            background: linear-gradient(135deg, #4caf50, #45a049);
+            color: white;
+        }
+
+        .btn-remover {
+            background: var(--red-primary);
+            color: white;
+            padding: 8px 15px;
+            font-size: 0.85rem;
+        }
+
+        .input-codigo {
+            width: 100%;
+            padding: 10px;
+            background: #1a1a1a;
+            border: 1px solid var(--gold-light);
+            color: white;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            margin: 10px 0;
+            font-size: 1rem;
+        }
+
+        .mensagem {
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            display: none;
+        }
+
+        .mensagem-sucesso {
+            background: rgba(76,175,80,0.2);
+            border-left: 4px solid #4caf50;
+            color: #4caf50;
+        }
+
+        .mensagem-info {
+            background: rgba(33,150,243,0.2);
+            border-left: 4px solid #2196f3;
+            color: #2196f3;
+        }
+
+        .tabela-codigos {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .tabela-codigos th {
+            background: rgba(212,175,55,0.2);
+            padding: 12px;
+            text-align: left;
+            color: var(--gold-light);
+            border-bottom: 2px solid var(--gold-light);
+            font-weight: bold;
+        }
+
+        .tabela-codigos td {
+            padding: 12px;
+            border-bottom: 1px solid rgba(212,175,55,0.2);
+            font-size: 0.9rem;
+        }
+
+        .tabela-codigos tr:hover {
+            background: rgba(212,175,55,0.1);
+        }
+
+        .codigo-gerado {
+            font-family: 'Courier New', monospace;
+            background: #1a1a1a;
+            padding: 8px 12px;
+            border-radius: 4px;
+            color: var(--gold-light);
+            font-weight: bold;
+        }
+
+        .campo-gerar {
+            margin-bottom: 15px;
+        }
+
+        .campo-gerar label {
+            display: block;
+            color: var(--gold-light);
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        .campo-gerar input, .campo-gerar select {
+            width: 100%;
+            padding: 10px;
+            background: #1a1a1a;
+            border: 1px solid rgba(212,175,55,0.3);
+            color: white;
+            border-radius: 6px;
+            margin-bottom: 10px;
+        }
+
+        .vazio {
+            text-align: center;
+            color: var(--text-secondary);
+            padding: 40px 20px;
+        }
+
+        .footer {
+            text-align: center;
+            color: var(--text-secondary);
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(212,175,55,0.3);
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔑 Gerenciador de Códigos PIX</h1>
+            <p class="info-texto">Gerencie solicitações de clientes e gere códigos de licença</p>
+        </header>
+
+        <div class="grid-2">
+            <!-- SOLICITAÇÕES PENDENTES -->
+            <div class="secao">
+                <h2>📋 Solicitações Pendentes</h2>
+                <div id="mensagem" class="mensagem"></div>
+                <div id="solicitacoes"></div>
+            </div>
+
+            <!-- GERAR NOVO CÓDIGO -->
+            <div class="secao">
+                <h2>🔐 Gerar Novo Código</h2>
+                <p style="margin-bottom: 15px; color: var(--text-secondary);">Preencha os dados e gere um código manualmente:</p>
+
+                <div class="campo-gerar">
+                    <label>ID da Solicitação (ou deixe em branco):</label>
+                    <input type="text" id="idSolicitacao" placeholder="Número do ID" value="">
+                </div>
+
+                <div class="campo-gerar">
+                    <label>Tipo de Plano:</label>
+                    <select id="tipoPlanoGerar">
+                        <option value="">Selecione...</option>
+                        <option value="semanal">Semanal (7 dias)</option>
+                        <option value="mensal">Mensal (30 dias)</option>
+                        <option value="trimestral">Trimestral (90 dias)</option>
+                        <option value="vitalicio">Vitalício (infinito)</option>
+                    </select>
+                </div>
+
+                <div class="campo-gerar">
+                    <label>Número sequencial (ex: 001, 002...):</label>
+                    <input type="text" id="numeroSequencial" placeholder="001" value="">
+                </div>
+
+                <button class="btn btn-gerar" onclick="gerarCodigoManualmente()">✨ Gerar Código</button>
+
+                <div id="divCodigoGerado" style="display: none; margin-top: 20px;">
+                    <p style="color: var(--gold-light); margin-bottom: 10px;">Código Gerado:</p>
+                    <input type="text" id="codigoGerado" class="input-codigo" readonly>
+                    <button class="btn btn-copiar" onclick="copiarCodigo()">📋 Copiar Código</button>
+                    <button class="btn" onclick="adicionarCodigoValido()">✓ Adicionar aos Válidos</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- HISTÓRICO DE CÓDIGOS GERADOS -->
+        <div class="secao" style="margin-bottom: 30px;">
+            <h2>📊 Histórico de Códigos Gerados</h2>
+            <div id="historicoDiv"></div>
+        </div>
+
+        <div class="footer">
+            <p>EventCalc Pro v7 © 2026 - Club Carnivorista</p>
+            <p><a href="index_v7.html" style="color: var(--gold-light); text-decoration: none;">← Voltar à Landing</a></p>
+        </div>
+    </div>
+
+    <script>
+        // ═══════════════════════════════════════════════════════════
+        // 🔒 PROTEÇÃO: Esta página só pode ser usada LOCALMENTE.
+        // Se alguém acessar pela URL pública, redireciona para 404.
+        // Defesa em camadas (Netlify já bloqueia via netlify.toml).
+        // ═══════════════════════════════════════════════════════════
+        (function bloquearProducao() {
+            const host = window.location.hostname;
+            const ehLocal = host === 'localhost' || host === '127.0.0.1' || host === '';
+            if (!ehLocal) {
+                document.body.innerHTML = '';
+                window.location.replace('/404.html');
+            }
+        })();
+
+        // Carregar solicitações PIX
+        function carregarSolicitacoes() {
+            const solicitacoes = JSON.parse(localStorage.getItem('eventcalc_solicitacoes_pix') || '[]');
+            const div = document.getElementById('solicitacoes');
+
+            if (solicitacoes.length === 0) {
+                div.innerHTML = '<div class="vazio">Nenhuma solicitação pendente</div>';
+                return;
+            }
+
+            let html = '<table class="tabela-codigos"><thead><tr><th>ID</th><th>Cliente</th><th>Plano</th><th>Valor</th><th>Data</th><th>Ações</th></tr></thead><tbody>';
+
+            solicitacoes.forEach(sol => {
+                const temCodigo = sol.codigo ? `✓ ${sol.codigo}` : '⏳ Pendente';
+                const statusClass = sol.codigo ? 'status-concluido' : 'status-pendente';
+
+                html += `
+                    <tr>
+                        <td>#${sol.id}</td>
+                        <td>${sol.nome}</td>
+                        <td>${sol.plano}</td>
+                        <td>R$ ${sol.valor.toFixed(2)}</td>
+                        <td>${sol.data}</td>
+                        <td>
+                            <span class="${statusClass}">${temCodigo}</span><br>
+                            <button class="btn btn-gerar" onclick="gerarParaSolicitacao('${sol.id}')">Gerar</button>
+                            <button class="btn btn-remover" onclick="removerSolicitacao('${sol.id}')">🗑️ Remover</button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            html += '</tbody></table>';
+            div.innerHTML = html;
+        }
+
+        // Gerar código para solicitação específica
+        function gerarParaSolicitacao(id) {
+            document.getElementById('idSolicitacao').value = id;
+            document.getElementById('numeroSequencial').focus();
+            document.querySelector('.grid-2 > div:last-child').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Gerar código manualmente
+        function gerarCodigoManualmente() {
+            const tipo = document.getElementById('tipoPlanoGerar').value;
+            const numero = document.getElementById('numeroSequencial').value.trim();
+
+            if (!tipo) {
+                showMsg('Selecione um tipo de plano', 'error');
+                return;
+            }
+
+            if (!numero) {
+                showMsg('Preencha o número sequencial', 'error');
+                return;
+            }
+
+            // Gerar código no padrão: EVENTCALC-TIPO-DATA-NUMERO
+            const data = new Date();
+            const ano = data.getFullYear();
+            const mes = String(data.getMonth() + 1).padStart(2, '0');
+            const dia = String(data.getDate()).padStart(2, '0');
+            const numFormatado = String(numero).padStart(3, '0');
+
+            const codigo = `EVENTCALC-${tipo.toUpperCase()}-${ano}-${numFormatado}`;
+
+            document.getElementById('codigoGerado').value = codigo;
+            document.getElementById('divCodigoGerado').style.display = 'block';
+        }
+
+        // Copiar código para clipboard
+        function copiarCodigo() {
+            const codigo = document.getElementById('codigoGerado').value;
+            navigator.clipboard.writeText(codigo).then(() => {
+                showMsg('✓ Código copiado!', 'success');
+            });
+        }
+
+        // Adicionar código aos válidos
+        function adicionarCodigoValido() {
+            const codigo = document.getElementById('codigoGerado').value;
+            const tipo = document.getElementById('tipoPlanoGerar').value;
+            const id = document.getElementById('idSolicitacao').value;
+
+            if (!codigo || !tipo) {
+                showMsg('Preencha todos os campos', 'error');
+                return;
+            }
+
+            // Salvar código nos válidos (seria em um arquivo, mas vamos usar localStorage para agora)
+            let codigosGerados = JSON.parse(localStorage.getItem('eventcalc_codigos_gerados') || '[]');
+
+            const novoCodigo = {
+                codigo: codigo,
+                tipo: tipo,
+                dataCriacao: new Date().toLocaleString('pt-BR'),
+                idSolicitacao: id || null,
+                usado: false
+            };
+
+            codigosGerados.push(novoCodigo);
+            localStorage.setItem('eventcalc_codigos_gerados', JSON.stringify(codigosGerados));
+
+            // Se tem ID de solicitação, marcar como concluída
+            if (id) {
+                let solicitacoes = JSON.parse(localStorage.getItem('eventcalc_solicitacoes_pix') || '[]');
+                solicitacoes = solicitacoes.map(s => {
+                    if (s.id == id) {
+                        s.codigo = codigo;
+                        s.status = 'concluido';
+                    }
+                    return s;
+                });
+                localStorage.setItem('eventcalc_solicitacoes_pix', JSON.stringify(solicitacoes));
+            }
+
+            showMsg(`✅ Código adicionado aos válidos!`, 'success');
+
+            // Limpar campos
+            document.getElementById('idSolicitacao').value = '';
+            document.getElementById('tipoPlanoGerar').value = '';
+            document.getElementById('numeroSequencial').value = '';
+            document.getElementById('divCodigoGerado').style.display = 'none';
+
+            // Recarregar
+            carregarSolicitacoes();
+            carregarHistorico();
+        }
+
+        // Remover solicitação
+        function removerSolicitacao(id) {
+            if (!confirm('Remover esta solicitação?')) return;
+
+            let solicitacoes = JSON.parse(localStorage.getItem('eventcalc_solicitacoes_pix') || '[]');
+            solicitacoes = solicitacoes.filter(s => s.id != id);
+            localStorage.setItem('eventcalc_solicitacoes_pix', JSON.stringify(solicitacoes));
+
+            carregarSolicitacoes();
+        }
+
+        // Carregar histórico de códigos
+        function carregarHistorico() {
+            const historico = JSON.parse(localStorage.getItem('eventcalc_codigos_gerados') || '[]');
+            const div = document.getElementById('historicoDiv');
+
+            if (historico.length === 0) {
+                div.innerHTML = '<div class="vazio">Nenhum código gerado ainda</div>';
+                return;
+            }
+
+            let html = '<table class="tabela-codigos"><thead><tr><th>Código</th><th>Tipo</th><th>Data</th><th>ID Solicitação</th><th>Status</th></tr></thead><tbody>';
+
+            historico.forEach(cod => {
+                const status = cod.usado ? '✓ Usado' : '⏳ Disponível';
+                const idSol = cod.idSolicitacao ? `#${cod.idSolicitacao}` : '-';
+
+                html += `
+                    <tr>
+                        <td><span class="codigo-gerado">${cod.codigo}</span></td>
+                        <td>${cod.tipo}</td>
+                        <td>${cod.dataCriacao}</td>
+                        <td>${idSol}</td>
+                        <td>${status}</td>
+                    </tr>
+                `;
+            });
+
+            html += '</tbody></table>';
+            div.innerHTML = html;
+        }
+
+        // Mostrar mensagem
+        function showMsg(msg, tipo) {
+            const div = document.getElementById('mensagem');
+            div.innerHTML = msg;
+            div.className = 'mensagem mensagem-' + (tipo === 'error' ? 'error' : tipo === 'success' ? 'sucesso' : 'info');
+            div.style.display = 'block';
+
+            if (tipo !== 'error') {
+                setTimeout(() => div.style.display = 'none', 3000);
+            }
+        }
+
+        // Carregar ao iniciar
+        document.addEventListener('DOMContentLoaded', () => {
+            carregarSolicitacoes();
+            carregarHistorico();
+        });
+
+        // Recarregar a cada 10 segundos (para ver atualizações de outras abas)
+        setInterval(() => {
+            carregarSolicitacoes();
+            carregarHistorico();
+        }, 10000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Termos de Uso - EventCalc</title>
+    <script src="lgpd-modal.js"></script>
+    <link rel="stylesheet" href="theme-override.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Lora', 'Arial', sans-serif;
+            background: #0a0a0a;
+            color: #ffffff;
+            line-height: 1.6;
+        }
+        :root {
+            --gold: #d4af37;
+            --dark-bg: #0a0a0a;
+            --dark-card: #1a1a1a;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 30px;
+            border-bottom: 2px solid var(--gold);
+        }
+        h1 {
+            font-family: 'Playfair Display', serif;
+            color: var(--gold);
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        h2 {
+            color: var(--gold);
+            font-size: 1.4rem;
+            margin: 30px 0 15px 0;
+            padding-top: 20px;
+            border-top: 1px solid #333;
+        }
+        h2:first-of-type { border-top: none; padding-top: 0; }
+        p, li {
+            color: #d0d0d0;
+            margin-bottom: 12px;
+            font-size: 1rem;
+        }
+        ul, ol {
+            margin-left: 30px;
+            margin-bottom: 18px;
+        }
+        ul li, ol li {
+            margin-bottom: 8px;
+        }
+        .highlight {
+            color: var(--gold);
+            font-weight: bold;
+        }
+        .last-update {
+            color: #909090;
+            font-size: 0.9rem;
+            font-style: italic;
+            text-align: center;
+            margin: 10px 0 30px 0;
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 40px;
+            color: var(--gold);
+            text-decoration: none;
+            font-weight: bold;
+            padding: 12px 24px;
+            border: 2px solid var(--gold);
+            border-radius: 6px;
+            transition: 0.3s;
+        }
+        .back-link:hover {
+            background: var(--gold);
+            color: var(--dark-bg);
+        }
+        .aviso-box {
+            background: rgba(212, 175, 55, 0.08);
+            border-left: 4px solid var(--gold);
+            padding: 18px 22px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .footer {
+            margin-top: 50px;
+            border-top: 1px solid #444;
+            padding-top: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+        .footer img { height: 100px; width: auto; object-fit: contain; }
+        .footer p { margin: 0; text-align: center; color: #909090; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📜 Termos de Uso</h1>
+            <p class="last-update">EventCalc — Última atualização: Maio de 2026</p>
+        </div>
+
+        <div class="aviso-box">
+            <p style="margin: 0; color: #fff;">
+                <strong>Ao utilizar o EventCalc, você concorda integralmente com estes Termos de Uso.</strong> Se discordar de qualquer cláusula, não utilize a aplicação.
+            </p>
+        </div>
+
+        <h2>1. Definições</h2>
+        <ul>
+            <li><span class="highlight">"Aplicação" / "Sistema":</span> O software EventCalc, acessível via navegador web.</li>
+            <li><span class="highlight">"Usuário":</span> Pessoa física ou jurídica que utiliza a Aplicação (geralmente um churrasqueiro, pitmaster ou empresa de catering).</li>
+            <li><span class="highlight">"Operador":</span> Equipe EventCalc / Club Carnivorista, responsável pela manutenção do sistema.</li>
+            <li><span class="highlight">"Cliente final":</span> Pessoa que recebe a proposta gerada pelo Usuário (contratante do evento).</li>
+        </ul>
+
+        <h2>2. Descrição do Serviço</h2>
+        <p>O EventCalc é uma <strong>calculadora online de orçamento para eventos de churrasco e catering</strong> que oferece:</p>
+        <ul>
+            <li>Cálculo automatizado de gramatura de carnes e acompanhamentos por pessoa</li>
+            <li>Sugestões de cardápios pré-configurados</li>
+            <li>Suporte a restrições alimentares (celíaco, lactose, vegano, vegetariano)</li>
+            <li>Geração de PDF profissional para apresentação ao cliente final</li>
+            <li>Armazenamento local (localStorage) dos orçamentos</li>
+            <li>Captura de leads através do tutorial gratuito</li>
+        </ul>
+
+        <h2>3. Aceitação e Cadastro</h2>
+        <p>O uso da Aplicação <strong>não exige cadastro</strong> nas funcionalidades de cálculo. Apenas para:</p>
+        <ul>
+            <li><strong>Receber o tutorial gratuito:</strong> exige nome, email e WhatsApp</li>
+            <li><strong>Ativar uma licença paga:</strong> exige código de licença válido</li>
+        </ul>
+        <p>O Usuário declara ter pelo menos <strong>18 anos</strong> ou possuir autorização legal para uso.</p>
+
+        <h2>4. Planos e Pagamento</h2>
+        <p>Atualmente oferecemos os seguintes planos:</p>
+        <ul>
+            <li><span class="highlight">Teste Gratuito:</span> 7 dias a partir da primeira visita, sem necessidade de pagamento</li>
+            <li><span class="highlight">Mensal:</span> R$ 19,90/mês</li>
+            <li><span class="highlight">Trimestral:</span> R$ 49,90 (economia de 21%)</li>
+        </ul>
+        <p><strong>Forma de pagamento:</strong> PIX. Após o pagamento, o Usuário receberá um código de licença por email/WhatsApp no prazo de até 24 horas úteis.</p>
+        <p><strong>Reajustes:</strong> Os valores podem ser reajustados anualmente, com aviso prévio de 30 dias.</p>
+
+        <h2>5. Direito de Arrependimento (Art. 49 CDC)</h2>
+        <p>O Usuário tem direito a desistir da contratação em até <strong>7 dias corridos</strong> após o pagamento, com reembolso integral, desde que solicite por email para <span class="highlight">jm.dryaged@gmail.com</span>.</p>
+
+        <h2>6. Suspensão e Cancelamento</h2>
+        <p>A licença poderá ser <strong>suspensa ou cancelada</strong> nas seguintes situações:</p>
+        <ul>
+            <li>Compartilhamento indevido de licença (detectado por múltiplos IPs)</li>
+            <li>Tentativa de burlar mecanismos de validação</li>
+            <li>Uso para fins ilícitos ou contrários à legislação brasileira</li>
+            <li>Falta de pagamento de renovação</li>
+        </ul>
+        <p>Em caso de cancelamento por culpa do Usuário, <strong>não haverá reembolso proporcional</strong>.</p>
+
+        <h2>7. Propriedade Intelectual</h2>
+        <p>O EventCalc (código, design, marca, conteúdo) é de propriedade do <strong>Club Carnivorista</strong> e está protegido pela Lei nº 9.610/98 (Direitos Autorais) e Lei nº 9.279/96 (Propriedade Industrial).</p>
+        <p><strong>É PROIBIDO:</strong></p>
+        <ul>
+            <li>Copiar, modificar ou redistribuir o código-fonte sem autorização</li>
+            <li>Fazer engenharia reversa do sistema</li>
+            <li>Revender o acesso à Aplicação sem licença comercial específica</li>
+            <li>Utilizar a marca "EventCalc Pro" ou "Club Carnivorista" sem permissão</li>
+        </ul>
+        <p>O Usuário possui apenas <strong>licença de uso</strong>, não propriedade do software.</p>
+
+        <h2>8. Conteúdo do Usuário</h2>
+        <p>Os dados que o Usuário insere na Aplicação (orçamentos, cardápios, dados de clientes, fotos, dados profissionais) <strong>pertencem ao próprio Usuário</strong>. O Operador não reivindica direitos sobre esse conteúdo.</p>
+        <p>O Usuário é o único responsável pelo conteúdo que insere, declarando ter os direitos necessários (consentimento dos clientes finais, autorização de imagem, etc.).</p>
+
+        <h2>9. Responsabilidades do Usuário</h2>
+        <p>Ao utilizar a Aplicação, o Usuário compromete-se a:</p>
+        <ul>
+            <li>Fornecer informações verdadeiras e atualizadas</li>
+            <li>Manter sigilo de sua senha de licença e dados profissionais</li>
+            <li>Não utilizar a Aplicação para enviar spam ou conteúdo ilegal</li>
+            <li>Respeitar a LGPD ao coletar dados de seus próprios clientes</li>
+            <li>Comunicar imediatamente qualquer uso não autorizado de sua conta</li>
+        </ul>
+
+        <h2>10. Limitação de Responsabilidade</h2>
+        <div class="aviso-box">
+            <p style="margin: 0;"><strong>Atenção:</strong> O EventCalc é uma <strong>ferramenta de apoio</strong>. As decisões finais sobre quantidades, preços e propostas são de inteira responsabilidade do Usuário.</p>
+        </div>
+        <p>O Operador <strong>NÃO se responsabiliza por:</strong></p>
+        <ul>
+            <li>Prejuízos decorrentes de erros do Usuário no preenchimento de dados</li>
+            <li>Perdas financeiras em eventos do Usuário (preços errados, falta de carne, etc.)</li>
+            <li>Indisponibilidade temporária do serviço por manutenção ou problemas de terceiros (Render, Netlify, Resend)</li>
+            <li>Perda de dados armazenados no navegador do Usuário (cache limpo, dispositivo perdido)</li>
+            <li>Conteúdo gerado pelo Usuário e enviado a seus clientes finais</li>
+        </ul>
+        <p>Em qualquer hipótese, a responsabilidade total do Operador está limitada ao <strong>valor pago pelo Usuário nos últimos 12 meses</strong>.</p>
+
+        <h2>11. Backup e Continuidade</h2>
+        <p>Os dados são armazenados primariamente no <strong>localStorage do navegador do Usuário</strong>. <strong>O backup é responsabilidade do Usuário.</strong> Recomendamos:</p>
+        <ul>
+            <li>Não limpar cache do navegador onde usa a Aplicação</li>
+            <li>Exportar PDFs e guardá-los em local seguro</li>
+            <li>Anotar dados importantes em local externo (planilha, papel)</li>
+        </ul>
+
+        <h2>12. Atualizações da Aplicação</h2>
+        <p>O Operador pode <strong>atualizar, modificar ou descontinuar</strong> funcionalidades a qualquer momento. Mudanças relevantes serão comunicadas por email aos Usuários ativos com antecedência mínima de 15 dias.</p>
+
+        <h2>13. Privacidade e LGPD</h2>
+        <p>O tratamento de dados pessoais é regido pela nossa <a href="politica-privacidade.html" class="highlight" style="text-decoration: underline;">Política de Privacidade</a>, em conformidade com a Lei nº 13.709/2018 (LGPD).</p>
+
+        <h2>14. Alterações nestes Termos</h2>
+        <p>Estes Termos podem ser modificados a qualquer momento. A versão vigente sempre estará disponível nesta página com a data de atualização. O uso continuado da Aplicação após mudanças significa <strong>aceitação tácita</strong> dos novos termos.</p>
+
+        <h2>15. Foro e Legislação Aplicável</h2>
+        <p>Este contrato é regido pelas <strong>leis da República Federativa do Brasil</strong>. Quaisquer disputas serão resolvidas no <strong>Foro da Comarca de Itapema/SC</strong>, com renúncia expressa de qualquer outro, por mais privilegiado que seja.</p>
+
+        <h2>16. Contato</h2>
+        <p>Para dúvidas, sugestões ou questões legais:</p>
+        <ul>
+            <li>📧 Email: <span class="highlight">jm.dryaged@gmail.com</span></li>
+            <li>📱 WhatsApp: <span class="highlight">+55 47 99668-1010</span></li>
+            <li>📍 Local: Itapema, Santa Catarina, Brasil</li>
+        </ul>
+
+        <a href="index_v7.html" class="back-link">← Voltar à Landing Page</a>
+
+        <div class="footer">
+            <img src="logo-club.jpeg" alt="Club Carnivorista">
+            <p>EventCalc © 2026 - Club Carnivorista. Todos os direitos reservados.</p>
+        </div>
+    </div>
+</body>
+</html>

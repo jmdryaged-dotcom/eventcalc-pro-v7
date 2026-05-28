@@ -3,9 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EventCalc Pro v7 - Questionário</title>
+    <title>EventCalc - Questionário</title>
     <!-- 🔐 Sistema de Expiração Automática -->
     <script src="sistema-expiracao.js"></script>
+    <script src="lgpd-modal.js"></script>
+    <script src="analytics.js"></script>
+    <link rel="stylesheet" href="theme-override.css">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Lora:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -213,7 +216,7 @@
 <div class="container">
 
     <div class="header">
-        <h1>EventCalc Pro v7</h1>
+        <h1>EventCalc</h1>
         <p>Sistema Profissional de Orçamento para Eventos</p>
     </div>
 
@@ -364,6 +367,14 @@
                     <input type="checkbox" id="smoker" />
                     <label for="smoker">🔥 Pit Smoker</label>
                 </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="varal" />
+                    <label for="varal">🔥 Varal de Defumação</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="fogoChao" />
+                    <label for="fogoChao">🔥 Fogo de Chão</label>
+                </div>
             </div>
             <small style="margin-top:10px;display:block;">Marque quais equipamentos você tem disponível</small>
         </div>
@@ -480,7 +491,7 @@
 </div>
 
 <footer>
-    <p>EventCalc Pro v7 — Sistema Profissional de Orçamento para Eventos</p>
+    <p>EventCalc — Sistema Profissional de Orçamento para Eventos</p>
 </footer>
 
 <script>
@@ -612,7 +623,7 @@
 
             // Equipamentos
             if (q.equipamentos) {
-                ['churrasqueira','forno','parrilla','smoker'].forEach(id => {
+                ['churrasqueira','forno','parrilla','smoker','varal','fogoChao'].forEach(id => {
                     document.getElementById(id).checked = q.equipamentos[id] || false;
                 });
             }
@@ -680,7 +691,9 @@
             churrasqueira: document.getElementById('churrasqueira').checked,
             forno:         document.getElementById('forno').checked,
             parrilla:      document.getElementById('parrilla').checked,
-            smoker:        document.getElementById('smoker').checked
+            smoker:        document.getElementById('smoker').checked,
+            varal:         document.getElementById('varal').checked,
+            fogoChao:      document.getElementById('fogoChao').checked
         };
 
         const volumes = {
