@@ -1,0 +1,79 @@
+# ═══════════════════════════════════════════════════════════════════
+# EventCalc — Configuração do Netlify
+# Site estático servido da raiz do repositório.
+# ═══════════════════════════════════════════════════════════════════
+
+[build]
+  # Publica direto da raiz (todos os HTML/CSS/JS estão lá)
+  publish = "."
+  # Não precisa de build — site é HTML puro
+  command = "echo 'Site estatico - nenhum build necessario'"
+
+[build.environment]
+  # Node 20 — versão LTS atual, compatível com nossas dependências
+  NODE_VERSION = "20"
+  # Flags otimizadas para instalação rápida
+  NPM_FLAGS = "--prefer-offline --no-audit --no-fund"
+
+# ═══════════════════════════════════════════════════════════════════
+# 🔒 PAINÉIS ADMIN — bloquear acesso público (404 em produção)
+# ═══════════════════════════════════════════════════════════════════
+[[redirects]]
+  from = "/gerenciador-licencas*"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/gerenciador-codigos-pix*"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/admin-setup*"
+  to = "/404.html"
+  status = 404
+  force = true
+
+# ═══════════════════════════════════════════════════════════════════
+# 🌐 ROTA RAIZ — landing
+# ═══════════════════════════════════════════════════════════════════
+[[redirects]]
+  from = "/"
+  to = "/index_v7.html"
+  status = 200
+
+# ═══════════════════════════════════════════════════════════════════
+# 🛡️ HEADERS DE SEGURANÇA
+# ═══════════════════════════════════════════════════════════════════
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "SAMEORIGIN"
+    X-Content-Type-Options = "nosniff"
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
+
+# Cache de imagens
+[[headers]]
+  for = "*.jpeg"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "*.jpg"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "*.png"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# HTML sem cache forte
+[[headers]]
+  for = "/*.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
