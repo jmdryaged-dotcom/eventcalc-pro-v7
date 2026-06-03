@@ -22,9 +22,8 @@
 (function() {
     'use strict';
 
-    // ⚠️ SUBSTITUA pelo seu Measurement ID do GA4 (formato G-XXXXXXXXXX)
-    // Quando estiver vazio ou for placeholder, o analytics fica desabilitado
-    const GA_MEASUREMENT_ID = 'G-XXXXXXXXXX';
+    // Measurement ID do GA4 — Club Carnivorista / EventCalc
+    const GA_MEASUREMENT_ID = 'G-SSC5V8L9XV';
 
     // Verificação: não carregar se não foi configurado
     if (!GA_MEASUREMENT_ID || GA_MEASUREMENT_ID === 'G-XXXXXXXXXX') {
