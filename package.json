@@ -1,7 +1,7 @@
 {
-  "name": "eventcalc-pro-v7-backend",
+  "name": "eventcalc-backend",
   "version": "1.0.0",
-  "description": "Backend para enviar emails com PDF do EventCalc Pro v7",
+  "description": "Backend para enviar emails com PDF do EventCalc",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

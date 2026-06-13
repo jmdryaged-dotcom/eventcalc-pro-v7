@@ -91,7 +91,7 @@ function gerarTutorialPDF() {
     doc.setFont('Playfair Display', 'bold');
     doc.setFontSize(36);
     doc.setTextColor(...corOuro);
-    doc.text('EventCalc Pro v7', 105, posY, { align: 'center' });
+    doc.text('EventCalc', 105, posY, { align: 'center' });
 
     posY += 15;
     doc.setFont('Lora', 'normal');
@@ -120,7 +120,7 @@ function gerarTutorialPDF() {
     doc.addPage();
     novaPagemComFundo();
 
-    adicionarTitulo('Por Que Usar EventCalc Pro v7?');
+    adicionarTitulo('Por Que Usar EventCalc?');
 
     adicionarTexto('Você gasta HORAS calculando orçamentos na mão, em planilhas confusas ou em cadernos? Esse tempo pode custar você CLIENTES!', 11, corBranco);
 
@@ -456,7 +456,7 @@ function gerarTutorialPDF() {
     doc.setFont('Lora', 'normal');
     doc.setFontSize(12);
     doc.setTextColor(...corBranco);
-    doc.text('Você aprendeu TUDO sobre EventCalc Pro v7.', 105, posY, { align: 'center' });
+    doc.text('Você aprendeu TUDO sobre EventCalc.', 105, posY, { align: 'center' });
 
     posY += 7;
     doc.setFontSize(11);
@@ -481,5 +481,5 @@ function gerarTutorialPDF() {
     doc.text('Próximo passo: Abra EventCalc e crie seu primeiro orçamento!', 105, posY, { align: 'center' });
 
     // ── DOWNLOAD ──
-    doc.save('EventCalc-Pro-v7-Tutorial-Gratuito.pdf');
+    doc.save('EventCalc-Tutorial-Gratuito.pdf');
 }

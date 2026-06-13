@@ -52,7 +52,7 @@ server.listen(PORT, () => {
     console.log(`
 ╔═══════════════════════════════════════════════════════════╗
 ║                                                           ║
-║  🚀 EventCalc Pro v7 - Servidor Local Iniciado!          ║
+║  🚀 EventCalc - Servidor Local Iniciado!          ║
 ║                                                           ║
 ║  📍 Acesse: http://localhost:3000                         ║
 ║                                                           ║

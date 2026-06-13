@@ -37,7 +37,7 @@ exports.handler = async (event) => {
         if (pdfBase64) {
             attachments.push({
                 content: pdfBase64.split(',')[1] || pdfBase64, // Remove "data:application/pdf;base64," se existir
-                filename: 'EventCalc-Pro-v7-Tutorial-Gratuito.pdf',
+                filename: 'EventCalc-Tutorial-Gratuito.pdf',
                 type: 'application/pdf',
                 disposition: 'attachment'
             });
@@ -60,7 +60,7 @@ exports.handler = async (event) => {
                     </div>
 
                     <p style="font-size: 0.95rem; color: #d4af37;">
-                        <strong>⭐ Este lead recebeu o Tutorial PDF por email. Ele está interessado em conhecer EventCalc Pro v7!</strong>
+                        <strong>⭐ Este lead recebeu o Tutorial PDF por email. Ele está interessado em conhecer EventCalc!</strong>
                     </p>
 
                     <p>
@@ -69,7 +69,7 @@ exports.handler = async (event) => {
                     </p>
 
                     <p style="color: #999; font-size: 0.9rem; margin-top: 20px;">
-                        EventCalc Pro v7 | Sistema Profissional de Orçamento
+                        EventCalc | Sistema Profissional de Orçamento
                     </p>
                 </div>
             `
@@ -79,12 +79,12 @@ exports.handler = async (event) => {
         const emailLead = await sgMail.send({
             to: email,
             from: process.env.SENDGRID_FROM_EMAIL || 'noreply@eventcalcpro.com',
-            subject: '📚 Seu Tutorial EventCalc Pro v7 Gratuito!',
+            subject: '📚 Seu Tutorial EventCalc Gratuito!',
             html: `
                 <div style="font-family: Arial, sans-serif; background: #0a0a0a; color: #fff; padding: 20px; border-radius: 8px;">
                     <h2 style="color: #d4af37;">Oi ${nome.split(' ')[0]}! 🎉</h2>
 
-                    <p>Obrigado por se interessar no <strong>EventCalc Pro v7</strong>!</p>
+                    <p>Obrigado por se interessar no <strong>EventCalc</strong>!</p>
 
                     <p style="font-size: 1.05rem; color: #d4af37;"><strong>📚 Seu Tutorial PDF está anexado neste email!</strong></p>
 
@@ -111,7 +111,7 @@ exports.handler = async (event) => {
                         <p style="color: #999; font-size: 0.9rem; margin: 0;">
                             <strong>Juliomar Meskiu</strong><br>
                             Médico Veterinário • Mestre Churrasqueiro<br>
-                            EventCalc Pro v7<br>
+                            EventCalc<br>
                             Itapema, SC
                         </p>
                     </div>

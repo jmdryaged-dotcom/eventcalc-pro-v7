@@ -40,13 +40,13 @@ exports.handler = async (event) => {
         let mensagem = '';
         switch(tipo) {
             case 'welcome':
-                mensagem = `Oi ${nome.split(' ')[0]}! 🎉\n\n📚 *Tutorial PDF enviado para seu email!*\n\nVocê solicitou nosso tutorial gratuito do EventCalc Pro v7. Já enviei um PDF completo com:\n✅ Como usar a calculadora\n✅ Quanto você economiza em TEMPO\n✅ Como AUMENTAR seu lucro\n✅ Exemplos práticos e dicas\n\n💡 *Próximo passo:*\nLeia o tutorial e entre em contato para uma proposta personalizada!\n\n📞 Dúvidas? Estou aqui!\n\nJuliomar 🏆\nMestre Churrasqueiro • EventCalc Pro v7`;
+                mensagem = `Oi ${nome.split(' ')[0]}! 🎉\n\n📚 *Tutorial PDF enviado para seu email!*\n\nVocê solicitou nosso tutorial gratuito do EventCalc. Já enviei um PDF completo com:\n✅ Como usar a calculadora\n✅ Quanto você economiza em TEMPO\n✅ Como AUMENTAR seu lucro\n✅ Exemplos práticos e dicas\n\n💡 *Próximo passo:*\nLeia o tutorial e entre em contato para uma proposta personalizada!\n\n📞 Dúvidas? Estou aqui!\n\nJuliomar 🏆\nMestre Churrasqueiro • EventCalc`;
                 break;
             case 'followup':
-                mensagem = `Oi ${nome.split(' ')[0]}!\n\nSó passando para confirmar se ainda tem interesse no EventCalc Pro v7.\n\nTemos uma proposta especial esperando por você! 🎯\n\nPosso enviar detalhes?\n\nJuliomar 🏆`;
+                mensagem = `Oi ${nome.split(' ')[0]}!\n\nSó passando para confirmar se ainda tem interesse no EventCalc.\n\nTemos uma proposta especial esperando por você! 🎯\n\nPosso enviar detalhes?\n\nJuliomar 🏆`;
                 break;
             default:
-                mensagem = `Oi ${nome}! 👋\n\nMuito obrigado pelo seu interesse no EventCalc Pro v7!\n\nJuliomar`;
+                mensagem = `Oi ${nome}! 👋\n\nMuito obrigado pelo seu interesse no EventCalc!\n\nJuliomar`;
         }
 
         // Enviar via Twilio

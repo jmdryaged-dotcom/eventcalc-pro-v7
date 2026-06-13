@@ -1,5 +1,5 @@
 /**
- * 🔐 BIBLIOTECA DE CHECKSUM - EventCalc Pro v7
+ * 🔐 BIBLIOTECA DE CHECKSUM - EventCalc
  *
  * Adiciona uma assinatura matemática (checksum) aos códigos de licença.
  * Sem o checksum correto, o código é rejeitado.

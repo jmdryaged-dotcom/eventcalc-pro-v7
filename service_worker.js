@@ -1,6 +1,6 @@
-// Service Worker para EventCalc Pro v7 - Modo Offline
+// Service Worker para EventCalc - Modo Offline
 
-const CACHE_NAME = 'eventcalc-pro-v7-cache-v1';
+const CACHE_NAME = 'eventcalc-cache-v2';
 const urlsParaCache = [
     './',
     './index_v7.html',
@@ -18,7 +18,7 @@ self.addEventListener('install', (event) => {
     event.waitUntil(
         caches.open(CACHE_NAME)
             .then((cache) => {
-                console.log('✅ Cache aberto - EventCalc Pro v7');
+                console.log('✅ Cache aberto - EventCalc');
                 return cache.addAll(urlsParaCache).catch((err) => {
                     console.warn('⚠️ Algumas URLs não foram cacheadas:', err);
                 });

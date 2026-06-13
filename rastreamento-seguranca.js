@@ -1,5 +1,5 @@
 /**
- * 🔐 SISTEMA DE RASTREAMENTO DE SEGURANÇA - EventCalc Pro v7
+ * 🔐 SISTEMA DE RASTREAMENTO DE SEGURANÇA - EventCalc
  *
  * Detecta e avisa sobre compartilhamento de licenças
  * Armazena localmente: IPs, timestamps, emails
