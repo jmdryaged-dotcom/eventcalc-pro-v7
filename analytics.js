@@ -6,10 +6,10 @@
  * 2. Crie uma conta (use jm.dryaged@gmail.com)
  * 3. Crie uma propriedade "EventCalc"
  * 4. Selecione "Web" como plataforma
- * 5. URL: https://cute-parfait-948162.netlify.app
+ * 5. URL: https://eventcalc-pro-v7.pages.dev
  * 6. Copie o "Measurement ID" (formato: G-XXXXXXXXXX)
  * 7. Substitua G-XXXXXXXXXX abaixo pelo seu ID
- * 8. Faça upload da pasta files no Netlify
+ * 8. Faça upload da pasta files no Cloudflare Pages (via git push)
  *
  * QUE EVENTOS SÃO MEDIDOS:
  * - Page view automático (toda visita)

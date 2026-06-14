@@ -65,7 +65,7 @@ exports.handler = async (event) => {
 
                     <p>
                         <a href="https://wa.me/${whatsapp.replace(/\D/g, '')}" style="background: #25d366; color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; display: inline-block; margin-right: 10px; margin-top: 10px;">📱 Responder no WhatsApp</a>
-                        <a href="https://cute-parfait-948162.netlify.app/admin-leads.html" style="background: #d4af37; color: #0a0a0a; padding: 10px 20px; border-radius: 6px; text-decoration: none; display: inline-block; margin-top: 10px;">📊 Ver no Painel</a>
+                        <a href="https://eventcalc-pro-v7.pages.dev/admin-leads.html" style="background: #d4af37; color: #0a0a0a; padding: 10px 20px; border-radius: 6px; text-decoration: none; display: inline-block; margin-top: 10px;">📊 Ver no Painel</a>
                     </p>
 
                     <p style="color: #999; font-size: 0.9rem; margin-top: 20px;">
