@@ -338,16 +338,24 @@
         
         .pricing-cards {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            grid-template-columns: 1fr;
             gap: 40px;
         }
-        
+        @media (min-width: 720px) {
+            .pricing-cards { grid-template-columns: 1fr 1fr; }
+        }
+
         .pricing-card {
             background: var(--dark-card);
             border: 2px solid var(--border-gold);
             border-radius: 12px;
             padding: 40px;
             text-align: center;
+            min-width: 0;
+            box-sizing: border-box;
+        }
+        @media (max-width: 480px) {
+            .pricing-card { padding: 28px 22px; }
         }
         
         .pricing-card.featured {

@@ -127,10 +127,13 @@
         }
         .volumes-section h3 { color: var(--gold); margin-bottom: 5px; font-family: 'Playfair Display'; font-size: 1.15rem; }
         .volumes-section .vol-hint { color: #909090; margin-bottom: 15px; font-size: 0.85rem; }
-        .volume-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(125px, 1fr)); gap: 10px; }
-        .volume-item { padding: 11px; background: rgba(0,0,0,0.2); border-radius: 6px; }
+        .volume-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
+        @media (min-width: 480px) {
+            .volume-grid { grid-template-columns: repeat(auto-fit, minmax(125px, 1fr)); }
+        }
+        .volume-item { padding: 11px; background: rgba(0,0,0,0.2); border-radius: 6px; min-width: 0; }
         .volume-item label { color: #c0c0c0; font-weight: 500; margin-bottom: 5px; font-size: 0.82rem; display: block; }
-        .volume-item input { margin-bottom: 0 !important; }
+        .volume-item input { margin-bottom: 0 !important; width: 100%; box-sizing: border-box; max-width: 100%; }
 
         /* ── BOTÕES ── */
         .buttons { display: flex; gap: 12px; margin-top: 24px; }

@@ -95,17 +95,20 @@
         .custos-grid {
             display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;
         }
+        .custos-grid > * { min-width: 0; }
         @media (max-width: 640px) { .custos-grid { grid-template-columns: 1fr; } }
 
         .custo-campo {
             background: var(--dark-card); border: 1px solid var(--gold-border);
             border-radius: 8px; padding: 14px 16px; margin-bottom: 12px;
+            min-width: 0; box-sizing: border-box;
         }
         .custo-campo label { display: block; color: var(--gold); font-size: 0.82rem; font-weight: 600; margin-bottom: 6px; }
-        .custo-campo input {
+        .custo-campo input, .custo-campo select, .custo-campo textarea {
             width: 100%; background: rgba(255,255,255,0.05);
             border: 1px solid rgba(212,175,55,0.15); color: white;
             padding: 9px 10px; border-radius: 5px; font-family: 'Lora'; font-size: 0.9rem;
+            box-sizing: border-box; max-width: 100%;
         }
         .custo-campo input:focus { outline: none; border-color: var(--gold); background: rgba(212,175,55,0.08); }
         .custo-campo input[readonly] { background: rgba(212,175,55,0.06); color: var(--gold); cursor: not-allowed; }
