@@ -12,3 +12,7 @@
 
 # 🌐 ROTA RAIZ — landing
 /                            /index_v7.html  200
+
+# 🔁 Suportar URLs com .html (Cloudflare Pages serve sem extensão por padrão)
+# Rewrite (status 200) preserva a URL no navegador e serve o conteúdo do arquivo.
+/*.html                      /:splat  200
