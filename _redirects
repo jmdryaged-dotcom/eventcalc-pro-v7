@@ -1,0 +1,14 @@
+# ════════════════════════════════════════════════════════════
+# Redirects — Cloudflare Pages
+# Equivalente ao bloco [[redirects]] do netlify.toml antigo
+# Ordem importa: primeira regra que casa, vence.
+# ════════════════════════════════════════════════════════════
+
+# 🔒 PAINÉIS ADMIN — 404 em produção (bloquear acesso público)
+/gerenciador-licencas*       /404.html  404
+/gerenciador-codigos-pix*    /404.html  404
+/admin-setup*                /404.html  404
+/admin-leads*                /404.html  404
+
+# 🌐 ROTA RAIZ — landing
+/                            /index_v7.html  200

@@ -1,0 +1,25 @@
+# ════════════════════════════════════════════════════════════
+# Headers de segurança — Cloudflare Pages
+# Equivalente ao bloco [[headers]] do netlify.toml antigo
+# ════════════════════════════════════════════════════════════
+
+/*
+  X-Frame-Options: SAMEORIGIN
+  X-Content-Type-Options: nosniff
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+
+# Cache forte pra imagens (1 ano, imutáveis)
+*.jpeg
+  Cache-Control: public, max-age=31536000, immutable
+
+*.jpg
+  Cache-Control: public, max-age=31536000, immutable
+
+*.png
+  Cache-Control: public, max-age=31536000, immutable
+
+# HTML sem cache forte (revalida sempre)
+/*.html
+  Cache-Control: public, max-age=0, must-revalidate
