@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EventCalc — Orçamento de eventos profissional em minutos</title>
-    <meta name="description" content="A calculadora profissional para churrasqueiros e empresas de eventos. Crie orçamentos completos em 5 minutos com PDF pronto para o cliente.">
-    <meta property="og:title" content="EventCalc — Orçamento de eventos em minutos">
-    <meta property="og:description" content="Pare de calcular no caderno. EventCalc faz seu orçamento profissional em 5 minutos.">
+    <title>EventCalc — Orçamentos de Churrasco em Minutos</title>
+    <meta name="description" content="A calculadora profissional para pitmasters, churrasqueiros e empresas de eventos. Orçamento completo de churrasco em 5 minutos com PDF pronto para o cliente.">
+    <meta property="og:title" content="EventCalc — Orçamentos de Churrasco em Minutos">
+    <meta property="og:description" content="Pare de calcular no caderno. EventCalc faz seu orçamento profissional de churrasco em 5 minutos.">
     <meta property="og:type" content="website">
 
     <!-- 🔐 Configuração de Ambiente (Frontend) -->
@@ -28,6 +28,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js"></script>
     <link rel="stylesheet" href="theme.css">
+    <link rel="stylesheet" href="mobile-fixes.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
@@ -363,35 +364,68 @@
             color: #909090;
         }
         
-        /* ── MODO EDIÇÃO ── */
+        /* ── MODO EDIÇÃO (pílula chamativa) ── */
         .edit-mode-btn {
             position: fixed;
-            bottom: 30px;
-            right: 30px;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--red-primary), var(--red-dark));
-            color: white;
-            border: none;
-            cursor: pointer;
-            font-size: 1.5rem;
-            display: flex;
+            bottom: 24px;
+            right: 24px;
+            display: inline-flex;
             align-items: center;
-            justify-content: center;
-            box-shadow: 0 8px 24px rgba(196,30,58,0.4);
-            transition: all 0.3s;
+            gap: 10px;
+            padding: 14px 22px;
+            border-radius: 999px;
+            background: rgba(28, 28, 32, 0.92);
+            color: #c9a14b;
+            border: 1.5px solid #c9a14b;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+            transition: transform 0.25s, box-shadow 0.25s;
             z-index: 200;
+            font-family: 'Inter', sans-serif;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
         }
+        .edit-mode-btn .edit-icon { font-size: 18px; line-height: 1; }
+        .edit-mode-btn .edit-label { white-space: nowrap; letter-spacing: 0.01em; }
 
         .edit-mode-btn:hover {
-            transform: scale(1.1);
-            box-shadow: 0 12px 32px rgba(196,30,58,0.6);
+            transform: translateY(-2px) scale(1.03);
+            box-shadow: 0 14px 36px rgba(212,175,55,0.5);
         }
 
-        .edit-mode-btn.active {
-            background: linear-gradient(135deg, var(--gold-light), #b8952a);
+        /* Estado DADOS INCOMPLETOS — chamativo, pulsante, dourado preenchido */
+        .edit-mode-btn.incompleto {
+            background: linear-gradient(135deg, #d4af37, #b8860b);
             color: #0a0a0a;
+            border-color: #d4af37;
+            animation: pulsar-edit 2.2s ease-in-out infinite;
+        }
+        @keyframes pulsar-edit {
+            0%, 100% { box-shadow: 0 8px 24px rgba(212,175,55,0.45); transform: scale(1); }
+            50%      { box-shadow: 0 14px 40px rgba(212,175,55,0.95); transform: scale(1.06); }
+        }
+
+        /* Estado DADOS COMPLETOS — discreto, outline dourado */
+        .edit-mode-btn.completo {
+            background: rgba(28, 28, 32, 0.85);
+            color: #c9a14b;
+            animation: none;
+        }
+
+        /* Estado ATIVO (painel aberto) */
+        .edit-mode-btn.active {
+            background: #c9a14b;
+            color: #0a0a0a;
+            border-color: #c9a14b;
+            animation: none;
+        }
+
+        /* Mobile: encolhe pra não ocupar tela toda */
+        @media (max-width: 480px) {
+            .edit-mode-btn { padding: 12px 16px; font-size: 13px; bottom: 16px; right: 16px; }
+            .edit-mode-btn .edit-label { max-width: 180px; overflow: hidden; text-overflow: ellipsis; }
         }
 
         .edit-panel {
@@ -1011,13 +1045,7 @@
             color: #f5f5f7 !important;
         }
 
-        /* PAINEL EDIÇÃO */
-        .edit-mode-btn {
-            background: #c9a14b !important;
-            color: #0a0a0b !important;
-            box-shadow: 0 8px 24px rgba(201, 161, 75, 0.3) !important;
-            border: none !important;
-        }
+        /* PAINEL EDIÇÃO (override removido — agora gerenciado por .incompleto/.completo/.active) */
         .edit-panel {
             background: #1c1c20 !important;
             border: 1px solid #2a2a30 !important;
@@ -1098,7 +1126,7 @@
     <!-- HERO -->
     <section class="hero">
         <div class="container">
-            <h1>Orçamento de eventos<br>em minutos.</h1>
+            <h1>Orçamentos de Churrasco<br>em minutos.</h1>
             <p class="subtitle">A calculadora que profissionais de churrasco usam todos os dias.</p>
             <p class="description">
                 Do questionário ao PDF: cardápio, volumes, custos e proposta para o cliente final.
@@ -1166,8 +1194,11 @@
         </div>
     </section>
     
-    <!-- BOTÃO EDIÇÃO FLUTUANTE -->
-    <button class="edit-mode-btn" id="editModeBtn" onclick="toggleEditMode()" title="Modo Edição">✏️</button>
+    <!-- BOTÃO EDIÇÃO FLUTUANTE (chamativo quando dados incompletos) -->
+    <button class="edit-mode-btn incompleto" id="editModeBtn" onclick="toggleEditMode()" title="Editar seus dados profissionais">
+        <span class="edit-icon">✏️</span>
+        <span class="edit-label" id="editLabel">Preencha seus dados</span>
+    </button>
 
     <!-- PAINEL DE EDIÇÃO -->
     <div class="edit-panel" id="editPanel">
@@ -1353,7 +1384,79 @@
             </div>
         </div>
     </section>
-    
+
+    <!-- DEPOIMENTOS / PROVA SOCIAL -->
+    <section class="depoimentos-section" id="depoimentos" style="padding: 80px 24px; background: #0a0a0a; border-top: 1px solid #1f1f24;">
+        <div class="container" style="max-width: 1100px; margin: 0 auto;">
+            <h2 class="section-title" style="text-align: center; font-family: 'Playfair Display', serif; font-size: clamp(28px, 4vw, 42px); color: #f5f5f7; margin-bottom: 12px;">O que dizem nossos primeiros usuários</h2>
+            <p style="text-align: center; color: #a1a1a6; font-size: 16px; max-width: 640px; margin: 0 auto 48px;">
+                EventCalc é novo no mercado — você pode ser um dos primeiros profissionais a deixar seu depoimento e ajudar outros pitmasters a crescerem.
+            </p>
+
+            <div class="depoimentos-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; margin-bottom: 40px;">
+
+                <!-- DEPOIMENTO PLACEHOLDER 1 -->
+                <div class="depoimento-card" style="background: #15151a; border: 1px solid #2a2a30; border-radius: 12px; padding: 28px; transition: transform 0.3s, border-color 0.3s;">
+                    <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 18px;">
+                        <div style="width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg, #2a2a30 0%, #1a1a1f 100%); display: flex; align-items: center; justify-content: center; font-size: 26px; border: 2px dashed #3a3a40;">👤</div>
+                        <div>
+                            <p style="color: #f5f5f7; font-weight: 600; margin: 0; font-size: 15px;">Sua vaga está aqui</p>
+                            <p style="color: #6e6e73; font-size: 13px; margin: 2px 0 0;">Pitmaster profissional</p>
+                        </div>
+                    </div>
+                    <p style="color: #d4af37; font-size: 14px; margin-bottom: 12px;">★★★★★</p>
+                    <p style="color: #a1a1a6; font-style: italic; line-height: 1.6; font-size: 14px; margin: 0;">
+                        "Seu depoimento real aparecerá aqui depois que você usar o EventCalc no seu próximo evento."
+                    </p>
+                </div>
+
+                <!-- DEPOIMENTO PLACEHOLDER 2 -->
+                <div class="depoimento-card" style="background: #15151a; border: 1px solid #2a2a30; border-radius: 12px; padding: 28px; transition: transform 0.3s, border-color 0.3s;">
+                    <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 18px;">
+                        <div style="width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg, #2a2a30 0%, #1a1a1f 100%); display: flex; align-items: center; justify-content: center; font-size: 26px; border: 2px dashed #3a3a40;">👤</div>
+                        <div>
+                            <p style="color: #f5f5f7; font-weight: 600; margin: 0; font-size: 15px;">Aguardando primeiro cliente</p>
+                            <p style="color: #6e6e73; font-size: 13px; margin: 2px 0 0;">Churrasqueiro / Buffet</p>
+                        </div>
+                    </div>
+                    <p style="color: #d4af37; font-size: 14px; margin-bottom: 12px;">★★★★★</p>
+                    <p style="color: #a1a1a6; font-style: italic; line-height: 1.6; font-size: 14px; margin: 0;">
+                        "Pode ser você. Compartilhe sua experiência real com o EventCalc e inspire outros profissionais do churrasco."
+                    </p>
+                </div>
+
+                <!-- DEPOIMENTO PLACEHOLDER 3 -->
+                <div class="depoimento-card" style="background: #15151a; border: 1px solid #2a2a30; border-radius: 12px; padding: 28px; transition: transform 0.3s, border-color 0.3s;">
+                    <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 18px;">
+                        <div style="width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg, #2a2a30 0%, #1a1a1f 100%); display: flex; align-items: center; justify-content: center; font-size: 26px; border: 2px dashed #3a3a40;">👤</div>
+                        <div>
+                            <p style="color: #f5f5f7; font-weight: 600; margin: 0; font-size: 15px;">Reservado para você</p>
+                            <p style="color: #6e6e73; font-size: 13px; margin: 2px 0 0;">Empresa de eventos</p>
+                        </div>
+                    </div>
+                    <p style="color: #d4af37; font-size: 14px; margin-bottom: 12px;">★★★★★</p>
+                    <p style="color: #a1a1a6; font-style: italic; line-height: 1.6; font-size: 14px; margin: 0;">
+                        "Como nova plataforma, valorizamos cada depoimento honesto. Use o EventCalc e nos conte como foi."
+                    </p>
+                </div>
+
+            </div>
+
+            <!-- CTA DEPOIMENTO -->
+            <div style="text-align: center; padding: 32px 24px; background: linear-gradient(135deg, #15151a 0%, #1a1a20 100%); border: 1px solid #d4af37; border-radius: 12px; max-width: 720px; margin: 0 auto;">
+                <p style="color: #d4af37; font-size: 18px; font-weight: 600; margin: 0 0 8px;">📣 Já usou o EventCalc?</p>
+                <p style="color: #a1a1a6; font-size: 14px; margin: 0 0 20px;">
+                    Conte sua experiência e ajude outros profissionais. Os primeiros depoimentos ganham destaque permanente nesta página.
+                </p>
+                <a href="https://wa.me/5547996681010?text=Olá!%20Quero%20enviar%20meu%20depoimento%20sobre%20o%20EventCalc"
+                   target="_blank" rel="noopener"
+                   style="display: inline-block; background: #d4af37; color: #0a0a0a; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 15px;">
+                    Enviar meu depoimento pelo WhatsApp →
+                </a>
+            </div>
+        </div>
+    </section>
+
     <!-- PRICING -->
     <section class="pricing" id="precos">
         <div class="container">
@@ -1484,6 +1587,9 @@
 
         // ── RENDERIZAR DADOS NA PÁGINA ──
         function renderizarDados() {
+            // Atualiza o botão flutuante (pulsante se incompleto)
+            atualizarBotaoEdicao();
+
             // ⚠️ Aviso se dados estão vazios
             const avisoVazio = document.getElementById('avisoPreenchimento');
             if (!dadosProfissional.nome || !dadosProfissional.email) {
@@ -1548,7 +1654,11 @@
             if (btn.classList.contains('active')) {
                 btn.classList.remove('active');
                 panel.classList.remove('show');
+                // Restaura o estado pulsante/discreto de acordo com os dados
+                atualizarBotaoEdicao();
             } else {
+                // Remove os outros estados enquanto o painel está aberto
+                btn.classList.remove('incompleto', 'completo');
                 btn.classList.add('active');
                 panel.classList.add('show');
                 carregarCamposEdicao();
@@ -1714,6 +1824,31 @@
             return regex.test(email);
         }
 
+        // ── ATUALIZA O BOTÃO FLUTUANTE DE EDIÇÃO ──
+        // Pulsa dourado quando dados essenciais estão faltando (chama atenção do assador
+        // ANTES dele chegar na proposta e descobrir que o nome/contato está vazio).
+        function atualizarBotaoEdicao() {
+            const btn = document.getElementById('editModeBtn');
+            const label = document.getElementById('editLabel');
+            if (!btn || !label) return;
+            // Não mexer no estado se o painel estiver aberto (mantém .active)
+            if (btn.classList.contains('active')) return;
+
+            const completo = !!(dadosProfissional?.nome && dadosProfissional?.profissao &&
+                                dadosProfissional?.whatsapp && dadosProfissional?.email);
+
+            btn.classList.remove('incompleto', 'completo');
+            if (completo) {
+                btn.classList.add('completo');
+                label.textContent = 'Editar meus dados';
+                btn.setAttribute('title', 'Editar dados do profissional');
+            } else {
+                btn.classList.add('incompleto');
+                label.textContent = '⚠ Preencha seus dados';
+                btn.setAttribute('title', 'Preencha seus dados — necessário para gerar a proposta ao cliente');
+            }
+        }
+
         function salvarEdicoes() {
             // Validações
             const nome = document.getElementById('editNome').value.trim();
@@ -1777,7 +1912,18 @@
         }
 
         // ── CARREGAR DADOS AO INICIAR ──
-        window.addEventListener('load', carregarDados);
+        window.addEventListener('load', () => {
+            carregarDados();
+            // Se veio da Proposta com #editar, abre o painel de edição automaticamente
+            // e rola pra seção do profissional
+            if (window.location.hash === '#editar') {
+                setTimeout(() => {
+                    const sec = document.getElementById('profissional');
+                    if (sec) sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    toggleEditMode();
+                }, 400);
+            }
+        });
 
         // ── GERENCIADOR DE MODAL DE LEADS ──
         function abrirModalLeads() {

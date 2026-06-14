@@ -1,6 +1,6 @@
 # EventCalc Pro v7
 
-Calculadora web de orçamento para eventos (churrascarias/catering). Projeto pessoal/profissional do Juliomar (Vet/Pitmaster, Itapema/SC).
+EventCalc — Orçamentos de Churrasco em Minutos. Calculadora web profissional para pitmasters/churrasqueiros/empresas de eventos. Projeto profissional do Juliomar (Vet/Pitmaster, Itapema/SC).
 
 ## Stack
 - HTML5 + CSS3 + Vanilla JS (sem framework, sem build)

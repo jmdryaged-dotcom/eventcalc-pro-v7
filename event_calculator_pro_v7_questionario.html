@@ -9,6 +9,7 @@
     <script src="lgpd-modal.js"></script>
     <script src="analytics.js"></script>
     <link rel="stylesheet" href="theme-override.css">
+    <link rel="stylesheet" href="mobile-fixes.css">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Lora:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -217,7 +218,7 @@
 
     <div class="header">
         <h1>EventCalc</h1>
-        <p>Sistema Profissional de Orçamento para Eventos</p>
+        <p>Orçamentos de Churrasco em Minutos</p>
     </div>
 
     <!-- BARRA DE PROGRESSO -->
@@ -491,7 +492,7 @@
 </div>
 
 <footer>
-    <p>EventCalc — Sistema Profissional de Orçamento para Eventos</p>
+    <p>EventCalc — Orçamentos de Churrasco em Minutos</p>
 </footer>
 
 <script>
@@ -861,7 +862,7 @@
             <div class="historico-item">
                 <div class="historico-info">
                     <div class="historico-nome">${escHtml(item.nome)}</div>
-                    <div class="historico-data">${item.numeroProposta} • ${item.local} • ${item.timestamp}</div>
+                    <div class="historico-data">${escHtml(item.numeroProposta)} • ${escHtml(item.local)} • ${escHtml(item.timestamp)}</div>
                 </div>
                 <div class="historico-btns">
                     <button class="btn-hist-carregar" onclick="carregarDoHistorico(${item.id})">Carregar</button>

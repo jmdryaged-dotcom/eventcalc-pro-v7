@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Desbloquear Acesso - EventCalc</title>
     <link rel="stylesheet" href="theme-override.css">
+    <link rel="stylesheet" href="mobile-fixes.css">
+    <script src="lgpd-modal.js"></script>
     <script src="rastreamento-seguranca.js"></script>
     <script src="licenca-checksum.js"></script>
     <style>
@@ -337,14 +339,23 @@
                 <a href="index_v7.html#precos" class="btn-ativar" style="display: inline-block; text-decoration: none;">Ver Planos</a>
             </div>
 
-            <!-- CÓDIGOS DE TESTE (só local) -->
-            <div class="info-caixa" style="margin-top: 30px; background: rgba(76,175,80,0.1); border-left-color: #4caf50;">
+            <!-- CÓDIGOS DE TESTE (só local) — Esconde via JS em produção -->
+            <div class="info-caixa" id="boxTesteLocal" style="display:none; margin-top: 30px; background: rgba(76,175,80,0.1); border-left-color: #4caf50;">
                 <h4 style="color: #4caf50;">🧪 Códigos de Teste (ambiente local)</h4>
                 <p>
                     <strong>EVENTCALC-MENSAL-2026-TEST001</strong> (30 dias de teste)<br>
                     <strong>EVENTCALC-ANUAL-2026-TEST002</strong> (365 dias de teste)
                 </p>
             </div>
+            <script>
+                (function(){
+                    var h = window.location.hostname;
+                    if (h === 'localhost' || h === '127.0.0.1' || h === '') {
+                        var b = document.getElementById('boxTesteLocal');
+                        if (b) b.style.display = 'block';
+                    }
+                })();
+            </script>
 
             <!-- INFO ADICIONAL -->
             <div class="info-caixa">

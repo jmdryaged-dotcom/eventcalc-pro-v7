@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biblioteca de Cardápios Especiais — EventCalc</title>
+    <meta name="description" content="Sugestões testadas de cardápios para celíacos, veganos, vegetarianos e intolerantes à lactose — todos compatíveis com churrasco.">
+
+    <script>
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            window.BACKEND_URL = 'http://localhost:3001';
+        } else {
+            window.BACKEND_URL = 'https://eventcalc-pro-v7.onrender.com';
+        }
+    </script>
+
+    <link rel="stylesheet" href="theme.css">
+    <link rel="stylesheet" href="mobile-fixes.css">
+    <script src="lgpd-modal.js"></script>
+
+    <style>
+        :root {
+            --bg: #0a0a0a;
+            --bg-card: #15151a;
+            --border: #2a2a30;
+            --gold: #d4af37;
+            --gold-soft: rgba(212,175,55,0.18);
+            --text: #f5f5f7;
+            --text-dim: #a1a1a6;
+            --text-muted: #6e6e73;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Lora', 'Inter', Georgia, serif;
+            font-size: 15px;
+            line-height: 1.55;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .biblio-header {
+            background: linear-gradient(180deg, #0a0a0a 0%, #0e0e12 100%);
+            border-bottom: 1px solid var(--border);
+            padding: 24px 18px 28px;
+            text-align: center;
+        }
+        .biblio-header a.voltar {
+            display: inline-block;
+            color: var(--text-dim);
+            text-decoration: none;
+            font-size: 13px;
+            margin-bottom: 14px;
+            transition: color 0.2s;
+        }
+        .biblio-header a.voltar:hover { color: var(--gold); }
+        .biblio-header h1 {
+            font-family: 'Playfair Display', Georgia, serif;
+            color: var(--gold);
+            font-size: clamp(24px, 6vw, 34px);
+            margin: 0 0 6px;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+        }
+        .biblio-header p {
+            color: var(--text-dim);
+            font-size: 14px;
+            margin: 0;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .biblio-container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 20px 16px 60px;
+        }
+
+        /* TABS */
+        .biblio-tabs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 22px;
+            position: sticky;
+            top: 0;
+            background: var(--bg);
+            padding: 8px 0;
+            z-index: 5;
+        }
+        .biblio-tab {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text-dim);
+            padding: 13px 10px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            font-family: inherit;
+            transition: all 0.22s;
+            text-align: center;
+        }
+        .biblio-tab:hover { color: var(--text); border-color: var(--gold-soft); }
+        .biblio-tab.active {
+            background: linear-gradient(135deg, var(--gold), #b8860b);
+            color: #0a0a0a;
+            border-color: var(--gold);
+        }
+        .biblio-tab:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+        @media (min-width: 640px) {
+            .biblio-tabs { grid-template-columns: repeat(4, 1fr); gap: 10px; }
+            .biblio-tab { font-size: 14px; padding: 14px 16px; }
+        }
+
+        /* ALERTA (celíaco) */
+        .biblio-alerta {
+            background: linear-gradient(135deg, rgba(212,175,55,0.08), rgba(212,175,55,0.03));
+            border: 1px solid var(--gold-soft);
+            border-left: 4px solid var(--gold);
+            border-radius: 10px;
+            padding: 18px 18px 14px;
+            margin-bottom: 22px;
+        }
+        .biblio-alerta h3 {
+            color: var(--gold);
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 17px;
+            margin: 0 0 10px;
+        }
+        .biblio-alerta ul {
+            margin: 0;
+            padding-left: 22px;
+            color: #d8d8da;
+            font-size: 13.5px;
+            line-height: 1.7;
+        }
+        .biblio-alerta li { margin-bottom: 4px; }
+        .biblio-alerta li strong { color: var(--gold); font-weight: 600; }
+
+        /* CATEGORIAS */
+        .categoria {
+            margin-bottom: 28px;
+        }
+        .categoria-titulo {
+            color: var(--gold);
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 20px;
+            font-weight: 700;
+            margin: 0 0 12px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .categoria-titulo .emoji-cat { font-size: 22px; }
+        .categoria-itens {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+        @media (min-width: 640px) {
+            .categoria-itens { grid-template-columns: 1fr 1fr; }
+        }
+        @media (min-width: 980px) {
+            .categoria-itens { grid-template-columns: 1fr 1fr 1fr; }
+        }
+
+        .item-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px 16px;
+            cursor: pointer;
+            transition: border-color 0.22s, transform 0.18s;
+            text-align: left;
+            color: inherit;
+            font-family: inherit;
+            font-size: 14px;
+            width: 100%;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+        .item-card:hover,
+        .item-card:focus-visible {
+            border-color: var(--gold);
+            outline: none;
+            transform: translateY(-2px);
+        }
+        .item-card .item-emoji { font-size: 22px; line-height: 1; flex-shrink: 0; }
+        .item-card .item-nome {
+            color: var(--text);
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+        .item-card .item-resumo {
+            color: var(--text-dim);
+            font-size: 12.5px;
+            line-height: 1.45;
+        }
+        .item-card .item-cta {
+            color: var(--gold);
+            font-size: 11.5px;
+            font-weight: 600;
+            margin-top: 6px;
+            display: inline-block;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+        }
+
+        /* MODAL FICHA TÉCNICA */
+        .ficha-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .ficha-overlay.aberta { display: flex; }
+        .ficha-modal {
+            background: var(--bg-card);
+            border: 1px solid var(--gold);
+            border-radius: 14px;
+            max-width: 560px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 26px 22px 22px;
+            font-family: inherit;
+        }
+        .ficha-modal h2 {
+            color: var(--gold);
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 22px;
+            margin: 0 0 4px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .ficha-modal h2 .ficha-emoji { font-size: 26px; }
+        .ficha-resumo {
+            color: var(--text-dim);
+            font-size: 13.5px;
+            margin: 0 0 16px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid var(--border);
+        }
+        .ficha-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 14px;
+            margin-bottom: 18px;
+        }
+        @media (min-width: 480px) {
+            .ficha-grid { grid-template-columns: 1fr 1fr; }
+        }
+        .ficha-block {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 10px 12px;
+        }
+        .ficha-block-label {
+            color: var(--gold);
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            margin: 0 0 4px;
+        }
+        .ficha-block-valor {
+            color: var(--text);
+            font-size: 14px;
+            margin: 0;
+            line-height: 1.4;
+        }
+        .ficha-secao {
+            margin-bottom: 14px;
+        }
+        .ficha-secao h4 {
+            color: var(--gold);
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+            margin: 0 0 6px;
+        }
+        .ficha-secao p {
+            color: #d8d8da;
+            font-size: 14px;
+            margin: 0;
+            line-height: 1.6;
+        }
+        .ficha-fechar {
+            background: var(--gold);
+            color: #0a0a0a;
+            border: none;
+            padding: 12px 22px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            font-family: inherit;
+            width: 100%;
+            margin-top: 6px;
+        }
+        .ficha-fechar:hover { filter: brightness(1.08); }
+
+        /* OVERLAY PREMIUM (não-assinantes) */
+        .premium-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.9);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            z-index: 200;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .premium-overlay.aberto { display: flex; }
+        .premium-card {
+            background: var(--bg-card);
+            border: 1.5px solid var(--gold);
+            border-radius: 16px;
+            max-width: 480px;
+            width: 100%;
+            padding: 36px 28px;
+            text-align: center;
+        }
+        .premium-card .premium-icone { font-size: 52px; margin-bottom: 12px; }
+        .premium-card h2 {
+            color: var(--gold);
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 24px;
+            margin: 0 0 10px;
+        }
+        .premium-card p {
+            color: var(--text-dim);
+            font-size: 14.5px;
+            line-height: 1.6;
+            margin: 0 0 22px;
+        }
+        .premium-card .premium-cta {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--gold), #b8860b);
+            color: #0a0a0a;
+            padding: 14px 28px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 15px;
+            margin-bottom: 10px;
+        }
+        .premium-card .premium-link {
+            display: block;
+            color: var(--text-muted);
+            font-size: 13px;
+            text-decoration: none;
+            margin-top: 10px;
+        }
+        .premium-card .premium-link:hover { color: var(--gold); }
+
+        footer {
+            color: var(--text-muted);
+            text-align: center;
+            padding: 20px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <header class="biblio-header">
+        <a href="event_calculator_pro_v7_cardapio_2b.html" class="voltar">← Voltar ao cardápio especial</a>
+        <h1>📚 Biblioteca de Cardápios Especiais</h1>
+        <p>Sugestões testadas para convidados com restrições — todas compatíveis com churrasco (mesmos equipamentos).</p>
+    </header>
+
+    <div class="biblio-container">
+        <nav class="biblio-tabs" role="tablist" aria-label="Tipo de restrição">
+            <button class="biblio-tab active" data-tipo="celiaco" role="tab" aria-selected="true">🌾 Celíacos</button>
+            <button class="biblio-tab" data-tipo="lactose" role="tab" aria-selected="false">🥛 Lactose</button>
+            <button class="biblio-tab" data-tipo="vegetariano" role="tab" aria-selected="false">🥗 Vegetarianos</button>
+            <button class="biblio-tab" data-tipo="vegano" role="tab" aria-selected="false">🌱 Veganos</button>
+        </nav>
+
+        <main id="painelCardapio" role="tabpanel" aria-live="polite">
+            <!-- Renderizado por JS -->
+        </main>
+    </div>
+
+    <!-- MODAL FICHA TÉCNICA -->
+    <div class="ficha-overlay" id="fichaOverlay" role="dialog" aria-modal="true" aria-labelledby="fichaTitulo">
+        <div class="ficha-modal" id="fichaModal">
+            <!-- preenchido por JS -->
+        </div>
+    </div>
+
+    <!-- BLOQUEIO PREMIUM -->
+    <div class="premium-overlay" id="premiumOverlay" role="dialog" aria-modal="true">
+        <div class="premium-card">
+            <div class="premium-icone">🔒</div>
+            <h2>Conteúdo exclusivo para assinantes</h2>
+            <p>A biblioteca completa com fichas técnicas, gramagens por pessoa e instruções anti-contaminação está disponível apenas para assinantes do EventCalc.</p>
+            <a href="index_v7.html#precos" class="premium-cta">Ver planos de assinatura</a>
+            <a href="acesso-premium.html" class="premium-link">Já tenho um código de licença →</a>
+        </div>
+    </div>
+
+    <footer>EventCalc — Orçamentos de Churrasco em Minutos</footer>
+
+    <script>
+        /* =========================================================
+           DADOS — 4 cardápios especiais, 5 categorias, 5 itens cada
+           Todas as fichas pensadas para churrasco (mesmos equipamentos)
+           ========================================================= */
+        const cardapios = {
+            celiaco: {
+                titulo: 'Cardápio para Celíacos',
+                subtitulo: 'Zero glúten — sem pão de trigo, cerveja escura ou farinha de trigo',
+                alertaContaminacao: true,
+                categorias: {
+                    aperitivo: [
+                        { nome: 'Queijo coalho grelhado', emoji: '🧀', resumo: 'No espeto, na própria grelha. Sem contato com pão.', gramagem: '80g por pessoa', tempo: '8 min', equipamento: 'Espeto longo, grelha alta', preparo: 'Espetar cubos de 3cm, grelhar 2 min de cada lado em fogo alto. Servir quente, sem temperos com farinha.', obs: 'Confirme no rótulo que o queijo coalho não usa amido modificado de trigo.' },
+                        { nome: 'Coração de galinha', emoji: '🐔', resumo: 'Marinado em vinho branco e alho — sem shoyu.', gramagem: '60g por pessoa', tempo: '12 min', equipamento: 'Espeto curto, grelha média', preparo: 'Marinar 2h em vinho branco, alho e ervas. Espetar 6-8 corações por espeto, grelhar virando a cada 3 min.', obs: 'NÃO usar shoyu/molho inglês — contêm glúten. Use sal grosso.' },
+                        { nome: 'Camarão grelhado', emoji: '🦐', resumo: 'No espeto, com manteiga sem trigo.', gramagem: '70g por pessoa', tempo: '6 min', equipamento: 'Espeto de inox, grelha alta', preparo: 'Espetar camarões grandes limpos, pincelar com manteiga clarificada e alho. Grelhar 2 min de cada lado.', obs: 'Verifique se a manteiga não tem aromatizante com glúten.' },
+                        { nome: 'Linguiça artesanal sem trigo', emoji: '🌭', resumo: 'Procure marcas sem farinha de trigo no rótulo.', gramagem: '90g por pessoa', tempo: '20 min', equipamento: 'Grelha, faca dedicada', preparo: 'Grelhar inteira em fogo médio, virando a cada 5 min. Fatiar com FACA EXCLUSIVA pra celíacos.', obs: 'Confirme rótulo. Marcas artesanais geralmente são sem trigo, industrializadas costumam ter.' },
+                        { nome: 'Pão de queijo (mandioca)', emoji: '🧀', resumo: 'Naturalmente sem glúten — feito com polvilho.', gramagem: '60g por pessoa', tempo: '25 min', equipamento: 'Forma, forno ou grelha tampada', preparo: 'Servir quente. Pode assar em forma de alumínio sobre a grelha tampada.', obs: 'Use forma exclusiva ou descartável de alumínio — evita contaminação.' }
+                    ],
+                    proteina: [
+                        { nome: 'Picanha', emoji: '🥩', resumo: 'Naturalmente sem glúten, só sal grosso.', gramagem: '180g por pessoa', tempo: '40 min', equipamento: 'Grelha exclusiva ou tela aluminizada', preparo: 'Salgar com sal grosso 30 min antes. Grelhar gordura pra baixo primeiro até dourar, depois 4 min de cada lado por ponto.', obs: 'A grelha deve estar limpa OU forrada com tela de alumínio nova para evitar resíduo de farofa/pão de outros eventos.' },
+                        { nome: 'Costela bovina', emoji: '🥩', resumo: 'Assada lenta com sal grosso e ervas.', gramagem: '250g por pessoa', tempo: '4 horas', equipamento: 'Grelha alta, papel-alumínio', preparo: 'Salgar e temperar com ervas frescas. Assar em fogo baixo (180°C) por 4h, regando com a própria gordura.', obs: 'NÃO usar caldo industrializado nem farinha pra dourar — só sal e ervas naturais.' },
+                        { nome: 'Frango assado', emoji: '🍗', resumo: 'Marinado em limão, alho e azeite.', gramagem: '200g por pessoa', tempo: '50 min', equipamento: 'Grelha média, espeto rotativo', preparo: 'Marinar peças em limão, alho e azeite por 1h. Assar em fogo médio, virando a cada 10 min.', obs: 'Confira que mostarda e marinada não têm trigo. Mostarda Dijon costuma ser segura.' },
+                        { nome: 'Costela suína', emoji: '🥓', resumo: 'No sal grosso, com pimenta-do-reino.', gramagem: '220g por pessoa', tempo: '2h30', equipamento: 'Grelha alta', preparo: 'Esfregar sal grosso e pimenta. Grelhar lentamente, gordura pra cima nos primeiros 90 min.', obs: 'Não usar molho barbecue industrializado — contém glúten. Faça caseiro com mostarda + mel.' },
+                        { nome: 'Maminha', emoji: '🥩', resumo: 'Corte macio, perfeito pra fatiar.', gramagem: '180g por pessoa', tempo: '35 min', equipamento: 'Grelha alta, tábua dedicada', preparo: 'Sal grosso 20 min antes. Selar em fogo alto 5 min de cada lado, terminar em fogo médio até o ponto desejado.', obs: 'Use tábua de corte EXCLUSIVA — celíaco não pode dividir tábua com pão de alho ou farofa.' }
+                    ],
+                    carboidrato: [
+                        { nome: 'Mandioca cozida', emoji: '🥔', resumo: 'Cozida em panela nova, com sal e manteiga.', gramagem: '150g por pessoa', tempo: '45 min', equipamento: 'Panela exclusiva', preparo: 'Descascar, cortar em pedaços e cozinhar em água com sal até ficar macia. Servir com manteiga clarificada.', obs: 'CUIDADO: panela usada para cozinhar massa contamina. Use panela nova ou bem higienizada.' },
+                        { nome: 'Batata-doce assada', emoji: '🍠', resumo: 'Em casca, sem nada adicionado.', gramagem: '160g por pessoa', tempo: '40 min', equipamento: 'Forno ou grelha tampada', preparo: 'Lavar bem, embrulhar em papel-alumínio individualmente e assar a 200°C até estar macia.', obs: 'Papel-alumínio individual evita contaminação cruzada.' },
+                        { nome: 'Polenta grelhada', emoji: '🌽', resumo: 'De fubá puro de milho.', gramagem: '140g por pessoa', tempo: '30 min', equipamento: 'Panela exclusiva + grelha', preparo: 'Preparar polenta firme, deixar esfriar em forma. Cortar em quadrados e grelhar até dourar dos dois lados.', obs: 'Confira no rótulo que o fubá é puro de milho — alguns têm aveia ou trigo misturado.' },
+                        { nome: 'Arroz branco', emoji: '🍚', resumo: 'Soltinho, com alho dourado.', gramagem: '120g por pessoa', tempo: '25 min', equipamento: 'Panela', preparo: 'Refogar arroz em alho e azeite, adicionar água fervente e sal. Cozinhar tampado 18 min.', obs: 'Naturalmente sem glúten. Cuidado só com a panela.' },
+                        { nome: 'Farofa de mandioca pura', emoji: '🌾', resumo: 'Farinha de mandioca + bacon e cebola.', gramagem: '60g por pessoa', tempo: '15 min', equipamento: 'Frigideira dedicada', preparo: 'Dourar bacon e cebola em manteiga. Adicionar farinha de mandioca aos poucos, mexer até dourar.', obs: 'Use FARINHA DE MANDIOCA pura — nunca farinha de trigo nem panko.' }
+                    ],
+                    salada: [
+                        { nome: 'Verde com vinagrete cítrico', emoji: '🥗', resumo: 'Alface, rúcula, molho de limão e azeite.', gramagem: '80g por pessoa', tempo: '10 min', equipamento: 'Tigela', preparo: 'Higienizar folhas, montar tigela. Molho: azeite, limão, sal e pimenta-do-reino.', obs: 'Evite molhos prontos — frequentemente contêm glúten.' },
+                        { nome: 'Tomate com cebola', emoji: '🍅', resumo: 'Tradicional brasileira, azeite e sal.', gramagem: '70g por pessoa', tempo: '8 min', equipamento: 'Tigela', preparo: 'Cortar tomate em cubos e cebola em meia-lua. Temperar com azeite, vinagre, sal e cheiro-verde.', obs: 'Sempre OK pra celíacos.' },
+                        { nome: 'Vinagrete tradicional', emoji: '🥄', resumo: 'Tomate, cebola, pimentão, vinagre.', gramagem: '60g por pessoa', tempo: '10 min', equipamento: 'Tigela', preparo: 'Picar tudo em cubos pequenos. Misturar com vinagre, azeite, sal e cheiro-verde.', obs: 'Confira que o vinagre é de álcool ou vinho — vinagre de malte tem glúten.' },
+                        { nome: 'Salada de batata sem maionese industrial', emoji: '🥔', resumo: 'Maionese caseira ou azeite.', gramagem: '120g por pessoa', tempo: '30 min', equipamento: 'Panela exclusiva', preparo: 'Cozinhar batatas em cubos. Temperar com maionese caseira (gema, óleo, limão) ou só azeite e ervas.', obs: 'Maionese industrial geralmente é OK, mas confira o rótulo.' },
+                        { nome: 'Tabule de quinoa', emoji: '🌿', resumo: 'Quinoa naturalmente sem glúten.', gramagem: '90g por pessoa', tempo: '40 min', equipamento: 'Panela', preparo: 'Cozinhar quinoa em água com sal. Misturar com hortelã, salsinha, tomate, pepino, suco de limão e azeite.', obs: 'Substituto perfeito do tabule tradicional de trigo (que contém glúten).' }
+                    ],
+                    sobremesa: [
+                        { nome: 'Pavê de chocolate (sem glúten)', emoji: '🍫', resumo: 'Com biscoito sem glúten ou tapioca crocante.', gramagem: '120g por pessoa', tempo: '30 min + 4h geladeira', equipamento: 'Refratário', preparo: 'Camadas alternadas de creme de chocolate e biscoitos sem glúten umedecidos em leite. Geladeira 4h.', obs: 'Existe biscoito tipo champagne sem glúten em mercados especializados.' },
+                        { nome: 'Manjar branco com calda', emoji: '🍮', resumo: 'Tradicional brasileiro, naturalmente sem glúten.', gramagem: '100g por pessoa', tempo: '20 min + 4h', equipamento: 'Forma de anel', preparo: 'Ferver leite com leite condensado e amido de milho. Despejar em forma. Calda de ameixa por cima.', obs: 'Amido de MILHO (Maizena) — confirme no rótulo, nunca amido modificado de trigo.' },
+                        { nome: 'Sagu de vinho', emoji: '🍷', resumo: 'Bolinhas de sagu cozidas em vinho.', gramagem: '110g por pessoa', tempo: '50 min', equipamento: 'Panela', preparo: 'Cozinhar sagu em água até ficar translúcido. Adicionar vinho tinto, açúcar e canela.', obs: 'Sagu é da mandioca — naturalmente sem glúten.' },
+                        { nome: 'Mousse de maracujá', emoji: '🥭', resumo: 'Leite condensado, creme de leite e maracujá.', gramagem: '100g por pessoa', tempo: '15 min + 3h', equipamento: 'Batedeira', preparo: 'Bater todos os ingredientes na batedeira. Levar à geladeira por 3h.', obs: 'Geralmente OK, confira só os rótulos do leite condensado.' },
+                        { nome: 'Pudim de leite', emoji: '🍮', resumo: 'Clássico — leite, ovos, açúcar.', gramagem: '120g por pessoa', tempo: '1h30', equipamento: 'Forma de pudim, panela banho-maria', preparo: 'Caramelizar açúcar na forma. Bater leite condensado, leite e ovos. Assar em banho-maria 1h.', obs: 'Naturalmente sem glúten.' }
+                    ]
+                }
+            },
+            lactose: {
+                titulo: 'Cardápio para Intolerantes à Lactose',
+                subtitulo: 'Sem leite, queijo, manteiga ou derivados — mas com carne à vontade',
+                alertaContaminacao: false,
+                categorias: {
+                    aperitivo: [
+                        { nome: 'Coração de galinha', emoji: '🐔', resumo: 'Marinado em vinho e alho, sem manteiga.', gramagem: '60g por pessoa', tempo: '12 min', equipamento: 'Espeto, grelha média', preparo: 'Marinar em vinho branco, alho e ervas. Espetar e grelhar virando a cada 3 min.', obs: 'Sem laticínios — perfeito para intolerantes.' },
+                        { nome: 'Linguiça artesanal', emoji: '🌭', resumo: 'Confira rótulo — algumas têm soro de leite.', gramagem: '90g por pessoa', tempo: '20 min', equipamento: 'Grelha', preparo: 'Grelhar inteira em fogo médio, fatiar antes de servir.', obs: 'Lactose costuma aparecer em linguiças industrializadas. Prefira artesanal.' },
+                        { nome: 'Camarão grelhado', emoji: '🦐', resumo: 'Com azeite, alho e limão (sem manteiga).', gramagem: '70g por pessoa', tempo: '6 min', equipamento: 'Espeto, grelha alta', preparo: 'Espetar camarões limpos, pincelar com azeite e alho. Grelhar 2 min de cada lado.', obs: 'Substitua manteiga por azeite extra-virgem.' },
+                        { nome: 'Sardela na brasa', emoji: '🐟', resumo: 'Inteira no espeto, sal grosso.', gramagem: '100g por pessoa', tempo: '12 min', equipamento: 'Espeto longo, grelha alta', preparo: 'Limpar sardelas, salgar com sal grosso. Grelhar 5-6 min de cada lado.', obs: 'Sem laticínios na receita tradicional.' },
+                        { nome: 'Bolinho de aipim', emoji: '🥔', resumo: 'Versão sem queijo, recheado com carne seca.', gramagem: '80g por pessoa', tempo: '40 min', equipamento: 'Frigideira, óleo', preparo: 'Massa de aipim cozido e amassado (sem queijo). Recheio de carne seca desfiada. Empanar e fritar.', obs: 'Substitua queijo por carne seca ou frango desfiado.' }
+                    ],
+                    proteina: [
+                        { nome: 'Picanha', emoji: '🥩', resumo: 'Sal grosso e ponto — sem manteiga.', gramagem: '180g por pessoa', tempo: '40 min', equipamento: 'Grelha alta', preparo: 'Salgar com sal grosso. Grelhar gordura pra baixo, depois 4 min de cada lado por ponto.', obs: 'Naturalmente sem lactose.' },
+                        { nome: 'Costela bovina', emoji: '🥩', resumo: 'Assada lenta, regada com gordura própria.', gramagem: '250g por pessoa', tempo: '4 horas', equipamento: 'Grelha alta', preparo: 'Salgar e temperar com ervas. Assar lento, regar com a própria gordura — nunca manteiga.', obs: 'Sem laticínios.' },
+                        { nome: 'Frango assado', emoji: '🍗', resumo: 'Marinado em limão, alho e azeite.', gramagem: '200g por pessoa', tempo: '50 min', equipamento: 'Grelha média', preparo: 'Marinar em limão, alho e azeite. Assar em fogo médio.', obs: 'Sem manteiga nem creme de leite na marinada.' },
+                        { nome: 'Costela suína', emoji: '🥓', resumo: 'No sal grosso ou churrasco com pimenta.', gramagem: '220g por pessoa', tempo: '2h30', equipamento: 'Grelha alta', preparo: 'Esfregar sal grosso e pimenta-do-reino. Grelhar lento.', obs: 'Evite molhos prontos — costumam ter creme de leite.' },
+                        { nome: 'Linguiça (artesanal)', emoji: '🌭', resumo: 'Sempre verifique o rótulo.', gramagem: '120g por pessoa', tempo: '20 min', equipamento: 'Grelha', preparo: 'Grelhar inteira, virar a cada 5 min até dourar.', obs: 'Industrializadas costumam ter soro de leite — prefira artesanal de açougue confiável.' }
+                    ],
+                    carboidrato: [
+                        { nome: 'Mandioca', emoji: '🥔', resumo: 'Cozida com sal — manteiga só se for clarificada (ghee).', gramagem: '150g por pessoa', tempo: '45 min', equipamento: 'Panela', preparo: 'Cozinhar em água com sal. Servir pura ou com ghee (manteiga clarificada — sem lactose).', obs: 'Ghee é manteiga sem lactose, alternativa segura.' },
+                        { nome: 'Batata-doce', emoji: '🍠', resumo: 'Assada em papel-alumínio.', gramagem: '160g por pessoa', tempo: '40 min', equipamento: 'Forno ou grelha tampada', preparo: 'Assar em casca, embrulhada em papel-alumínio. Servir com azeite.', obs: 'Naturalmente sem lactose.' },
+                        { nome: 'Arroz branco', emoji: '🍚', resumo: 'Com alho dourado em azeite.', gramagem: '120g por pessoa', tempo: '25 min', equipamento: 'Panela', preparo: 'Refogar em azeite e alho (sem manteiga). Adicionar água fervente e sal.', obs: 'Substitua manteiga por azeite ou óleo.' },
+                        { nome: 'Farofa sem manteiga', emoji: '🌾', resumo: 'Em óleo ou ghee, com bacon e cebola.', gramagem: '60g por pessoa', tempo: '15 min', equipamento: 'Frigideira', preparo: 'Dourar bacon e cebola em óleo (não manteiga). Adicionar farinha de mandioca e mexer.', obs: 'Ghee funciona perfeitamente como substituto sem lactose.' },
+                        { nome: 'Pão sem manteiga', emoji: '🍞', resumo: 'Pão francês pincelado com azeite e alho.', gramagem: '50g por pessoa', tempo: '10 min', equipamento: 'Forno ou grelha tampada', preparo: 'Cortar pão ao meio, pincelar com azeite + alho amassado. Tostar.', obs: 'Substitua o pão de alho tradicional (com manteiga) por essa versão.' }
+                    ],
+                    salada: [
+                        { nome: 'Verde com vinagrete', emoji: '🥗', resumo: 'Folhas e molho azeite + limão.', gramagem: '80g por pessoa', tempo: '10 min', equipamento: 'Tigela', preparo: 'Higienizar folhas. Molho: azeite, limão, sal e pimenta.', obs: 'Sem queijo nem creme — tudo OK.' },
+                        { nome: 'Tabule', emoji: '🌿', resumo: 'Trigo, hortelã, tomate, pepino.', gramagem: '90g por pessoa', tempo: '40 min', equipamento: 'Tigela', preparo: 'Hidratar trigo. Misturar com hortelã, salsinha, tomate, pepino, limão e azeite.', obs: 'Sem laticínios — perfeito.' },
+                        { nome: 'Salada de batata (sem maionese cremosa)', emoji: '🥔', resumo: 'Maionese caseira ou só azeite.', gramagem: '120g por pessoa', tempo: '30 min', equipamento: 'Panela, tigela', preparo: 'Cozinhar batatas em cubos. Temperar com azeite, mostarda, vinagre e ervas.', obs: 'Algumas maioneses industriais têm soro de leite — confira rótulo ou faça caseira.' },
+                        { nome: 'Tomate com cebola', emoji: '🍅', resumo: 'Brasileiríssima, sem complicação.', gramagem: '70g por pessoa', tempo: '8 min', equipamento: 'Tigela', preparo: 'Tomate em cubos, cebola em meia-lua. Azeite, vinagre, sal e cheiro-verde.', obs: 'Naturalmente sem lactose.' },
+                        { nome: 'Vinagrete tradicional', emoji: '🥄', resumo: 'Tomate, pimentão, cebola, vinagre.', gramagem: '60g por pessoa', tempo: '10 min', equipamento: 'Tigela', preparo: 'Picar tudo bem pequeno. Misturar com vinagre, azeite e cheiro-verde.', obs: 'Clássico sem laticínios.' }
+                    ],
+                    sobremesa: [
+                        { nome: 'Sorbet de frutas', emoji: '🍧', resumo: 'Polpa de fruta congelada batida — zero leite.', gramagem: '100g por pessoa', tempo: '4h congelador', equipamento: 'Liquidificador, freezer', preparo: 'Bater polpa de fruta (manga, maracujá, morango) com açúcar. Congelar 4h. Bater novamente antes de servir.', obs: 'Sorbet é diferente de sorvete — sem leite.' },
+                        { nome: 'Salada de frutas', emoji: '🍓', resumo: 'Frutas frescas, suco de laranja e hortelã.', gramagem: '120g por pessoa', tempo: '15 min', equipamento: 'Tigela', preparo: 'Cortar frutas em cubos. Misturar com suco de laranja e hortelã picada.', obs: 'Zero laticínios.' },
+                        { nome: 'Mousse de chocolate vegano', emoji: '🍫', resumo: 'Com creme vegetal de coco no lugar do leite.', gramagem: '100g por pessoa', tempo: '20 min + 3h', equipamento: 'Batedeira', preparo: 'Derreter chocolate amargo. Misturar com creme de coco batido. Levar à geladeira 3h.', obs: 'Sem leite — usa creme vegetal de coco gelado.' },
+                        { nome: 'Sagu de vinho', emoji: '🍷', resumo: 'Sagu, vinho tinto, açúcar.', gramagem: '110g por pessoa', tempo: '50 min', equipamento: 'Panela', preparo: 'Cozinhar sagu até ficar translúcido. Adicionar vinho tinto, açúcar e canela.', obs: 'Tradicionalmente sem leite.' },
+                        { nome: 'Pudim de tapioca', emoji: '🍮', resumo: 'Leite de coco em vez de leite normal.', gramagem: '110g por pessoa', tempo: '1h + 3h gelar', equipamento: 'Forma, panela', preparo: 'Tapioca granulada hidratada em leite de coco, ovos e açúcar. Assar em banho-maria.', obs: 'Variação sem lactose do pudim tradicional.' }
+                    ]
+                }
+            },
+            vegetariano: {
+                titulo: 'Cardápio Vegetariano',
+                subtitulo: 'Sem carne — mas aceita queijo, ovos e laticínios',
+                alertaContaminacao: false,
+                categorias: {
+                    aperitivo: [
+                        { nome: 'Queijo coalho grelhado', emoji: '🧀', resumo: 'No espeto, fácil e querido.', gramagem: '80g por pessoa', tempo: '8 min', equipamento: 'Espeto, grelha alta', preparo: 'Cubos de 3cm no espeto. Grelhar 2 min de cada lado em fogo alto.', obs: 'Clássico do churrasco brasileiro.' },
+                        { nome: 'Bolinho de queijo', emoji: '🧀', resumo: 'Crocante por fora, derretido por dentro.', gramagem: '70g por pessoa', tempo: '30 min', equipamento: 'Frigideira, óleo', preparo: 'Massa de batata cozida com queijo coalho ralado. Empanar e fritar até dourar.', obs: 'Servir quentinho.' },
+                        { nome: 'Berinjela à milanesa', emoji: '🍆', resumo: 'Fatias empanadas e fritas.', gramagem: '90g por pessoa', tempo: '25 min', equipamento: 'Frigideira', preparo: 'Fatiar berinjela, passar em ovo e farinha de rosca temperada. Fritar até dourar.', obs: 'Pode ser assada em vez de frita.' },
+                        { nome: 'Espetinho de queijo com tomate', emoji: '🍅', resumo: 'Queijo coalho + tomate-cereja.', gramagem: '80g por pessoa', tempo: '8 min', equipamento: 'Espeto, grelha média', preparo: 'Alternar cubos de queijo coalho e tomate-cereja. Grelhar rápido em fogo médio.', obs: 'Visualmente lindo e simples.' },
+                        { nome: 'Bruschetta de gorgonzola', emoji: '🥖', resumo: 'Pão tostado, gorgonzola e mel.', gramagem: '60g por pessoa', tempo: '10 min', equipamento: 'Grelha tampada', preparo: 'Tostar fatias de pão. Adicionar gorgonzola amassado e fio de mel.', obs: 'Combinação adulta, sucesso garantido.' }
+                    ],
+                    proteina: [
+                        { nome: 'Halloumi grelhado', emoji: '🧀', resumo: 'Queijo cipriota que não derrete na grelha.', gramagem: '120g por pessoa', tempo: '8 min', equipamento: 'Grelha alta', preparo: 'Cortar em fatias de 1cm. Grelhar 2 min de cada lado direto na grelha.', obs: 'Substituto perfeito da carne — sustança real.' },
+                        { nome: 'Provoleta', emoji: '🧀', resumo: 'Queijo provolone grelhado com orégano.', gramagem: '100g por pessoa', tempo: '6 min', equipamento: 'Frigideira de ferro pequena', preparo: 'Disco de provolone com orégano e pimenta. Grelhar em frigideira até dourar embaixo.', obs: 'Tradição argentina, sucesso em churrasco.' },
+                        { nome: 'Hambúrguer de feijão preto', emoji: '🍔', resumo: 'Caseiro, com aveia e temperos.', gramagem: '150g por pessoa', tempo: '40 min', equipamento: 'Grelha média', preparo: 'Amassar feijão preto cozido com aveia, cebola, alho, ovo. Formar discos e grelhar 4 min cada lado.', obs: 'Servir em pão com queijo derretido por cima.' },
+                        { nome: 'Lasanha vegetariana', emoji: '🍝', resumo: 'Berinjela, abobrinha, queijo, molho.', gramagem: '200g por pessoa', tempo: '1h', equipamento: 'Forno, refratário', preparo: 'Camadas de massa, molho de tomate, legumes grelhados e queijo. Gratinar 35 min.', obs: 'Opção robusta pra eventos longos.' },
+                        { nome: 'Berinjela à parmegiana', emoji: '🍆', resumo: 'Empanada, com molho e queijo.', gramagem: '180g por pessoa', tempo: '50 min', equipamento: 'Frigideira + forno', preparo: 'Empanar e fritar fatias de berinjela. Montar em refratário com molho de tomate e queijo. Gratinar.', obs: 'Substituto vegetariano da carne à parmegiana.' }
+                    ],
+                    carboidrato: [
+                        { nome: 'Pão de alho', emoji: '🍞', resumo: 'Clássico do churrasco, com manteiga e alho.', gramagem: '50g por pessoa', tempo: '10 min', equipamento: 'Grelha tampada', preparo: 'Pão francês cortado, pincelado com manteiga + alho amassado + salsinha. Tostar até dourar.', obs: 'Item obrigatório.' },
+                        { nome: 'Polenta cremosa', emoji: '🌽', resumo: 'Com queijo gorgonzola ou parmesão.', gramagem: '130g por pessoa', tempo: '30 min', equipamento: 'Panela', preparo: 'Cozinhar fubá em água/caldo de legumes, mexendo sempre. Adicionar queijo no fim.', obs: 'Cremosa funciona melhor que firme nesse cardápio.' },
+                        { nome: 'Arroz com brócolis', emoji: '🥦', resumo: 'Refogado com alho e brócolis.', gramagem: '120g por pessoa', tempo: '25 min', equipamento: 'Panela', preparo: 'Refogar arroz em azeite e alho. Adicionar brócolis picado nos últimos 5 min de cozimento.', obs: 'Cor e sabor pra acompanhar.' },
+                        { nome: 'Mandioca frita', emoji: '🍟', resumo: 'Pré-cozida, frita até dourar.', gramagem: '130g por pessoa', tempo: '40 min', equipamento: 'Panela + frigideira', preparo: 'Cozinhar mandioca al dente. Cortar em palitos e fritar em óleo bem quente.', obs: 'Servir com sal grosso por cima.' },
+                        { nome: 'Batata gratinada', emoji: '🥔', resumo: 'Fatias finas com creme e queijo.', gramagem: '150g por pessoa', tempo: '50 min', equipamento: 'Refratário, forno', preparo: 'Camadas de batata fatiada com creme de leite, queijo ralado, sal e noz-moscada. Assar até dourar.', obs: 'Acompanhamento robusto e saboroso.' }
+                    ],
+                    salada: [
+                        { nome: 'Caprese', emoji: '🍅', resumo: 'Tomate, mozzarella, manjericão.', gramagem: '90g por pessoa', tempo: '10 min', equipamento: 'Travessa', preparo: 'Intercalar fatias de tomate e mozzarella de búfala. Folhas de manjericão. Azeite e sal grosso.', obs: 'Visualmente elegante.' },
+                        { nome: 'Folhas com queijo de cabra', emoji: '🥗', resumo: 'Mix de folhas + queijo de cabra crocante.', gramagem: '90g por pessoa', tempo: '15 min', equipamento: 'Forno + tigela', preparo: 'Empanar bolinhas de queijo de cabra em farinha de rosca, assar 8 min. Servir sobre folhas com molho balsâmico.', obs: 'Toque sofisticado.' },
+                        { nome: 'Salada de macarrão', emoji: '🍝', resumo: 'Penne, mozzarella, tomate-cereja, manjericão.', gramagem: '130g por pessoa', tempo: '30 min', equipamento: 'Panela, tigela', preparo: 'Cozinhar penne al dente. Misturar frio com mozzarella em cubos, tomate-cereja e molho de mostarda.', obs: 'Boa opção pra calor — servida fria.' },
+                        { nome: 'Tabule', emoji: '🌿', resumo: 'Trigo, hortelã, tomate, pepino, limão.', gramagem: '90g por pessoa', tempo: '40 min', equipamento: 'Tigela', preparo: 'Hidratar trigo. Misturar com hortelã, salsinha, tomate, pepino, suco de limão e azeite.', obs: 'Sem laticínios — pode adaptar pra vegano.' },
+                        { nome: 'Vinagrete com queijo', emoji: '🥄', resumo: 'Vinagrete tradicional + cubos de mozzarella.', gramagem: '90g por pessoa', tempo: '12 min', equipamento: 'Tigela', preparo: 'Vinagrete normal. Adicionar mozzarella em cubos pequenos no final.', obs: 'Variação cremosa do vinagrete.' }
+                    ],
+                    sobremesa: [
+                        { nome: 'Pavê', emoji: '🍫', resumo: 'Camadas de creme e biscoito.', gramagem: '120g por pessoa', tempo: '30 min + 4h geladeira', equipamento: 'Refratário', preparo: 'Camadas de biscoito champagne molhado em leite e creme de chocolate. Geladeira 4h.', obs: 'Clássico de festa.' },
+                        { nome: 'Mousse de chocolate', emoji: '🍫', resumo: 'Aerada, com claras em neve.', gramagem: '100g por pessoa', tempo: '20 min + 3h gelar', equipamento: 'Batedeira', preparo: 'Derreter chocolate, misturar com gemas e açúcar. Incorporar claras em neve. Gelar 3h.', obs: 'Textura aerada faz diferença.' },
+                        { nome: 'Pudim de leite', emoji: '🍮', resumo: 'Clássico — leite condensado, leite, ovos.', gramagem: '120g por pessoa', tempo: '1h30', equipamento: 'Forma de pudim, panela banho-maria', preparo: 'Caramelizar açúcar na forma. Bater os 3 ingredientes. Assar em banho-maria 1h.', obs: 'Item esperado em churrasco.' },
+                        { nome: 'Brigadeirão', emoji: '🍫', resumo: 'Brigadeiro em formato pudim.', gramagem: '110g por pessoa', tempo: '1h', equipamento: 'Forma, panela banho-maria', preparo: 'Cozinhar leite condensado, chocolate em pó, manteiga e ovos. Assar em forma untada 40 min.', obs: 'Sucesso garantido.' },
+                        { nome: 'Salada de frutas com sorvete', emoji: '🍦', resumo: 'Frutas frescas + sorvete de creme.', gramagem: '140g por pessoa', tempo: '15 min', equipamento: 'Tigela', preparo: 'Cortar frutas em cubos. Servir com bola de sorvete de creme por cima.', obs: 'Refrescante pra calor.' }
+                    ]
+                }
+            },
+            vegano: {
+                titulo: 'Cardápio Vegano',
+                subtitulo: 'Zero produtos de origem animal — sem carne, ovos ou laticínios',
+                alertaContaminacao: false,
+                categorias: {
+                    aperitivo: [
+                        { nome: 'Espetinho de cogumelos', emoji: '🍄', resumo: 'Marinados em shoyu, alho e gengibre.', gramagem: '70g por pessoa', tempo: '12 min', equipamento: 'Espeto, grelha média', preparo: 'Marinar cogumelos paris ou shimeji por 1h em shoyu, alho, gengibre e azeite. Espetar e grelhar virando.', obs: 'Textura surpreendente, sabor umami.' },
+                        { nome: 'Bruschetta de tomate', emoji: '🍅', resumo: 'Pão tostado, tomate, alho, manjericão.', gramagem: '60g por pessoa', tempo: '15 min', equipamento: 'Grelha tampada', preparo: 'Tostar pão pincelado com azeite. Picar tomate com alho, manjericão, sal e azeite. Montar por cima.', obs: 'Não usar manteiga no pão — só azeite.' },
+                        { nome: 'Pastel assado de palmito', emoji: '🥟', resumo: 'Massa sem ovo nem manteiga.', gramagem: '70g por pessoa', tempo: '40 min', equipamento: 'Forno', preparo: 'Massa de farinha, óleo, água e sal. Recheio de palmito refogado com cebola e tomate. Assar 25 min.', obs: 'Verificar que a massa não tem ovo nem manteiga.' },
+                        { nome: 'Mini-bolinho de quinoa', emoji: '🌾', resumo: 'Crocante por fora, macio dentro.', gramagem: '70g por pessoa', tempo: '35 min', equipamento: 'Forno', preparo: 'Quinoa cozida misturada com cenoura ralada, cebola, alho e farinha de grão-de-bico. Formar bolinhas, assar 20 min.', obs: 'Sem ovo (a farinha de grão-de-bico liga a massa).' },
+                        { nome: 'Chips de batata-doce', emoji: '🍠', resumo: 'Assados com azeite e pimenta-do-reino.', gramagem: '60g por pessoa', tempo: '30 min', equipamento: 'Forno', preparo: 'Fatiar batata-doce bem fina. Pincelar com azeite e temperar. Assar em forno alto 20 min virando na metade.', obs: 'Substitui batata frita clássica.' }
+                    ],
+                    proteina: [
+                        { nome: 'Espetinho de tofu marinado', emoji: '🌱', resumo: 'Tofu firme em molho de soja e gengibre.', gramagem: '140g por pessoa', tempo: '2h marinada + 10 min', equipamento: 'Espeto, grelha média', preparo: 'Cortar tofu firme em cubos. Marinar 2h em shoyu, alho, gengibre e óleo de gergelim. Espetar e grelhar.', obs: 'Drenar bem o tofu antes (peso por cima) — fica mais firme.' },
+                        { nome: 'Hambúrguer de grão-de-bico', emoji: '🍔', resumo: 'Falafel em formato hambúrguer.', gramagem: '150g por pessoa', tempo: '40 min', equipamento: 'Grelha média ou frigideira', preparo: 'Grão-de-bico processado com cebola, alho, salsinha, cominho e farinha de grão-de-bico. Formar discos e grelhar 5 min cada lado.', obs: 'Servir em pão com hummus e folhas.' },
+                        { nome: 'Berinjela à parmegiana vegana', emoji: '🍆', resumo: 'Com queijo vegano à base de castanhas.', gramagem: '180g por pessoa', tempo: '50 min', equipamento: 'Frigideira + forno', preparo: 'Empanar fatias de berinjela em farinha de rosca. Montar com molho de tomate e queijo vegano (castanha-de-caju + levedura nutricional).', obs: 'Queijo vegano pode ser comprado pronto ou feito caseiro.' },
+                        { nome: 'Jaca verde desfiada', emoji: '🌳', resumo: 'Textura idêntica à carne desfiada.', gramagem: '170g por pessoa', tempo: '1h', equipamento: 'Panela', preparo: 'Cozinhar jaca verde em água até ficar macia. Desfiar com garfo. Refogar com molho de tomate, alho, cebola e páprica defumada.', obs: 'Visual e textura impressionantes — convidados perguntam o que é.' },
+                        { nome: 'Cogumelo portobello grelhado', emoji: '🍄', resumo: 'Inteiro, marinado, no churrasco.', gramagem: '140g por pessoa', tempo: '20 min', equipamento: 'Grelha média', preparo: 'Marinar portobellos inteiros (chapéu pra baixo) em azeite, alho, vinagre balsâmico e ervas por 1h. Grelhar 5 min de cada lado.', obs: 'Substituto premium do bife — textura carnuda.' }
+                    ],
+                    carboidrato: [
+                        { nome: 'Mandioca assada', emoji: '🥔', resumo: 'Em casca, com sal grosso.', gramagem: '150g por pessoa', tempo: '50 min', equipamento: 'Forno ou grelha tampada', preparo: 'Lavar bem, embrulhar em papel-alumínio individualmente com sal grosso. Assar 45 min.', obs: 'Sem manteiga — só azeite ou ghee vegano (manteiga vegetal).' },
+                        { nome: 'Pão de alho vegano', emoji: '🍞', resumo: 'Com pasta de azeite + alho + ervas.', gramagem: '50g por pessoa', tempo: '12 min', equipamento: 'Grelha tampada', preparo: 'Pão francês pincelado com azeite, alho amassado e salsinha. Tostar na grelha tampada.', obs: 'Sem manteiga — só azeite.' },
+                        { nome: 'Arroz integral', emoji: '🍚', resumo: 'Refogado em azeite e alho.', gramagem: '120g por pessoa', tempo: '40 min', equipamento: 'Panela', preparo: 'Refogar arroz integral em azeite e alho. Adicionar água quente e sal. Cozinhar 35 min tampado.', obs: 'Mais nutritivo que arroz branco.' },
+                        { nome: 'Risoto de cogumelos sem queijo', emoji: '🍄', resumo: 'Cremoso, com castanha-de-caju como base.', gramagem: '150g por pessoa', tempo: '40 min', equipamento: 'Panela', preparo: 'Refogar arroz arbóreo. Adicionar caldo de legumes aos poucos, mexendo. Incorporar cogumelos refogados e creme de castanha-de-caju.', obs: 'Castanha-de-caju batida com água substitui parmesão.' },
+                        { nome: 'Batata rústica', emoji: '🥔', resumo: 'Em gomos, assada com ervas e azeite.', gramagem: '140g por pessoa', tempo: '40 min', equipamento: 'Forno', preparo: 'Cortar batatas grandes em 6 gomos cada. Misturar com azeite, alecrim, sal e páprica. Assar a 200°C por 35 min.', obs: 'Sem manteiga — só azeite.' }
+                    ],
+                    salada: [
+                        { nome: 'Tabule', emoji: '🌿', resumo: 'Sem queijo nem laticínios.', gramagem: '90g por pessoa', tempo: '40 min', equipamento: 'Tigela', preparo: 'Hidratar trigo para quibe. Misturar com hortelã, salsinha, tomate, pepino, limão e azeite.', obs: 'Naturalmente vegano.' },
+                        { nome: 'Salada de grão-de-bico', emoji: '🌰', resumo: 'Com cebola roxa, tomate, salsinha.', gramagem: '100g por pessoa', tempo: '15 min', equipamento: 'Tigela', preparo: 'Misturar grão-de-bico cozido (ou em lata) com cebola roxa, tomate, salsinha, limão, azeite e cominho.', obs: 'Rica em proteína.' },
+                        { nome: 'Folhas com manga', emoji: '🥭', resumo: 'Mix de folhas + manga + castanhas.', gramagem: '90g por pessoa', tempo: '12 min', equipamento: 'Tigela', preparo: 'Mix de folhas verdes, manga em cubos, castanhas-de-caju tostadas. Molho de limão e mostarda.', obs: 'Refrescante, doce e crocante.' },
+                        { nome: 'Beterraba assada', emoji: '🍠', resumo: 'Em rodelas, com hortelã e limão.', gramagem: '110g por pessoa', tempo: '50 min', equipamento: 'Forno', preparo: 'Assar beterrabas inteiras em papel-alumínio 45 min. Cortar em rodelas. Temperar com azeite, limão, hortelã e sal.', obs: 'Cor vibrante no prato.' },
+                        { nome: 'Quinoa com legumes', emoji: '🌾', resumo: 'Cozida, com legumes coloridos.', gramagem: '110g por pessoa', tempo: '30 min', equipamento: 'Panela, tigela', preparo: 'Cozinhar quinoa. Misturar com cenoura, pepino, tomate-cereja e cebolinha picada. Molho de limão e azeite.', obs: 'Proteína completa.' }
+                    ],
+                    sobremesa: [
+                        { nome: 'Brigadeiro vegano de coco', emoji: '🥥', resumo: 'Leite de coco no lugar do leite condensado.', gramagem: '90g por pessoa', tempo: '30 min', equipamento: 'Panela', preparo: 'Ferver leite de coco com açúcar mascavo e chocolate vegano em pó até dar ponto. Esfriar, enrolar e cobrir com coco ralado.', obs: 'Cremoso e doce.' },
+                        { nome: 'Mousse de chocolate com aquafaba', emoji: '🍫', resumo: 'Sem ovos — usa água do grão-de-bico.', gramagem: '100g por pessoa', tempo: '25 min + 3h', equipamento: 'Batedeira', preparo: 'Bater aquafaba (água de cozimento de grão-de-bico) até picos firmes. Incorporar chocolate derretido e açúcar. Gelar 3h.', obs: 'Aquafaba substitui clara de ovo — descoberta incrível do veganismo.' },
+                        { nome: 'Salada de frutas com hortelã', emoji: '🍓', resumo: 'Frutas frescas, suco de laranja, hortelã.', gramagem: '120g por pessoa', tempo: '15 min', equipamento: 'Tigela', preparo: 'Cortar frutas variadas. Adicionar suco de laranja natural e hortelã picada.', obs: 'Sempre vegano.' },
+                        { nome: 'Crumble de maçã vegano', emoji: '🍎', resumo: 'Com farelo de aveia e óleo de coco.', gramagem: '110g por pessoa', tempo: '40 min', equipamento: 'Refratário, forno', preparo: 'Maçãs em cubos com canela. Farelo de aveia, açúcar mascavo, óleo de coco. Assar 30 min a 180°C.', obs: 'Servir morno.' },
+                        { nome: 'Picolé de frutas', emoji: '🍦', resumo: 'Polpa de fruta congelada nos palitinhos.', gramagem: '80g por pessoa', tempo: '4h congelador', equipamento: 'Formas de picolé', preparo: 'Bater polpa de fruta com açúcar. Despejar nas formas e congelar 4h.', obs: 'Refrescante e sem laticínios.' }
+                    ]
+                }
+            }
+        };
+
+        const NOMES_CATEGORIAS = {
+            aperitivo: { nome: 'Aperitivos', emoji: '🥂' },
+            proteina: { nome: 'Proteínas', emoji: '🥩' },
+            carboidrato: { nome: 'Carboidratos', emoji: '🥖' },
+            salada: { nome: 'Saladas', emoji: '🥗' },
+            sobremesa: { nome: 'Sobremesas', emoji: '🍮' }
+        };
+
+        const INSTRUCOES_CELIACO = [
+            '<strong>Tábuas e facas EXCLUSIVAS</strong> para o convidado celíaco — marque com fita dourada.',
+            '<strong>Grelha dedicada</strong> OU forre a grelha comum com tela aluminizada NOVA antes de colocar a carne do celíaco.',
+            '<strong>Espátulas e garfos separados</strong> — uma pessoa só mexe na comida do celíaco, sem revezar com farofa/pão.',
+            '<strong>Panelas e frigideiras</strong> que cozinharam massa, cerveja escura ou panko contaminam — use panelas novas ou bem higienizadas.',
+            '<strong>Lave as mãos</strong> depois de manusear pão, farinha, cerveja escura ou farofa — antes de tocar na comida do celíaco.',
+            '<strong>Avise TODA a equipe</strong> sobre o convidado celíaco antes do evento começar.',
+            '<strong>Prepare uma porção-piloto</strong> em recipiente identificado ANTES do convidado pedir — evita correria e contaminação no buffet.',
+            '<strong>Cerveja escura, shoyu industrial e molho inglês contêm glúten</strong> — substitua por cerveja sem glúten certificada e shoyu de arroz.'
+        ];
+
+        /* =========================================================
+           VERIFICAÇÃO DE LICENÇA
+           ========================================================= */
+        function temLicencaAtiva() {
+            try {
+                if (localStorage.getItem('eventcalc_licenca_ativa') !== 'true') return false;
+                const exp = localStorage.getItem('eventcalc_licenca_expiracao');
+                if (!exp) return false;
+                return new Date() <= new Date(exp);
+            } catch(e) { return false; }
+        }
+
+        function bloquearAcessoSeNecessario() {
+            if (!temLicencaAtiva()) {
+                document.getElementById('premiumOverlay').classList.add('aberto');
+                // Esconde scroll do fundo
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        /* =========================================================
+           RENDERIZAÇÃO
+           ========================================================= */
+        let tipoAtual = 'celiaco';
+
+        function renderizarPainel(tipo) {
+            tipoAtual = tipo;
+            const data = cardapios[tipo];
+            const painel = document.getElementById('painelCardapio');
+            let html = '';
+
+            if (data.alertaContaminacao) {
+                html += `
+                <section class="biblio-alerta" aria-labelledby="alerta-titulo">
+                    <h3 id="alerta-titulo">⚠️ Atenção — instruções anti-contaminação cruzada</h3>
+                    <ul>
+                        ${INSTRUCOES_CELIACO.map(i => '<li>' + i + '</li>').join('')}
+                    </ul>
+                </section>`;
+            }
+
+            Object.keys(NOMES_CATEGORIAS).forEach(catKey => {
+                const cat = NOMES_CATEGORIAS[catKey];
+                const itens = data.categorias[catKey] || [];
+                html += `
+                <section class="categoria">
+                    <h2 class="categoria-titulo"><span class="emoji-cat">${cat.emoji}</span> ${cat.nome}</h2>
+                    <div class="categoria-itens">
+                        ${itens.map((item, idx) => `
+                            <button type="button" class="item-card" data-cat="${catKey}" data-idx="${idx}" aria-label="Ver ficha técnica de ${item.nome}">
+                                <span class="item-emoji" aria-hidden="true">${item.emoji}</span>
+                                <span>
+                                    <span class="item-nome">${item.nome}</span>
+                                    <span class="item-resumo">${item.resumo}</span>
+                                    <span class="item-cta">Ver ficha técnica →</span>
+                                </span>
+                            </button>
+                        `).join('')}
+                    </div>
+                </section>`;
+            });
+
+            painel.innerHTML = html;
+            painel.querySelectorAll('.item-card').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const catKey = btn.dataset.cat;
+                    const idx = parseInt(btn.dataset.idx, 10);
+                    abrirFicha(catKey, idx);
+                });
+            });
+        }
+
+        function abrirFicha(catKey, idx) {
+            const item = cardapios[tipoAtual].categorias[catKey][idx];
+            const modal = document.getElementById('fichaModal');
+            modal.innerHTML = `
+                <h2 id="fichaTitulo"><span class="ficha-emoji">${item.emoji}</span> ${item.nome}</h2>
+                <p class="ficha-resumo">${item.resumo}</p>
+
+                <div class="ficha-grid">
+                    <div class="ficha-block">
+                        <p class="ficha-block-label">Gramagem</p>
+                        <p class="ficha-block-valor">${item.gramagem}</p>
+                    </div>
+                    <div class="ficha-block">
+                        <p class="ficha-block-label">Tempo</p>
+                        <p class="ficha-block-valor">${item.tempo}</p>
+                    </div>
+                    <div class="ficha-block" style="grid-column: 1 / -1;">
+                        <p class="ficha-block-label">Equipamento</p>
+                        <p class="ficha-block-valor">${item.equipamento}</p>
+                    </div>
+                </div>
+
+                <div class="ficha-secao">
+                    <h4>Modo de preparo</h4>
+                    <p>${item.preparo}</p>
+                </div>
+
+                <div class="ficha-secao">
+                    <h4>Observações</h4>
+                    <p>${item.obs}</p>
+                </div>
+
+                <button class="ficha-fechar" type="button" onclick="fecharFicha()">Fechar</button>
+            `;
+            document.getElementById('fichaOverlay').classList.add('aberta');
+        }
+
+        function fecharFicha() {
+            document.getElementById('fichaOverlay').classList.remove('aberta');
+        }
+
+        // Fechar modal clicando no fundo
+        document.getElementById('fichaOverlay').addEventListener('click', (e) => {
+            if (e.target.id === 'fichaOverlay') fecharFicha();
+        });
+
+        // ESC fecha modal
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') fecharFicha();
+        });
+
+        /* =========================================================
+           TABS
+           ========================================================= */
+        document.querySelectorAll('.biblio-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.biblio-tab').forEach(t => {
+                    t.classList.remove('active');
+                    t.setAttribute('aria-selected', 'false');
+                });
+                tab.classList.add('active');
+                tab.setAttribute('aria-selected', 'true');
+                renderizarPainel(tab.dataset.tipo);
+                document.getElementById('painelCardapio').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+        });
+
+        /* =========================================================
+           INIT
+           ========================================================= */
+        window.addEventListener('load', () => {
+            renderizarPainel('celiaco');
+            bloquearAcessoSeNecessario();
+        });
+    </script>
+</body>
+</html>
