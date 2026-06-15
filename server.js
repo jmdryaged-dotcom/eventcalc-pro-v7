@@ -3,7 +3,8 @@ const { Resend } = require('resend');
 const cors = require('cors');
 const { jsPDF } = require('jspdf');
 const { gerarTutorialPDF } = require('./tutorial-pdf');
-const webhookHotmart = require('./webhook-hotmart'); // ⭐ NOVO
+const webhookHotmart = require('./webhook-hotmart');
+const aceiteIpca = require('./aceite-ipca-endpoint');// ⭐ NOVO
 require('dotenv').config();
 
 const app = express();
@@ -218,6 +219,11 @@ app.post('/send-tutorial', async (req, res) => {
 // ════════════════════════════════════════════
 
 app.post('/webhook/hotmart', webhookHotmart.makeHandler({ resend }));
+
+app.post('/aceite-ipca',
+    aceiteIpca.rateLimiter,
+    aceiteIpca.makeHandler({ resend })
+);
 
 // ════════════════════════════════════════════
 // ENDPOINT: Health Check
