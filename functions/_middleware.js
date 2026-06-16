@@ -16,5 +16,17 @@ export async function onRequest(context) {
     });
   }
 
-  return context.next();
+  const response = await context.next();
+
+  const newHeaders = new Headers(response.headers);
+  const ct = newHeaders.get('Content-Type') || '';
+  if (ct.includes('text/html')) {
+    newHeaders.set('Cache-Control', 'no-cache, must-revalidate');
+  }
+
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers: newHeaders,
+  });
 }
