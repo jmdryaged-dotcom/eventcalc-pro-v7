@@ -4,8 +4,50 @@ const cors = require('cors');
 const { jsPDF } = require('jspdf');
 const { gerarTutorialPDF } = require('./tutorial-pdf');
 const webhookHotmart = require('./webhook-hotmart');
-const aceiteIpca = require('./aceite-ipca-endpoint');// ⭐ NOVO
+const aceiteIpca = require('./aceite-ipca-endpoint');
 require('dotenv').config();
+
+// ════════════════════════════════════════════
+// SUPABASE — persistir leads
+// ════════════════════════════════════════════
+const SUPABASE_URL = process.env.SUPABASE_URL || '';
+const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || '';
+
+async function salvarLeadNoSupabase(dados) {
+    if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+        console.warn('[leads] Supabase não configurado — lead NÃO persistido');
+        return false;
+    }
+    try {
+        const resp = await fetch(`${SUPABASE_URL}/rest/v1/leads`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'apikey': SUPABASE_ANON_KEY,
+                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                'Prefer': 'return=minimal'
+            },
+            body: JSON.stringify({
+                nome: (dados.nome || '').substring(0, 200),
+                email: (dados.email || '').substring(0, 200),
+                whatsapp: (dados.whatsapp || '').substring(0, 30),
+                ip: dados.ip || null,
+                user_agent: (dados.user_agent || '').substring(0, 500),
+                origem: 'tutorial'
+            })
+        });
+        if (resp.ok) {
+            console.log('[leads] ✅ Lead salvo no Supabase');
+            return true;
+        }
+        const err = await resp.text();
+        console.error('[leads] Supabase erro:', resp.status, err);
+        return false;
+    } catch (e) {
+        console.error('[leads] Supabase falha:', e.message);
+        return false;
+    }
+}
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -195,8 +237,14 @@ app.post('/send-tutorial', async (req, res) => {
 
         console.log(`✅ Email enviado com sucesso ao cliente! ID: ${data.id}`);
 
-        // ── NOTIFICAR ADMIN (em paralelo, sem bloquear resposta) ──
-        // Roda assíncrono. Se falhar, não impacta o cliente.
+        // ── PERSISTIR LEAD NO SUPABASE + NOTIFICAR ADMIN (em paralelo) ──
+        const clientIp = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.ip || '';
+        const clientUa = req.headers['user-agent'] || '';
+
+        salvarLeadNoSupabase({ nome, email, whatsapp, ip: clientIp, user_agent: clientUa }).catch(err => {
+            console.error('⚠️ Falha silenciosa ao salvar lead:', err.message);
+        });
+
         notificarAdminNovoLead(nome, email, whatsapp).catch(err => {
             console.error('⚠️ Falha silenciosa ao notificar admin:', err.message);
         });
