@@ -30,6 +30,50 @@ const crypto = require('crypto');
 const rateLimit = require('express-rate-limit');
 
 /* ============================================================
+   0) SUPABASE CLIENT (persistência jurídica)
+   ============================================================ */
+const SUPABASE_URL = process.env.SUPABASE_URL || '';
+const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || '';
+
+async function salvarNoSupabase(dados) {
+    if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+        console.warn('[aceite-ipca] Supabase não configurado — aceite NÃO persistido no banco');
+        return false;
+    }
+    try {
+        const resp = await fetch(`${SUPABASE_URL}/rest/v1/aceites_ipca`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'apikey': SUPABASE_ANON_KEY,
+                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                'Prefer': 'return=minimal'
+            },
+            body: JSON.stringify({
+                email: dados.email,
+                timestamp_aceite: dados.timestamp,
+                versao_termos: dados.versao_termos,
+                hash_aceite: dados.hash_aceite,
+                ip: dados.ip,
+                user_agent: (dados.user_agent || '').substring(0, 500),
+                idioma: dados.idioma || 'pt-BR',
+                tela: dados.tela || 'n/d'
+            })
+        });
+        if (resp.ok) {
+            console.log('[aceite-ipca] ✅ Salvo no Supabase');
+            return true;
+        }
+        const err = await resp.text();
+        console.error('[aceite-ipca] Supabase erro:', resp.status, err);
+        return false;
+    } catch (e) {
+        console.error('[aceite-ipca] Supabase falha:', e.message);
+        return false;
+    }
+}
+
+/* ============================================================
    1) RATE LIMITER (anti-flood / brute-force)
    ============================================================ */
 const rateLimiter = rateLimit({
@@ -226,6 +270,12 @@ function makeHandler({ resend }) {
                 ua: (user_agent || '').substring(0, 100),
                 from_email: fromEmail
             }));
+
+            // ── SALVAR NO SUPABASE (persistência jurídica) ──
+            await salvarNoSupabase({
+                email, timestamp, versao_termos, hash_aceite,
+                ip: ipReal, user_agent, idioma, tela
+            });
 
             // ── EMAIL CLIENTE (comprovante) ──
             try {
