@@ -11,7 +11,13 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 // Middleware
-app.use(cors());
+app.use(cors({
+    origin: [
+        'https://eventcalc-pro-v7.pages.dev',
+        'http://localhost:3001',
+        'http://127.0.0.1:3001'
+    ]
+}));
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb' }));
 
