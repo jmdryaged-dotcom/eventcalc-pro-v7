@@ -46,8 +46,9 @@
     }
 
     function clienteEPagante() {
-        // Só clientes COM LICENÇA ATIVA precisam aceitar (trial gratuito não)
-        return localStorage.getItem('eventcalc_licenca_ativa') === 'true';
+        const ativa = localStorage.getItem('eventcalc_licenca_ativa') === 'true';
+        const status = localStorage.getItem('license_status') === 'active';
+        return ativa || status;
     }
 
     function jaAceitou() {
