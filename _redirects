@@ -5,10 +5,14 @@
 # ════════════════════════════════════════════════════════════
 
 # 🔒 PAINÉIS ADMIN — 404 em produção (bloquear acesso público)
-/gerenciador-licencas*       /404.html  404
-/gerenciador-codigos-pix*    /404.html  404
-/admin-setup*                /404.html  404
-/admin-leads*                /404.html  404
+/gerenciador-licencas            /404.html  404
+/gerenciador-licencas.html       /404.html  404
+/gerenciador-codigos-pix         /404.html  404
+/gerenciador-codigos-pix.html    /404.html  404
+/admin-setup                     /404.html  404
+/admin-setup.html                /404.html  404
+/admin-leads                     /404.html  404
+/admin-leads.html                /404.html  404
 
 # 🌐 ROTA RAIZ — landing
 /                            /index_v7.html  200
