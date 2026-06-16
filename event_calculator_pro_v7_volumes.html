@@ -205,6 +205,47 @@
             min-width: 45px; text-align: right; font-family: 'Playfair Display';
         }
 
+        /* Override theme-override.css para inputs dentro da tabela */
+        .tabela-box table { table-layout: fixed !important; }
+        .tabela-box colgroup col.col-item  { width: 28%; }
+        .tabela-box colgroup col.col-num   { width: 13%; }
+        .tabela-box colgroup col.col-calc  { width: 13%; }
+        .tabela-box colgroup col.col-del   { width: 7%; }
+
+        .tabela-box td input,
+        .tabela-box td input[type="text"],
+        .tabela-box td input[type="number"] {
+            padding: 5px 6px !important;
+            font-size: 13px !important;
+            min-height: auto !important;
+            min-width: 0 !important;
+            width: 100% !important;
+            background: rgba(255,255,255,0.06) !important;
+            border: 1px solid rgba(212,175,55,0.2) !important;
+            border-radius: 4px !important;
+            box-sizing: border-box !important;
+        }
+        .tabela-box td input:focus,
+        .tabela-box td input[type="text"]:focus,
+        .tabela-box td input[type="number"]:focus {
+            border-color: var(--gold) !important;
+            background: rgba(212,175,55,0.08) !important;
+        }
+        .tabela-box td {
+            padding: 5px 4px !important;
+            overflow: visible !important;
+        }
+        .tabela-box th {
+            padding: 7px 4px !important;
+            font-size: 11px !important;
+        }
+        .tabela-box .btn-remove-row {
+            padding: 4px 8px !important;
+            min-height: auto !important;
+            font-size: 12px !important;
+            border-radius: 4px !important;
+        }
+
         footer {
             background: var(--dark-card); border-top: 1px solid rgba(212,175,55,0.3);
             padding: 22px; text-align: center; color: #707070;
@@ -280,6 +321,15 @@
             <div class="column-title">📋 Volumes para Compra</div>
             <div class="tabela-box">
                 <table>
+                    <colgroup>
+                        <col class="col-item">
+                        <col class="col-num">
+                        <col class="col-num">
+                        <col class="col-num">
+                        <col class="col-calc">
+                        <col class="col-calc">
+                        <col class="col-del">
+                    </colgroup>
                     <thead>
                         <tr>
                             <th>Item</th>
