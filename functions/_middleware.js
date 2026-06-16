@@ -16,6 +16,18 @@ export async function onRequest(context) {
     });
   }
 
+  if (url.pathname === '/') {
+    url.pathname = '/index_v7.html';
+    const asset = await context.env.ASSETS.fetch(new Request(url, context.request));
+    return new Response(asset.body, {
+      status: 200,
+      headers: {
+        'Content-Type': 'text/html; charset=utf-8',
+        'Cache-Control': 'no-cache, must-revalidate',
+      },
+    });
+  }
+
   const response = await context.next();
 
   const newHeaders = new Headers(response.headers);
