@@ -212,7 +212,7 @@ function makeHandler({ resend }) {
             }
 
             const ipReal = req.ip || req.headers['x-forwarded-for'] || 'desconhecido';
-            const fromEmail = process.env.FROM_EMAIL || 'noreply@eventcalcpro.com';
+            const fromEmail = process.env.FROM_EMAIL || 'EventCalc <onboarding@resend.dev>';
             const adminEmail = process.env.ADMIN_EMAIL || 'jm.dryaged@gmail.com';
 
             // ── LOG ESTRUTURADO (auditoria) ──
@@ -223,25 +223,28 @@ function makeHandler({ resend }) {
                 ip_mascarado: mascararIP(ipReal),
                 versao: versao_termos,
                 hash: hash_aceite,
-                ua: (user_agent || '').substring(0, 100)
+                ua: (user_agent || '').substring(0, 100),
+                from_email: fromEmail
             }));
 
             // ── EMAIL CLIENTE (comprovante) ──
             try {
-                await resend.emails.send({
-                    from: `EventCalc <${fromEmail}>`,
+                const r1 = await resend.emails.send({
+                    from: fromEmail,
                     to: email,
                     subject: '✓ Comprovante de aceite — EventCalc',
                     html: emailClienteHTML({ email, timestamp, versao_termos, hash_aceite })
                 });
+                if (r1.error) console.error('[aceite-ipca] Resend erro cliente:', JSON.stringify(r1.error));
+                else console.log('[aceite-ipca] Email cliente enviado:', r1.data?.id);
             } catch (e) {
                 console.error('[aceite-ipca] Falha ao enviar email cliente:', e.message);
             }
 
             // ── EMAIL ADMIN (registro auditoria) ──
             try {
-                await resend.emails.send({
-                    from: `EventCalc <${fromEmail}>`,
+                const r2 = await resend.emails.send({
+                    from: fromEmail,
                     to: adminEmail,
                     subject: `⚖️ Novo aceite IPCA: ${email}`,
                     html: emailAdminHTML({
@@ -252,6 +255,8 @@ function makeHandler({ resend }) {
                         hash_aceite
                     })
                 });
+                if (r2.error) console.error('[aceite-ipca] Resend erro admin:', JSON.stringify(r2.error));
+                else console.log('[aceite-ipca] Email admin enviado:', r2.data?.id);
             } catch (e) {
                 console.error('[aceite-ipca] Falha ao enviar email admin:', e.message);
             }
