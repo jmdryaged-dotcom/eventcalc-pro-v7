@@ -1,3 +1,22 @@
+var LOGO_CLUB_BASE64 = null;
+(function() {
+    try {
+        var img = new Image();
+        img.onload = function() {
+            var canvas = document.createElement('canvas');
+            var maxW = 200;
+            var scale = maxW / img.width;
+            canvas.width = maxW;
+            canvas.height = img.height * scale;
+            var ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            LOGO_CLUB_BASE64 = canvas.toDataURL('image/jpeg', 0.7);
+        };
+        img.crossOrigin = 'anonymous';
+        img.src = 'logo-club.jpeg';
+    } catch(e) {}
+})();
+
 function gerarTutorialPDF() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
@@ -73,7 +92,12 @@ function gerarTutorialPDF() {
 
     // ── PAGINA 1: CAPA ──
     novaPagemComFundo();
-    posY = 70;
+
+    if (LOGO_CLUB_BASE64) {
+        try { doc.addImage(LOGO_CLUB_BASE64, 'JPEG', 77.5, 20, 55, 40); } catch(e) {}
+    }
+
+    posY = LOGO_CLUB_BASE64 ? 75 : 70;
     doc.setFont('times', 'bold');
     doc.setFontSize(36);
     doc.setTextColor(...corOuro);
@@ -440,6 +464,11 @@ function gerarTutorialPDF() {
     // ── PAGINA 14: CTA - PRODUTOS CLUB CARNIVORISTA ──
     doc.addPage();
     novaPagemComFundo();
+
+    if (LOGO_CLUB_BASE64) {
+        try { doc.addImage(LOGO_CLUB_BASE64, 'JPEG', 87.5, 15, 35, 25); } catch(e) {}
+        posY = 50;
+    }
 
     adicionarTitulo('Quer Aprender Mais?');
 
