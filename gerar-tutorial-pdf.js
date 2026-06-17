@@ -33,7 +33,7 @@ function gerarTutorialPDF() {
 
     // ── FUNÇÃO: Título Principal ──
     function adicionarTitulo(texto) {
-        doc.setFont('Playfair Display', 'bold');
+        doc.setFont('times', 'bold');
         doc.setFontSize(22);
         doc.setTextColor(...corOuro);
         doc.text(texto, margemEsq, posY);
@@ -42,7 +42,7 @@ function gerarTutorialPDF() {
 
     // ── FUNÇÃO: Subtítulo ──
     function adicionarSubtitulo(texto) {
-        doc.setFont('Lora', 'bold');
+        doc.setFont('helvetica', 'bold');
         doc.setFontSize(13);
         doc.setTextColor(...corOuro);
         doc.text(texto, margemEsq, posY);
@@ -51,7 +51,7 @@ function gerarTutorialPDF() {
 
     // ── FUNÇÃO: Texto Normal ──
     function adicionarTexto(texto, tamanho = 10, cor = corCinza) {
-        doc.setFont('Lora', 'normal');
+        doc.setFont('helvetica', 'normal');
         doc.setFontSize(tamanho);
         doc.setTextColor(...cor);
 
@@ -68,12 +68,12 @@ function gerarTutorialPDF() {
         doc.setLineWidth(1);
         doc.rect(margemEsq, posY - 2, larguraTexto, 22, 'S');
 
-        doc.setFont('Lora', 'bold');
+        doc.setFont('helvetica', 'bold');
         doc.setFontSize(10);
         doc.setTextColor(...cor);
         doc.text(titulo, margemEsq + 3, posY + 1);
 
-        doc.setFont('Lora', 'normal');
+        doc.setFont('helvetica', 'normal');
         doc.setFontSize(9);
         doc.setTextColor(...corBranco);
         const linhas = doc.splitTextToSize(conteudo, larguraTexto - 6);
@@ -88,26 +88,26 @@ function gerarTutorialPDF() {
     novaPagemComFundo();
 
     posY = 70;
-    doc.setFont('Playfair Display', 'bold');
+    doc.setFont('times', 'bold');
     doc.setFontSize(36);
     doc.setTextColor(...corOuro);
     doc.text('EventCalc', 105, posY, { align: 'center' });
 
     posY += 15;
-    doc.setFont('Lora', 'normal');
+    doc.setFont('helvetica', 'normal');
     doc.setFontSize(16);
     doc.setTextColor(...corBranco);
     doc.text('Tutorial Completo', 105, posY, { align: 'center' });
 
     posY += 12;
-    doc.setFont('Lora', 'normal');
+    doc.setFont('helvetica', 'normal');
     doc.setFontSize(11);
     doc.setTextColor(...corCinza);
     doc.text('Como usar a calculadora de orçamentos', 105, posY, { align: 'center' });
     doc.text('para eventos com máxima eficiência', 105, posY + 5, { align: 'center' });
 
     posY += 25;
-    doc.setFont('Lora', 'normal');
+    doc.setFont('helvetica', 'normal');
     doc.setFontSize(10);
     doc.setTextColor(...corOuro);
     doc.text('🚀 Economize HORAS de trabalho', 105, posY, { align: 'center' });
@@ -150,13 +150,13 @@ function gerarTutorialPDF() {
     adicionarTexto('Vamos fazer as contas juntos:', 11, corBranco);
 
     posY += 3;
-    doc.setFont('Lora', 'bold');
+    doc.setFont('helvetica', 'bold');
     doc.setFontSize(10);
     doc.setTextColor(...corOuro);
     doc.text('Cenário ANTES (sem EventCalc):', margemEsq, posY);
     posY += 4;
 
-    doc.setFont('Lora', 'normal');
+    doc.setFont('helvetica', 'normal');
     doc.setFontSize(9);
     doc.setTextColor(...corCinza);
     doc.text('• Você recebe um pedido de orçamento', margemEsq + 3, posY);
@@ -166,13 +166,13 @@ function gerarTutorialPDF() {
     doc.text('• Total perdido: 3 horas de trabalho + cliente desconfiado', margemEsq + 3, posY + 16);
     posY += 22;
 
-    doc.setFont('Lora', 'bold');
+    doc.setFont('helvetica', 'bold');
     doc.setFontSize(10);
     doc.setTextColor(...corOuro);
     doc.text('Cenário DEPOIS (com EventCalc):', margemEsq, posY);
     posY += 4;
 
-    doc.setFont('Lora', 'normal');
+    doc.setFont('helvetica', 'normal');
     doc.setFontSize(9);
     doc.setTextColor(...corCinza);
     doc.text('• Cliente pede orçamento', margemEsq + 3, posY);
@@ -182,13 +182,13 @@ function gerarTutorialPDF() {
     doc.text('• Total economizado: 2 HORAS + cliente impressionado', margemEsq + 3, posY + 16);
     posY += 22;
 
-    doc.setFont('Lora', 'bold');
+    doc.setFont('helvetica', 'bold');
     doc.setFontSize(11);
     doc.setTextColor(...corVermelho);
     doc.text('RESULTADO: 2 HORAS GANHAS POR ORÇAMENTO!', margemEsq, posY);
 
     posY += 7;
-    doc.setFont('Lora', 'normal');
+    doc.setFont('helvetica', 'normal');
     doc.setFontSize(10);
     doc.setTextColor(...corOuro);
     doc.text('Se você faz 4 orçamentos por semana:', margemEsq, posY);
@@ -220,13 +220,13 @@ function gerarTutorialPDF() {
     adicionarTexto('Uma única conta errada em um grande evento pode custar CENTENAS de reais em prejuízo. EventCalc elimina erros de cálculo.');
 
     posY += 5;
-    doc.setFont('Lora', 'normal');
+    doc.setFont('helvetica', 'normal');
     doc.setFontSize(11);
     doc.setTextColor(...corVermelho);
     doc.text('EXEMPLO REAL:', margemEsq, posY);
 
     posY += 5;
-    doc.setFont('Lora', 'normal');
+    doc.setFont('helvetica', 'normal');
     doc.setFontSize(10);
     doc.setTextColor(...corCinza);
     const exemploTexto = doc.splitTextToSize(
@@ -330,7 +330,7 @@ function gerarTutorialPDF() {
     adicionarCaixa('📊 LUCRO', 'Sua margem de ganho (20%? 30%? 50%?)');
 
     posY += 2;
-    doc.setFont('Lora', 'bold');
+    doc.setFont('helvetica', 'bold');
     doc.setFontSize(11);
     doc.setTextColor(...corVermelho);
     doc.text('👉 RESULTADO FINAL: Apareça em TEMPO REAL!', margemEsq, posY);
@@ -375,7 +375,7 @@ function gerarTutorialPDF() {
     adicionarCaixa('💳 COMO PAGAR', 'PIX, transferência, dinheiro. Seus dados de pagamento');
 
     posY += 2;
-    doc.setFont('Lora', 'bold');
+    doc.setFont('helvetica', 'bold');
     doc.setFontSize(11);
     doc.setTextColor(...corOuro);
     doc.text('🎁 ESSA PROPOSTA VENDE SOZINHA!', margemEsq, posY);
@@ -407,7 +407,7 @@ function gerarTutorialPDF() {
     ];
 
     passos.forEach((passo, idx) => {
-        doc.setFont('Lora', 'normal');
+        doc.setFont('helvetica', 'normal');
         doc.setFontSize(10);
         doc.setTextColor(...corOuro);
         doc.text(passo, margemEsq, posY);
@@ -447,13 +447,13 @@ function gerarTutorialPDF() {
     novaPagemComFundo();
 
     posY = 80;
-    doc.setFont('Playfair Display', 'bold');
+    doc.setFont('times', 'bold');
     doc.setFontSize(28);
     doc.setTextColor(...corOuro);
     doc.text('Você Está Pronto! 🚀', 105, posY, { align: 'center' });
 
     posY += 20;
-    doc.setFont('Lora', 'normal');
+    doc.setFont('helvetica', 'normal');
     doc.setFontSize(12);
     doc.setTextColor(...corBranco);
     doc.text('Você aprendeu TUDO sobre EventCalc.', 105, posY, { align: 'center' });
@@ -465,7 +465,7 @@ function gerarTutorialPDF() {
     doc.text('HORAS de trabalho e AUMENTAR seu LUCRO!', 105, posY + 5, { align: 'center' });
 
     posY += 20;
-    doc.setFont('Lora', 'bold');
+    doc.setFont('helvetica', 'bold');
     doc.setFontSize(12);
     doc.setTextColor(...corOuro);
     doc.text('⏱️  Economize 2 HORAS por orçamento', 105, posY, { align: 'center' });
@@ -475,7 +475,7 @@ function gerarTutorialPDF() {
     doc.text('📊 Seja mais profissional que a concorrência', 105, posY, { align: 'center' });
 
     posY += 20;
-    doc.setFont('Lora', 'italic');
+    doc.setFont('helvetica', 'italic');
     doc.setFontSize(10);
     doc.setTextColor(...corVermelho);
     doc.text('Próximo passo: Abra EventCalc e crie seu primeiro orçamento!', 105, posY, { align: 'center' });
