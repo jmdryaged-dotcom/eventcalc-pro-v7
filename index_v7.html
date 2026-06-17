@@ -1588,10 +1588,10 @@
             <button class="leads-modal-close" onclick="fecharModalLeads()">&times;</button>
 
             <h2>📚 Receber Tutorial Gratuito</h2>
-            <p class="leads-modal-subtitle">Compartilhe seus dados e receba nosso tutorial exclusivo + proposta no seu email</p>
+            <p class="leads-modal-subtitle">Compartilhe seus dados e baixe nosso tutorial exclusivo + proposta grátis</p>
 
             <div class="leads-success-message" id="leadsSuccessMsg">
-                ✅ Sucesso! Confira seu email por um PDF com o tutorial completo + uma proposta personalizada!
+                ✅ Sucesso! Seu tutorial PDF está sendo baixado agora!
             </div>
 
             <form id="leadsForm" onsubmit="enviarLeads(event)">
@@ -2166,7 +2166,7 @@
             const btn = event.target.querySelector('button[type="submit"]');
             const textOriginal = btn.textContent;
             btn.disabled = true;
-            btn.textContent = '⏳ Gerando PDF e enviando...';
+            btn.textContent = '⏳ Gerando seu PDF...';
 
             // Criar objeto de lead
             const lead = {
@@ -2192,71 +2192,50 @@
             leads.push(lead);
             localStorage.setItem('eventCalcLeads', JSON.stringify(leads));
 
-            // ── PASSO 2: Enviar para servidor Node.js via /send-tutorial ──
-            // (O servidor vai gerar o PDF)
+            // ── PASSO 2: Gerar PDF localmente e baixar ──
+            try {
+                if (typeof gerarTutorialPDF === 'function') {
+                    gerarTutorialPDF();
+                } else {
+                    console.warn('gerarTutorialPDF não disponível');
+                }
+            } catch(e) {
+                console.error('Erro ao gerar PDF:', e);
+            }
+
+            // ── PASSO 3: Notificar admin (fire-and-forget) ──
             const BACKEND_URL = window.BACKEND_URL || 'http://localhost:3001';
-            fetch(BACKEND_URL + '/send-tutorial', {
+            fetch(BACKEND_URL + '/capture-lead', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    nome: nome,
-                    email: email,
-                    whatsapp: whatsapp
-                })
-            })
-            .then(res => {
-                    if (!res.ok) {
-                        throw new Error(`Erro HTTP: ${res.status}`);
-                    }
-                    return res.json();
-                })
-                .then(data => {
-                    if (data.sucesso) {
-                        console.log('✅ Tutorial enviado com sucesso:', data.mensagem);
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nome, email, whatsapp })
+            }).catch(err => {
+                console.warn('Notificação admin falhou (lead salvo local):', err.message);
+            });
 
-                        // 📊 GA: lead capturado com sucesso
-                        if (window.eventoGA) {
-                            window.eventoGA('lead_capturado', {
-                                metodo: 'form_landing',
-                                tem_whatsapp: !!whatsapp
-                            });
-                        }
-
-                        // Exibir mensagem de sucesso
-                        const successMsg = document.getElementById('leadsSuccessMsg');
-                        successMsg.classList.add('show');
-
-                        // Limpar formulário
-                        document.getElementById('leadsForm').reset();
-
-                        // Reabilitar botão
-                        btn.disabled = false;
-                        btn.textContent = textOriginal;
-
-                        // Fechar modal após 3 segundos
-                        setTimeout(() => {
-                            fecharModalLeads();
-                        }, 3000);
-                    } else {
-                        throw new Error(data.mensagem || 'Erro desconhecido ao enviar email');
-                    }
-                })
-                .catch(err => {
-                    console.error('❌ Erro ao enviar tutorial:', err);
-
-                    // 📊 GA: erro no envio
-                    if (window.eventoGA) {
-                        window.eventoGA('lead_erro', { mensagem: err.message });
-                    }
-
-                    alert(`❌ Erro ao enviar: ${err.message}\n\nPor favor, tente novamente em alguns minutos.`);
-
-                    // Reabilitar botão em caso de erro
-                    btn.disabled = false;
-                    btn.textContent = textOriginal;
+            // 📊 GA: lead capturado com sucesso
+            if (window.eventoGA) {
+                window.eventoGA('lead_capturado', {
+                    metodo: 'form_landing',
+                    tem_whatsapp: !!whatsapp
                 });
+            }
+
+            // Exibir mensagem de sucesso
+            const successMsg = document.getElementById('leadsSuccessMsg');
+            successMsg.classList.add('show');
+
+            // Limpar formulário
+            document.getElementById('leadsForm').reset();
+
+            // Reabilitar botão
+            btn.disabled = false;
+            btn.textContent = textOriginal;
+
+            // Fechar modal após 3 segundos
+            setTimeout(() => {
+                fecharModalLeads();
+            }, 3000);
         }
 
 

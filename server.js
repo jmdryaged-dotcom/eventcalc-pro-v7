@@ -3,63 +3,14 @@ const { Resend } = require('resend');
 const cors = require('cors');
 const { jsPDF } = require('jspdf');
 const { gerarTutorialPDF } = require('./tutorial-pdf');
-const webhookHotmart = require('./webhook-hotmart');
-const aceiteIpca = require('./aceite-ipca-endpoint');
+const webhookHotmart = require('./webhook-hotmart'); // ⭐ NOVO
 require('dotenv').config();
-
-// ════════════════════════════════════════════
-// SUPABASE — persistir leads
-// ════════════════════════════════════════════
-const SUPABASE_URL = process.env.SUPABASE_URL || '';
-const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || '';
-
-async function salvarLeadNoSupabase(dados) {
-    if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-        console.warn('[leads] Supabase não configurado — lead NÃO persistido');
-        return false;
-    }
-    try {
-        const resp = await fetch(`${SUPABASE_URL}/rest/v1/leads`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'apikey': SUPABASE_ANON_KEY,
-                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-                'Prefer': 'return=minimal'
-            },
-            body: JSON.stringify({
-                nome: (dados.nome || '').substring(0, 200),
-                email: (dados.email || '').substring(0, 200),
-                whatsapp: (dados.whatsapp || '').substring(0, 30),
-                ip: dados.ip || null,
-                user_agent: (dados.user_agent || '').substring(0, 500),
-                origem: 'tutorial'
-            })
-        });
-        if (resp.ok) {
-            console.log('[leads] ✅ Lead salvo no Supabase');
-            return true;
-        }
-        const err = await resp.text();
-        console.error('[leads] Supabase erro:', resp.status, err);
-        return false;
-    } catch (e) {
-        console.error('[leads] Supabase falha:', e.message);
-        return false;
-    }
-}
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
 // Middleware
-app.use(cors({
-    origin: [
-        'https://eventcalc-pro-v7.pages.dev',
-        'http://localhost:3001',
-        'http://127.0.0.1:3001'
-    ]
-}));
+app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb' }));
 
@@ -237,14 +188,8 @@ app.post('/send-tutorial', async (req, res) => {
 
         console.log(`✅ Email enviado com sucesso ao cliente! ID: ${data.id}`);
 
-        // ── PERSISTIR LEAD NO SUPABASE + NOTIFICAR ADMIN (em paralelo) ──
-        const clientIp = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.ip || '';
-        const clientUa = req.headers['user-agent'] || '';
-
-        salvarLeadNoSupabase({ nome, email, whatsapp, ip: clientIp, user_agent: clientUa }).catch(err => {
-            console.error('⚠️ Falha silenciosa ao salvar lead:', err.message);
-        });
-
+        // ── NOTIFICAR ADMIN (em paralelo, sem bloquear resposta) ──
+        // Roda assíncrono. Se falhar, não impacta o cliente.
         notificarAdminNovoLead(nome, email, whatsapp).catch(err => {
             console.error('⚠️ Falha silenciosa ao notificar admin:', err.message);
         });
@@ -268,16 +213,56 @@ app.post('/send-tutorial', async (req, res) => {
 });
 
 // ════════════════════════════════════════════
+// ENDPOINT: Capturar Lead (sem enviar email ao cliente)
+// O PDF é gerado e baixado no frontend diretamente.
+// Aqui só notificamos o admin sobre o novo lead.
+// ════════════════════════════════════════════
+
+app.post('/capture-lead', async (req, res) => {
+    try {
+        const { nome, email, whatsapp } = req.body;
+
+        if (!nome || !email) {
+            return res.status(400).json({
+                sucesso: false,
+                mensagem: 'Dados incompletos. Faltam: nome ou email.'
+            });
+        }
+
+        const emailValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        if (!emailValido) {
+            return res.status(400).json({
+                sucesso: false,
+                mensagem: 'Email inválido.'
+            });
+        }
+
+        console.log(`🎯 Novo lead capturado: ${nome} (${email})`);
+
+        notificarAdminNovoLead(nome, email, whatsapp).catch(err => {
+            console.error('⚠️ Falha silenciosa ao notificar admin:', err.message);
+        });
+
+        res.json({
+            sucesso: true,
+            mensagem: '✅ Dados recebidos com sucesso!'
+        });
+
+    } catch (erro) {
+        console.error('❌ Erro ao capturar lead:', erro);
+        res.status(500).json({
+            sucesso: false,
+            mensagem: `❌ Erro: ${erro.message}`
+        });
+    }
+});
+
+// ════════════════════════════════════════════
 // ⭐ NOVO ENDPOINT: Webhook Hotmart
 // Recebe notificação de compra e gera código de licença
 // ════════════════════════════════════════════
 
 app.post('/webhook/hotmart', webhookHotmart.makeHandler({ resend }));
-
-app.post('/aceite-ipca',
-    aceiteIpca.rateLimiter,
-    aceiteIpca.makeHandler({ resend })
-);
 
 // ════════════════════════════════════════════
 // ENDPOINT: Health Check
