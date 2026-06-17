@@ -437,5 +437,253 @@ function gerarTutorialPDF() {
     doc.setTextColor(...corVermelho);
     doc.text('Proximo passo: Abra EventCalc e crie seu primeiro orcamento!', 105, posY, { align: 'center' });
 
+    // ── PAGINA 14: CTA - PRODUTOS CLUB CARNIVORISTA ──
+    doc.addPage();
+    novaPagemComFundo();
+
+    adicionarTitulo('Quer Aprender Mais?');
+
+    posY += 5;
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(11);
+    doc.setTextColor(...corCinza);
+    const textoIntroCTA = 'Gostou do EventCalc? O Club Carnivorista tem outros produtos que vao levar seu negocio para o proximo nivel.';
+    const linhasIntroCTA = doc.splitTextToSize(textoIntroCTA, 180);
+    doc.text(linhasIntroCTA, margemEsq, posY);
+    posY += linhasIntroCTA.length * 5 + 10;
+
+    const produtos = [
+        {
+            titulo: 'A ARTE DO CHURRASCO: Do Fogo ao Primeiro Corte',
+            desc: 'O ponto de partida do verdadeiro churrasqueiro. Dominio da grelha, escolha de utensilios, acendimento do carvao, tipos de cortes, ponto perfeito da carne e os erros que ninguem te conta. Com quizzes interativos ao final de cada capitulo.',
+            link: 'https://go.hotmart.com/D100305376G?dp=1'
+        },
+        {
+            titulo: 'ENTRE DOIS PAES: O Guia do Hamburguer Artesanal',
+            desc: 'Nao e so um livro de receitas - e um manifesto. Para quem leva hamburguer a serio: blends, ponto da carne, paes artesanais, cortes premium, molhos que emocionam. Inclui quizzes com humor e super quiz interativo final.',
+            link: 'https://go.hotmart.com/S100382006A'
+        }
+    ];
+
+    produtos.forEach(function(produto) {
+        if (posY > 220) {
+            doc.addPage();
+            novaPagemComFundo();
+            posY = 30;
+        }
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(9);
+        var linhasDesc = doc.splitTextToSize(produto.desc, 170);
+        var alturaDescricao = linhasDesc.length * 4;
+        var alturaBox = 16 + alturaDescricao + 14;
+
+        doc.setDrawColor(...corOuro);
+        doc.setLineWidth(0.5);
+        doc.roundedRect(13, posY - 4, 184, alturaBox, 3, 3);
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(11);
+        doc.setTextColor(...corOuro);
+        var linhasTitProd = doc.splitTextToSize(produto.titulo, 175);
+        doc.text(linhasTitProd, 18, posY + 2);
+
+        var yDesc = posY + 4 + (linhasTitProd.length * 5);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(9);
+        doc.setTextColor(...corCinza);
+        doc.text(linhasDesc, 18, yDesc);
+
+        var yCTA = yDesc + alturaDescricao + 4;
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(9);
+        doc.setTextColor(...corOuro);
+        doc.text('>> ADQUIRA AGORA:', 18, yCTA);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8);
+        doc.setTextColor(...corBranco);
+        doc.text(produto.link, 18, yCTA + 5);
+
+        posY += alturaBox + 8;
+    });
+
+    posY += 5;
+    doc.setFont('helvetica', 'italic');
+    doc.setFontSize(10);
+    doc.setTextColor(...corCinza);
+    doc.text('Cada produto foi pensado para ajudar profissionais como voce a crescer.', 105, posY, { align: 'center' });
+    posY += 6;
+    doc.text('Sem pressa, sem pressao. Quando estiver pronto, estamos aqui!', 105, posY, { align: 'center' });
+
+    // ── PAGINA 15: TEASER - ASSADOR 5 MINUTOS ──
+    doc.addPage();
+    novaPagemComFundo();
+
+    doc.setDrawColor(...corOuro);
+    doc.setLineWidth(0.8);
+    doc.line(15, 22, 195, 22);
+    doc.line(15, 28, 195, 28);
+
+    doc.setFillColor(...corOuro);
+    doc.roundedRect(80, 32, 50, 8, 2, 2, 'F');
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(10);
+    doc.setTextColor(...corPreto);
+    doc.text('EM BREVE', 105, 38, { align: 'center' });
+
+    posY = 55;
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(20);
+    doc.setTextColor(...corOuro);
+    doc.text('E se voce respondesse', 105, posY, { align: 'center' });
+    posY += 9;
+    doc.text('um orcamento as 23h...', 105, posY, { align: 'center' });
+    posY += 9;
+    doc.setTextColor(...corBranco);
+    doc.text('em apenas 5 MINUTOS?', 105, posY, { align: 'center' });
+
+    posY += 18;
+    doc.setDrawColor(...corOuro);
+    doc.setLineWidth(0.3);
+    doc.line(70, posY, 140, posY);
+    posY += 10;
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(11);
+    doc.setTextColor(...corCinza);
+    var paragrafosTeaser = [
+        '73% dos clientes fecham com QUEM RESPONDE PRIMEIRO.',
+        '',
+        'Enquanto voce calcula no caderno depois do almoco,',
+        'seu concorrente ja respondeu e fechou o evento.',
+        '',
+        'Estamos construindo algo NOVO para o Club Carnivorista:',
+        ''
+    ];
+    paragrafosTeaser.forEach(function(linha) {
+        doc.text(linha, 105, posY, { align: 'center' });
+        posY += 6;
+    });
+
+    posY += 4;
+    doc.setFillColor(20, 20, 20);
+    doc.setDrawColor(...corOuro);
+    doc.setLineWidth(1.5);
+    doc.roundedRect(25, posY, 160, 50, 4, 4, 'FD');
+
+    posY += 12;
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(16);
+    doc.setTextColor(...corOuro);
+    doc.text('ASSADOR 5 MINUTOS', 105, posY, { align: 'center' });
+
+    posY += 8;
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    doc.setTextColor(...corBranco);
+    doc.text('Seu WhatsApp virando uma maquina', 105, posY, { align: 'center' });
+    posY += 5;
+    doc.text('de fechar eventos - automaticamente.', 105, posY, { align: 'center' });
+
+    posY += 9;
+    doc.setFont('helvetica', 'italic');
+    doc.setFontSize(9);
+    doc.setTextColor(...corCinza);
+    doc.text('Cliente manda os dados. Sistema calcula tudo.', 105, posY, { align: 'center' });
+    posY += 5;
+    doc.text('Voce revisa e envia o orcamento. Em minutos.', 105, posY, { align: 'center' });
+
+    posY += 18;
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(10);
+    doc.setTextColor(...corOuro);
+    doc.text('O QUE VOCE GANHA:', 105, posY, { align: 'center' });
+    posY += 8;
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    doc.setTextColor(...corCinza);
+    var beneficiosAssador = [
+        '+ Orcamento profissional em 5 minutos (sem caderno, sem Excel)',
+        '+ Responde clientes 24h por dia - mesmo dormindo',
+        '+ Fecha mais eventos por ser o PRIMEIRO a responder',
+        '+ Tempo de volta com sua familia (nao mais 2h calculando)'
+    ];
+    beneficiosAssador.forEach(function(b) {
+        doc.text(b, 30, posY);
+        posY += 6;
+    });
+
+    posY += 8;
+    doc.setFillColor(...corOuro);
+    doc.roundedRect(35, posY, 140, 22, 3, 3, 'F');
+
+    posY += 9;
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(11);
+    doc.setTextColor(...corPreto);
+    doc.text('VAGAS LIMITADAS no BETA', 105, posY, { align: 'center' });
+    posY += 7;
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    doc.text('Os primeiros 10 testadores garantem condicoes exclusivas vitalicias', 105, posY, { align: 'center' });
+
+    posY += 16;
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(11);
+    doc.setTextColor(...corOuro);
+    doc.text('>> QUER SER UM DOS PRIMEIROS A TESTAR? <<', 105, posY, { align: 'center' });
+    posY += 7;
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    doc.setTextColor(...corBranco);
+    doc.text('Responda este email com a frase "QUERO O BETA"', 105, posY, { align: 'center' });
+    posY += 5;
+    doc.text('ou chame no WhatsApp - link na proxima pagina.', 105, posY, { align: 'center' });
+
+    // ── PAGINA 16: CONTATO ──
+    doc.addPage();
+    novaPagemComFundo();
+
+    adicionarTitulo('Duvidas? Contato!');
+
+    posY += 15;
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(12);
+    doc.setTextColor(...corOuro);
+    doc.text('Estamos aqui para AJUDAR!', 105, posY, { align: 'center' });
+
+    posY += 15;
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    doc.setTextColor(...corBranco);
+    doc.text('E-MAIL:', margemEsq, posY);
+    posY += 6;
+    doc.setFontSize(9);
+    doc.setTextColor(...corCinza);
+    doc.text('jm.dryaged@gmail.com', margemEsq + 5, posY);
+
+    posY += 12;
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    doc.setTextColor(...corBranco);
+    doc.text('WHATSAPP:', margemEsq, posY);
+    posY += 6;
+    doc.setFontSize(9);
+    doc.setTextColor(...corCinza);
+    doc.text('+55 47 99668-1010', margemEsq + 5, posY);
+
+    posY += 15;
+    doc.setFont('helvetica', 'italic');
+    doc.setFontSize(9);
+    doc.setTextColor(...corOuro);
+    doc.text('Respondo em ate 24 horas!', 105, posY, { align: 'center' });
+
+    posY += 10;
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(10);
+    doc.setTextColor(...corBranco);
+    doc.text('Muito sucesso com seus eventos!', 105, posY, { align: 'center' });
+
     doc.save('EventCalc-Tutorial-Gratuito.pdf');
 }
