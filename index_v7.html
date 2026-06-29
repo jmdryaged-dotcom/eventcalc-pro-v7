@@ -65,6 +65,13 @@
             --border-gold: rgba(212,175,55,0.3);
             --text-primary: #ffffff;
             --text-secondary: #d0d0d0;
+            /* Liquid Glass */
+            --glass-bg: rgba(26, 26, 30, 0.45);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-gold-border: rgba(212, 175, 55, 0.15);
+            --glass-blur: 20px;
+            --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.06);
         }
         
         html { scroll-behavior: smooth; }
@@ -77,8 +84,11 @@
         .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
         
         header {
-            background: linear-gradient(180deg, rgba(26,26,26,0.95) 0%, rgba(10,10,10,0.8) 100%);
-            border-bottom: 1px solid var(--border-gold);
+            background: rgba(10, 10, 12, 0.6);
+            backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+            -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+            border-bottom: 1px solid var(--glass-gold-border);
+            box-shadow: var(--glass-shadow), var(--glass-highlight);
             padding: 20px 0;
             position: sticky;
             top: 0;
@@ -186,17 +196,21 @@
         }
         
         .feature-card {
-            background: linear-gradient(135deg, rgba(36,36,36,0.5) 0%, rgba(26,26,26,0.5) 100%);
-            border: 1px solid var(--border-gold);
-            border-radius: 12px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+            -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+            border: 1px solid var(--glass-gold-border);
+            border-radius: 16px;
             padding: 40px;
             text-align: center;
-            transition: all 0.3s;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: var(--glass-shadow), var(--glass-highlight);
         }
-        
+
         .feature-card:hover {
-            border-color: var(--gold-light);
-            transform: translateY(-10px);
+            border-color: rgba(212, 175, 55, 0.4);
+            transform: translateY(-8px);
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5), var(--glass-highlight), 0 0 20px rgba(212, 175, 55, 0.08);
         }
         
         .feature-icon { font-size: 3.5rem; margin-bottom: 20px; }
@@ -230,13 +244,16 @@
             width: 300px;
             height: 300px;
             margin: 0 auto;
-            border: 3px solid var(--border-gold);
-            border-radius: 12px;
+            border: 1px solid var(--glass-gold-border);
+            border-radius: 16px;
             overflow: hidden;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: linear-gradient(135deg, rgba(212,175,55,0.2), rgba(196,30,58,0.2));
+            background: rgba(26, 26, 30, 0.5);
+            backdrop-filter: blur(16px) saturate(160%);
+            -webkit-backdrop-filter: blur(16px) saturate(160%);
+            box-shadow: var(--glass-shadow), var(--glass-highlight);
         }
         
         .foto-placeholder {
@@ -272,11 +289,17 @@
         }
         
         .curriculo-box {
-            background: rgba(212,175,55,0.1);
-            border-left: 4px solid var(--gold-light);
+            background: rgba(212, 175, 55, 0.06);
+            backdrop-filter: blur(16px) saturate(160%);
+            -webkit-backdrop-filter: blur(16px) saturate(160%);
+            border-left: 3px solid var(--gold-light);
+            border-top: 1px solid var(--glass-border);
+            border-right: 1px solid var(--glass-border);
+            border-bottom: 1px solid var(--glass-border);
             padding: 20px;
-            border-radius: 6px;
+            border-radius: 12px;
             margin-bottom: 30px;
+            box-shadow: var(--glass-shadow), var(--glass-highlight);
         }
         
         .curriculo-box h4 {
@@ -293,10 +316,16 @@
         }
         
         .contatos-box {
-            background: rgba(196,30,58,0.1);
-            border-left: 4px solid var(--red-primary);
+            background: rgba(196, 30, 58, 0.06);
+            backdrop-filter: blur(16px) saturate(160%);
+            -webkit-backdrop-filter: blur(16px) saturate(160%);
+            border-left: 3px solid var(--red-primary);
+            border-top: 1px solid var(--glass-border);
+            border-right: 1px solid var(--glass-border);
+            border-bottom: 1px solid var(--glass-border);
             padding: 20px;
-            border-radius: 6px;
+            border-radius: 12px;
+            box-shadow: var(--glass-shadow), var(--glass-highlight);
         }
         
         .contatos-box h4 {
@@ -346,13 +375,17 @@
         }
 
         .pricing-card {
-            background: var(--dark-card);
-            border: 2px solid var(--border-gold);
-            border-radius: 12px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+            -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+            border: 1px solid var(--glass-gold-border);
+            border-radius: 16px;
             padding: 40px;
             text-align: center;
             min-width: 0;
             box-sizing: border-box;
+            box-shadow: var(--glass-shadow), var(--glass-highlight);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
         @media (max-width: 480px) {
             .pricing-card { padding: 28px 22px; }
@@ -406,17 +439,18 @@
             gap: 10px;
             padding: 14px 22px;
             border-radius: 999px;
-            background: rgba(28, 28, 32, 0.92);
+            background: rgba(28, 28, 32, 0.5);
             color: #c9a14b;
-            border: 1.5px solid #c9a14b;
+            border: 1px solid rgba(201, 161, 75, 0.3);
             cursor: pointer;
             font-size: 14px;
             font-weight: 600;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
-            transition: transform 0.25s, box-shadow 0.25s;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             z-index: 200;
             font-family: 'Inter', sans-serif;
-            backdrop-filter: blur(8px);
+            backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+            -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
             -webkit-backdrop-filter: blur(8px);
         }
         .edit-mode-btn .edit-icon { font-size: 18px; line-height: 1; }
@@ -1428,7 +1462,7 @@
             <div class="depoimentos-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; margin-bottom: 40px;">
 
                 <!-- DEPOIMENTO PLACEHOLDER 1 -->
-                <div class="depoimento-card" style="background: #15151a; border: 1px solid #2a2a30; border-radius: 12px; padding: 28px; transition: transform 0.3s, border-color 0.3s;">
+                <div class="depoimento-card" style="background: rgba(21, 21, 26, 0.45); backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 28px; transition: all 0.4s cubic-bezier(0.4,0,0.2,1); box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06);">
                     <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 18px;">
                         <div style="width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg, #2a2a30 0%, #1a1a1f 100%); display: flex; align-items: center; justify-content: center; font-size: 26px; border: 2px dashed #3a3a40;">👤</div>
                         <div>
@@ -1443,7 +1477,7 @@
                 </div>
 
                 <!-- DEPOIMENTO PLACEHOLDER 2 -->
-                <div class="depoimento-card" style="background: #15151a; border: 1px solid #2a2a30; border-radius: 12px; padding: 28px; transition: transform 0.3s, border-color 0.3s;">
+                <div class="depoimento-card" style="background: rgba(21, 21, 26, 0.45); backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 28px; transition: all 0.4s cubic-bezier(0.4,0,0.2,1); box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06);">
                     <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 18px;">
                         <div style="width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg, #2a2a30 0%, #1a1a1f 100%); display: flex; align-items: center; justify-content: center; font-size: 26px; border: 2px dashed #3a3a40;">👤</div>
                         <div>
@@ -1458,7 +1492,7 @@
                 </div>
 
                 <!-- DEPOIMENTO PLACEHOLDER 3 -->
-                <div class="depoimento-card" style="background: #15151a; border: 1px solid #2a2a30; border-radius: 12px; padding: 28px; transition: transform 0.3s, border-color 0.3s;">
+                <div class="depoimento-card" style="background: rgba(21, 21, 26, 0.45); backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 28px; transition: all 0.4s cubic-bezier(0.4,0,0.2,1); box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06);">
                     <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 18px;">
                         <div style="width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg, #2a2a30 0%, #1a1a1f 100%); display: flex; align-items: center; justify-content: center; font-size: 26px; border: 2px dashed #3a3a40;">👤</div>
                         <div>
@@ -1543,7 +1577,7 @@
             </div>
 
             <!-- Política de Preço Transparente -->
-            <div style="max-width: 920px; margin: 36px auto 0; background: #15151a; border: 1px solid #2a2a30; border-radius: 12px; padding: 24px 26px;">
+            <div style="max-width: 920px; margin: 36px auto 0; background: rgba(21,21,26,0.45); backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 24px 26px; box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06);">
                 <h3 style="color: #d4af37; font-family: 'Playfair Display', serif; font-size: 18px; margin: 0 0 14px; text-align: center;">🛡️ Política de Preço Transparente</h3>
                 <div style="display: grid; grid-template-columns: 1fr; gap: 14px;">
                     <div style="display: flex; gap: 14px; align-items: flex-start;">
