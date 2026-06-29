@@ -255,16 +255,22 @@
             margin-top: 50px; font-size: 0.83rem;
         }
 
-        /* ── AMBIENT ORBS (necessário para o Liquid Glass aparecer) ── */
+        /* ── LIQUID GLASS: AMBIENT LIGHT FORTE ── */
+        body {
+            background:
+                radial-gradient(ellipse at 18% 25%, rgba(212,175,55,0.12) 0%, transparent 50%),
+                radial-gradient(ellipse at 82% 75%, rgba(196,30,58,0.09) 0%, transparent 50%),
+                #0a0a0a !important;
+        }
         body::before {
             content: "";
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
             background:
-                radial-gradient(ellipse at 15% 20%, rgba(212, 175, 55, 0.08) 0%, transparent 50%),
-                radial-gradient(ellipse at 85% 80%, rgba(196, 30, 58, 0.06) 0%, transparent 50%),
-                radial-gradient(ellipse at 50% 0%,  rgba(212, 175, 55, 0.06) 0%, transparent 55%),
-                radial-gradient(ellipse at 80% 10%, rgba(196, 30, 58, 0.04) 0%, transparent 40%);
+                radial-gradient(ellipse at 15% 20%, rgba(212, 175, 55, 0.22) 0%, transparent 40%),
+                radial-gradient(ellipse at 85% 80%, rgba(196, 30, 58, 0.16) 0%, transparent 40%),
+                radial-gradient(ellipse at 55% 5%,  rgba(212, 175, 55, 0.14) 0%, transparent 35%),
+                radial-gradient(ellipse at 75% 15%, rgba(196, 30, 58, 0.10) 0%, transparent 30%);
             pointer-events: none;
             z-index: 0;
         }
