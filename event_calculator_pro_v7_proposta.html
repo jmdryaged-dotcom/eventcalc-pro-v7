@@ -28,15 +28,27 @@
             --gold-border: rgba(212,175,55,0.3);
             --red: #c41e3a;
             --white: #ffffff;
+            /* Liquid Glass */
+            --glass-bg: rgba(26, 26, 30, 0.45);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-gold-border: rgba(212, 175, 55, 0.15);
+            --glass-blur: 20px;
+            --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.06);
         }
         body { font-family: 'Lora', serif; background: var(--dark-bg); color: var(--white); }
         .container { max-width: 1050px; margin: 0 auto; padding: 20px; }
 
         /* ── HEADER ── */
         .header {
-            background: linear-gradient(135deg, #1a1a1a 0%, #242424 100%);
-            padding: 28px 40px; border-radius: 8px; margin-bottom: 16px;
-            border: 1px solid var(--gold-border); text-align: center;
+            background: var(--glass-bg);
+            backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+            -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+            border: 1px solid var(--glass-gold-border);
+            box-shadow: var(--glass-shadow), var(--glass-highlight);
+            padding: 28px 40px; border-radius: 16px; margin-bottom: 16px;
+            text-align: center;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .header h1 { font-family: 'Playfair Display'; font-size: 2rem; color: var(--gold); margin-bottom: 4px; }
         .header p { color: #909090; font-size: 0.88rem; }
@@ -46,7 +58,12 @@
         .prog-bar {
             display: flex; align-items: center; justify-content: center;
             padding: 14px 20px; margin-bottom: 16px;
-            background: var(--dark-card); border: 1px solid var(--gold-border); border-radius: 8px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+            -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+            border: 1px solid var(--glass-gold-border);
+            border-radius: 16px;
+            box-shadow: var(--glass-shadow), var(--glass-highlight);
         }
         .prog-step { display: flex; flex-direction: column; align-items: center; gap: 4px; }
         .prog-circle {
@@ -66,8 +83,13 @@
 
         /* ── TABS ── */
         .tabs-nav {
-            display: flex; background: var(--dark-card);
-            border: 1px solid var(--gold-border); border-radius: 8px;
+            display: flex;
+            background: var(--glass-bg);
+            backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+            -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+            border: 1px solid var(--glass-gold-border);
+            box-shadow: var(--glass-shadow), var(--glass-highlight);
+            border-radius: 16px;
             overflow: hidden; margin-bottom: 20px;
         }
         .tab-btn {
@@ -100,9 +122,14 @@
         @media (max-width: 640px) { .custos-grid { grid-template-columns: 1fr; } }
 
         .custo-campo {
-            background: var(--dark-card); border: 1px solid var(--gold-border);
-            border-radius: 8px; padding: 14px 16px; margin-bottom: 12px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+            -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+            border: 1px solid var(--glass-gold-border);
+            box-shadow: var(--glass-shadow), var(--glass-highlight);
+            border-radius: 16px; padding: 14px 16px; margin-bottom: 12px;
             min-width: 0; box-sizing: border-box;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .custo-campo label { display: block; color: var(--gold); font-size: 0.82rem; font-weight: 600; margin-bottom: 6px; }
         .custo-campo input, .custo-campo select, .custo-campo textarea {
@@ -126,8 +153,12 @@
 
         /* RESUMO LIVE */
         .resumo-live {
-            background: var(--dark-card); border: 2px solid var(--gold-border);
-            border-radius: 8px; padding: 18px 22px; margin-bottom: 18px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+            -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+            border: 1px solid var(--glass-gold-border);
+            box-shadow: var(--glass-shadow), var(--glass-highlight);
+            border-radius: 16px; padding: 18px 22px; margin-bottom: 18px;
         }
         .resumo-live-title {
             font-family: 'Playfair Display'; color: var(--gold);
@@ -167,9 +198,13 @@
 
         /* ── ABA 2: RELATÓRIO ASSADOR (dark, gold) ── */
         .doc-assador {
-            background: var(--dark-surface); color: #d0d0d0;
-            padding: 28px 32px; border-radius: 8px;
-            border: 1px solid var(--gold-border);
+            background: var(--glass-bg);
+            backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+            -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+            border: 1px solid var(--glass-gold-border);
+            box-shadow: var(--glass-shadow), var(--glass-highlight);
+            color: #d0d0d0;
+            padding: 28px 32px; border-radius: 16px;
         }
         .doc-assador h1 { font-family: 'Playfair Display'; color: var(--gold); font-size: 1.7rem; text-align: center; margin-bottom: 4px; }
         .doc-assador .doc-sub { text-align: center; color: #707070; font-size: 0.82rem; margin-bottom: 20px; }
@@ -359,7 +394,11 @@
         }
 
         footer {
-            background: var(--dark-card); border-top: 1px solid var(--gold-border);
+            background: var(--glass-bg);
+            backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+            -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+            border-top: 1px solid var(--glass-gold-border);
+            box-shadow: var(--glass-shadow), var(--glass-highlight);
             padding: 22px; text-align: center; color: #707070;
             margin-top: 50px; font-size: 0.83rem;
         }
