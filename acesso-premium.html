@@ -540,8 +540,10 @@
 
         // Mapa de preços (usado para metadados ao ativar código)
         const PRECOS_PLANOS = {
-            'mensal': { valor: 19.90, dias: 30, nome: 'Mensal' },
-            'anual':  { valor: 197.00, dias: 365, nome: 'Anual' }
+            'mensal':     { valor: 19.90,  dias: 30,    nome: 'Mensal' },
+            'trimestral': { valor: 0,      dias: 90,    nome: 'Trimestral (Cortesia)' },
+            'anual':      { valor: 197.00, dias: 365,   nome: 'Anual' },
+            'vitalicio':  { valor: 0,      dias: 36500, nome: 'Vitalicio (Owner)' }
         };
 
         // Permitir ativar com Enter

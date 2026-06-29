@@ -37,7 +37,9 @@ const CHAVE_SECRETA = 'CLUB-CARNIVORISTA-2026-EVENTCALC-V7-PIX-MAY';
 // Duração de cada plano em dias (alinhado com PRECOS_PLANOS do acesso-premium.html)
 const DIAS_POR_PLANO = {
     mensal: 30,
+    trimestral: 90,
     anual: 365,
+    vitalicio: 36500,
     cortesia: 30
 };
 
